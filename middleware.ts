@@ -1,5 +1,4 @@
 import {
-  handleRootRedirect,
   isAdminRoute,
   isAppRoute,
   redirectToSignIn,
@@ -12,8 +11,9 @@ import { NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Root redirect is handled by app/page.tsx
   if (pathname === "/") {
-    return handleRootRedirect(request) ?? NextResponse.next();
+    return NextResponse.next();
   }
 
   if (isAppRoute(pathname)) {

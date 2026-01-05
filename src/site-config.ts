@@ -1,22 +1,23 @@
 export const SiteConfig = {
-  title: "NOW.TS",
-  description: "Collect and showcase powerful video and text testimonials",
-  prodUrl: "https://demo.nowts.app",
-  appId: "nowts",
-  domain: "demo.nowts.app",
+  title: "DevFlow",
+  description:
+    "Productivity system for developers - Time-blocking, AI insights, War Room",
+  prodUrl: "https://devflow.app", // TODO: Update with real domain
+  appId: "devflow",
+  domain: "devflow.app", // TODO: Update with real domain
   appIcon: "/images/icon.png",
   company: {
-    name: "NOW.TS LLC",
-    address: "421 Rue de Paris, France", // Remove if not needed
+    name: "DevFlow",
+    address: "France",
   },
   brand: {
-    primary: "#007291", // You can adjust this to your brand color
+    primary: "#007291", // TODO: Update DevFlow brand color
   },
   team: {
-    image: "https://melvynx.com/images/me/twitter-en.jpg",
-    website: "https://melvynx.com",
-    twitter: "https://twitter.com/melvyn_me",
-    name: "Melvynx",
+    image: "https://placeholder.com/150", // TODO: Update with your profile
+    website: "https://devflow.app", // TODO: Update with your website
+    twitter: "https://twitter.com/devflow", // TODO: Update with your twitter
+    name: "DevFlow Team",
   },
   features: {
     /**
@@ -27,9 +28,11 @@ export const SiteConfig = {
      */
     enableImageUpload: false as boolean,
     /**
-     * If enable, the user will be redirected to `/orgs` when he visits the landing page at `/`
-     * The logic is located in middleware.ts
+     * DevFlow: App requires authentication
+     * If user is logged in, redirect to /app
+     * If user is not logged in, redirect to /auth/signin
+     * No public landing page
      */
-    enableLandingRedirection: true as boolean,
+    enableLandingRedirection: false as boolean,
   },
 };

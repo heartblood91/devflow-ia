@@ -18,7 +18,11 @@ const searchParamsCache = createSearchParamsCache({
   page: parseAsInteger.withDefault(1),
 });
 
-export default async function Page(props: PageProps<"/admin/users">) {
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function Page(props: PageProps) {
   await getRequiredAdmin();
 
   const { q, page } = await searchParamsCache.parse(props.searchParams);
