@@ -80,7 +80,7 @@ Créer la vue hebdomadaire (calendrier 7 jours) avec affichage des time blocks.
       date: { gte: weekStart, lt: weekEnd },
     },
     include: { task: true },
-    orderBy: { startTime: 'asc' },
+    orderBy: { startTime: "asc" },
   });
   ```
 - [ ] Grouper par jour
@@ -115,6 +115,7 @@ Créer la vue hebdomadaire (calendrier 7 jours) avec affichage des time blocks.
 ## Design Notes
 
 **Style : Brutal/Minimalist**
+
 - Grid strict, borders épaisses (2px)
 - Horaires en gras (font-bold)
 - Jours en uppercase (MON, TUE, WED, etc.)
@@ -123,6 +124,7 @@ Créer la vue hebdomadaire (calendrier 7 jours) avec affichage des time blocks.
 - Hover : border épaissit (2px → 4px), pas de shadow
 
 **Typographie :**
+
 - Header semaine : text-2xl font-bold
 - Jours : text-sm font-semibold uppercase
 - Horaires : text-xs font-medium text-gray-500

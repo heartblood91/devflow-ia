@@ -20,7 +20,7 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
 - [ ] shadcn Dialog (max-w-6xl, fullscreen sur mobile)
 - [ ] Layout 2 colonnes :
   ```tsx
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
     <div>{/* Rétrospective */}</div>
     <div>{/* Planification (Jour 3) */}</div>
   </div>
@@ -120,8 +120,12 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
 
 - [ ] Créer `lib/stats/calculateWeeklyStats.ts`
 - [ ] Logic :
+
   ```ts
-  export async function calculateWeeklyStats(userId: string, weekStartDate: Date) {
+  export async function calculateWeeklyStats(
+    userId: string,
+    weekStartDate: Date,
+  ) {
     const weekEnd = addDays(weekStartDate, 7);
 
     // 1. Tasks complétées
@@ -131,7 +135,7 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
         completedAt: { gte: weekStartDate, lt: weekEnd },
       },
     });
-    const completedTasks = tasks.filter((t) => t.status === 'done').length;
+    const completedTasks = tasks.filter((t) => t.status === "done").length;
     const totalTasks = tasks.length;
 
     // 2. Temps total
@@ -169,8 +173,12 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
         date: { gte: weekStartDate, lt: weekEnd },
       },
     });
-    const avgFocusQuality = reflections.reduce((sum, r) => sum + r.focusQuality, 0) / reflections.length || 0;
-    const avgEnergyLevel = reflections.reduce((sum, r) => sum + r.energyLevel, 0) / reflections.length || 0;
+    const avgFocusQuality =
+      reflections.reduce((sum, r) => sum + r.focusQuality, 0) /
+        reflections.length || 0;
+    const avgEnergyLevel =
+      reflections.reduce((sum, r) => sum + r.energyLevel, 0) /
+        reflections.length || 0;
 
     return {
       completedTasks,
@@ -191,9 +199,10 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
 - [ ] Créer `components/weekly/DevFlowAIInsights.tsx`
 - [ ] Server Action : `generateWeeklyInsights(stats)`
 - [ ] Prompt GPT-4o-mini :
+
   ```ts
   const INSIGHTS_PROMPT = `Tu es DevFlow AI. Analyse les stats de la semaine passée et donne 3 insights actionnables.
-
+  
   Stats :
   - Tâches complétées : ${stats.completedTasks}/${stats.totalTasks} (${percentage}%)
   - Temps total : ${stats.totalHours}h/${stats.maxHours}h
@@ -201,15 +210,15 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
   - Focus quality : ${stats.avgFocusQuality.toFixed(1)}/5
   - Energy level : ${stats.avgEnergyLevel.toFixed(1)}/5
   - Tasks skippées : ${stats.skippedTasks}
-
+  
   Ton style : concis, actionnable, friendly, dev-oriented, pas de bullshit.
-
+  
   Exemples :
   - "Belle semaine ! 8/12 tâches terminées. Tu as bien géré la charge."
   - "Tu utilises trop de créneaux secours (2/2). Prévois plus de buffer (25% au lieu de 20%)."
   - "Focus quality élevé (4.2/5). Continue à placer tes tâches difficiles sur tes peaks."
   - "Energy level bas (3.8/5). Dors plus ou réduis la charge."
-
+  
   Génère 3 insights (max 2 lignes chacun). Format :
   1. [Insight 1]
   2. [Insight 2]
@@ -217,10 +226,11 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
   ```
 
 - [ ] Call OpenAI :
+
   ```ts
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'system', content: prompt }],
+    model: "gpt-4o-mini",
+    messages: [{ role: "system", content: prompt }],
     temperature: 0.7,
     max_tokens: 300,
   });
@@ -234,12 +244,15 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
     </CardHeader>
     <CardContent>
       <div className="insights-list">
-        {insights.split('\n').filter(Boolean).map((insight, i) => (
-          <div key={i} className="insight-item">
-            <MessageCircle className="size-5 text-blue-500" />
-            <p>{insight.replace(/^\d+\.\s*/, '')}</p>
-          </div>
-        ))}
+        {insights
+          .split("\n")
+          .filter(Boolean)
+          .map((insight, i) => (
+            <div key={i} className="insight-item">
+              <MessageCircle className="size-5 text-blue-500" />
+              <p>{insight.replace(/^\d+\.\s*/, "")}</p>
+            </div>
+          ))}
       </div>
     </CardContent>
   </Card>
@@ -268,16 +281,19 @@ Créer la partie rétrospective de la War Room (stats semaine passée + AI insig
 ## Design Notes
 
 **War Room Modal :**
+
 - Background : bg-white dark:bg-gray-950
 - Border modale : border-4 border-black
 - Close button : X en haut-droite, gros (size-6)
 
 **Stats Grid :**
+
 - 3 cols desktop, 2 cols tablet, 1 col mobile
 - Gap-4 entre cards
 - StatCard : border-2, pas de shadow, hover:border-4
 
 **AI Insights :**
+
 - Border-l-4 border-blue-500 (accent)
 - Background gris très clair (bg-gray-50)
 - Icon MessageCircle en bleu

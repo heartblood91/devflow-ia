@@ -15,6 +15,7 @@ Nettoyer la boilerplate Next.js 15, retirer le superflu (multi-tenant, marketing
 ## Architecture Confirmée
 
 **✅ ON GARDE :**
+
 - Next.js 15 (App Router) - monolith, pas de monorepo
 - Better Auth (moderne, meilleur que NextAuth)
 - Vitest + Playwright (déjà configuré)
@@ -23,12 +24,14 @@ Nettoyer la boilerplate Next.js 15, retirer le superflu (multi-tenant, marketing
 - Email system (utile pour notifications)
 
 **❌ ON RETIRE :**
+
 - Features multi-tenant / organizations
 - Pages marketing / landing page
 - Stripe billing (on le fera simple en Phase 9)
 - Components/pages inutiles pour DevFlow
 
 **📁 Structure DevFlow (simple) :**
+
 ```
 app/                    # Next.js App Router
   ├── (auth)/          # Auth pages
@@ -71,6 +74,7 @@ prisma/
 ### 1. Audit Boilerplate Actuel (1h)
 
 - [ ] Lire structure complète :
+
   ```bash
   tree -L 3 -I 'node_modules|.next|dist'
   ```
@@ -85,6 +89,7 @@ prisma/
 - [ ] Lister dans un fichier `CLEANUP.md` :
   ```markdown
   # To Delete
+
   - app/organizations/
   - app/marketing/
   - app/pricing/
@@ -96,6 +101,7 @@ prisma/
 ### 2. Cleanup Files (2h)
 
 - [ ] Supprimer dossiers inutiles :
+
   ```bash
   # Exemples (adapter selon ton audit)
   rm -rf app/organizations
@@ -108,6 +114,7 @@ prisma/
   ```
 
 - [ ] Supprimer pages auth inutiles (garder uniquement login/signup) :
+
   ```bash
   # Si tu as forgot-password, verify-email, etc. et pas besoin
   # les garder si tu en as besoin
@@ -125,6 +132,7 @@ prisma/
 
 - [ ] Audit `package.json`
 - [ ] Retirer packages inutiles :
+
   ```bash
   # Exemples courants (selon ta boilerplate)
   pnpm remove @stripe/stripe-js  # si pas utilisé (on le fera Phase 9)
@@ -134,6 +142,7 @@ prisma/
   ```
 
 - [ ] Vérifier dependencies essentielles présentes :
+
   ```json
   {
     "dependencies": {
@@ -146,7 +155,7 @@ prisma/
       "zod": "^3.x",
       "react-hook-form": "^7.x",
       "date-fns": "^3.x",
-      "sonner": "^1.x"  // pour toasts
+      "sonner": "^1.x" // pour toasts
     },
     "devDependencies": {
       "typescript": "^5.x",
@@ -160,6 +169,7 @@ prisma/
   ```
 
 - [ ] Ajouter si manquant :
+
   ```bash
   pnpm add openai  # Pour DevFlow AI
   pnpm add @dnd-kit/core @dnd-kit/sortable  # Pour drag & drop
@@ -175,6 +185,7 @@ prisma/
 
 - [ ] Ouvrir `prisma/schema.prisma`
 - [ ] Supprimer models multi-tenant :
+
   ```prisma
   // SUPPRIMER (exemples) :
   model Organization { }
@@ -184,6 +195,7 @@ prisma/
   ```
 
 - [ ] Garder uniquement User minimal :
+
   ```prisma
   datasource db {
     provider = "postgresql"
@@ -224,6 +236,7 @@ prisma/
 ### 5. Setup DevFlow Folders (1h)
 
 - [ ] Créer structure :
+
   ```bash
   mkdir -p lib/actions
   mkdir -p lib/ai
@@ -237,6 +250,7 @@ prisma/
   ```
 
 - [ ] Créer placeholders :
+
   ```bash
   # lib/actions/tasks.ts (placeholder)
   touch lib/actions/tasks.ts
@@ -285,31 +299,33 @@ prisma/
 
 - [ ] Vérifier `vitest.config.ts` existe et configuré
 - [ ] Si manquant, créer :
+
   ```ts
-  import { defineConfig } from 'vitest/config';
-  import react from '@vitejs/plugin-react';
-  import path from 'path';
+  import { defineConfig } from "vitest/config";
+  import react from "@vitejs/plugin-react";
+  import path from "path";
 
   export default defineConfig({
     plugins: [react()],
     test: {
-      environment: 'jsdom',
+      environment: "jsdom",
       globals: true,
-      setupFiles: ['./tests/setup.ts'],
+      setupFiles: ["./tests/setup.ts"],
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './'),
+        "@": path.resolve(__dirname, "./"),
       },
     },
   });
   ```
 
 - [ ] Créer `tests/setup.ts` :
+
   ```ts
-  import { expect, afterEach } from 'vitest';
-  import { cleanup } from '@testing-library/react';
-  import * as matchers from '@testing-library/jest-dom/matchers';
+  import { expect, afterEach } from "vitest";
+  import { cleanup } from "@testing-library/react";
+  import * as matchers from "@testing-library/jest-dom/matchers";
 
   expect.extend(matchers);
 
@@ -319,11 +335,12 @@ prisma/
   ```
 
 - [ ] Créer smoke test `tests/smoke.test.ts` :
-  ```ts
-  import { describe, it, expect } from 'vitest';
 
-  describe('Smoke test', () => {
-    it('should pass', () => {
+  ```ts
+  import { describe, it, expect } from "vitest";
+
+  describe("Smoke test", () => {
+    it("should pass", () => {
       expect(true).toBe(true);
     });
   });
@@ -339,6 +356,7 @@ prisma/
 
 - [ ] Audit `.env.example`
 - [ ] Garder uniquement nécessaire :
+
   ```
   # Database
   DATABASE_URL="postgresql://..."
@@ -367,6 +385,7 @@ prisma/
 
 - [ ] Retirer contenu boilerplate
 - [ ] Écrire README DevFlow minimal :
+
   ```markdown
   # DevFlow
 
@@ -375,6 +394,7 @@ prisma/
   ## What is DevFlow?
 
   DevFlow is a productivity app that aggregates scientifically validated concepts:
+
   - Time-blocking with chronotype optimization
   - Weekly War Room (planning)
   - Daily Reflection with AI insights
@@ -401,7 +421,9 @@ prisma/
   2. Setup database:
      \`\`\`bash
      cp .env.example .env
+
      # Configure DATABASE_URL in .env
+
      npx prisma migrate dev
      \`\`\`
 
@@ -422,6 +444,7 @@ prisma/
   ## Architecture
 
   Simple Next.js monolith with clean separation:
+
   - `app/` - Next.js App Router
   - `lib/actions/` - Server Actions (business logic)
   - `lib/ai/` - DevFlow AI
@@ -436,6 +459,7 @@ prisma/
 ### 11. Git Cleanup (1h)
 
 - [ ] Vérifier `.gitignore` :
+
   ```
   # dependencies
   node_modules
@@ -465,6 +489,7 @@ prisma/
   ```
 
 - [ ] Commit cleanup :
+
   ```bash
   git add .
   git commit -m "chore: complete Phase 0 cleanup for DevFlow
@@ -503,28 +528,33 @@ prisma/
 ## Checklist Software Craftsmanship
 
 ✅ **Architecture Simple**
+
 - Next.js 15 monolith (pas de monorepo over-engineering)
 - Séparation logique (actions, ai, components)
 - Testable
 
 ✅ **Testing**
+
 - Vitest configuré
 - Playwright configuré
 - Smoke test passe
 - Tests à lancer manuellement (pnpm test:ci)
 
 ✅ **Code Quality**
+
 - ESLint strict
 - Prettier auto-format
 - No console.log (warn only)
 - TypeScript strict mode
 
 ✅ **Git Hygiene**
+
 - Commits clairs, atomiques
 - Conventional commits (dans CLAUDE.md)
 - Pas de pre-commit hooks (responsabilité développeur)
 
 ✅ **Documentation**
+
 - README DevFlow
 - Code commenté si nécessaire
 

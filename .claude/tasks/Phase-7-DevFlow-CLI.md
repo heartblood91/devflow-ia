@@ -48,6 +48,7 @@ cli/
 #### Setup
 
 - [ ] Installer dependencies :
+
   ```bash
   cd cli
   pnpm add commander chalk inquirer axios dotenv
@@ -59,88 +60,92 @@ cli/
 ```ts
 #!/usr/bin/env node
 
-import { program } from 'commander';
-import { authCommands } from './commands/auth';
-import { taskCommands } from './commands/tasks';
-import { planningCommands } from './commands/planning';
-import { statsCommands } from './commands/stats';
+import { program } from "commander";
+import { authCommands } from "./commands/auth";
+import { taskCommands } from "./commands/tasks";
+import { planningCommands } from "./commands/planning";
+import { statsCommands } from "./commands/stats";
 
 program
-  .name('devflow')
-  .description('DevFlow CLI - Productivity system for 10x developers')
-  .version('1.0.0');
+  .name("devflow")
+  .description("DevFlow CLI - Productivity system for 10x developers")
+  .version("1.0.0");
 
 // Auth commands
 program
-  .command('login')
-  .description('Login to DevFlow')
+  .command("login")
+  .description("Login to DevFlow")
   .action(authCommands.login);
 
 program
-  .command('logout')
-  .description('Logout from DevFlow')
+  .command("logout")
+  .description("Logout from DevFlow")
   .action(authCommands.logout);
 
 program
-  .command('whoami')
-  .description('Show current user')
+  .command("whoami")
+  .description("Show current user")
   .action(authCommands.whoami);
 
 // Task commands
 program
-  .command('add <title>')
-  .description('Create a new task')
-  .option('-d, --description <description>', 'Task description')
-  .option('-p, --priority <priority>', 'Priority (sacred/important/optional)', 'optional')
-  .option('--difficulty <difficulty>', 'Difficulty (1-5)', '3')
-  .option('-e, --estimate <minutes>', 'Estimated duration (minutes)')
-  .option('--deadline <date>', 'Deadline (YYYY-MM-DD)')
-  .option('-q, --quarter <quarter>', 'Quarter (Q1-2026, etc.)')
+  .command("add <title>")
+  .description("Create a new task")
+  .option("-d, --description <description>", "Task description")
+  .option(
+    "-p, --priority <priority>",
+    "Priority (sacred/important/optional)",
+    "optional",
+  )
+  .option("--difficulty <difficulty>", "Difficulty (1-5)", "3")
+  .option("-e, --estimate <minutes>", "Estimated duration (minutes)")
+  .option("--deadline <date>", "Deadline (YYYY-MM-DD)")
+  .option("-q, --quarter <quarter>", "Quarter (Q1-2026, etc.)")
   .action(taskCommands.add);
 
 program
-  .command('list')
-  .description('List all tasks')
-  .option('-s, --status <status>', 'Filter by status (inbox/todo/doing/done)')
-  .option('-p, --priority <priority>', 'Filter by priority')
+  .command("list")
+  .description("List all tasks")
+  .option("-s, --status <status>", "Filter by status (inbox/todo/doing/done)")
+  .option("-p, --priority <priority>", "Filter by priority")
   .action(taskCommands.list);
 
 program
-  .command('show <taskId>')
-  .description('Show task details')
+  .command("show <taskId>")
+  .description("Show task details")
   .action(taskCommands.show);
 
 program
-  .command('update <taskId>')
-  .description('Update a task')
-  .option('-t, --title <title>', 'New title')
-  .option('-p, --priority <priority>', 'New priority')
-  .option('--status <status>', 'New status')
+  .command("update <taskId>")
+  .description("Update a task")
+  .option("-t, --title <title>", "New title")
+  .option("-p, --priority <priority>", "New priority")
+  .option("--status <status>", "New status")
   .action(taskCommands.update);
 
 program
-  .command('delete <taskId>')
-  .description('Delete a task')
-  .option('-f, --force', 'Skip confirmation')
+  .command("delete <taskId>")
+  .description("Delete a task")
+  .option("-f, --force", "Skip confirmation")
   .action(taskCommands.delete);
 
 // Planning commands
 program
-  .command('plan')
-  .description('Generate weekly planning')
+  .command("plan")
+  .description("Generate weekly planning")
   .action(planningCommands.plan);
 
 program
-  .command('week')
-  .description('Show current week planning')
+  .command("week")
+  .description("Show current week planning")
   .action(planningCommands.week);
 
 // Stats commands
 program
-  .command('stats')
-  .description('Show productivity stats')
-  .option('-w, --week', 'Show weekly stats')
-  .option('-m, --month', 'Show monthly stats')
+  .command("stats")
+  .description("Show productivity stats")
+  .option("-w, --week", "Show weekly stats")
+  .option("-m, --month", "Show monthly stats")
   .action(statsCommands.stats);
 
 program.parse(process.argv);
@@ -163,6 +168,7 @@ program.parse(process.argv);
   ```
 
 **Tests :**
+
 - [ ] Test `devflow --help` → affiche commands
 - [ ] Test `devflow --version` → affiche version
 
@@ -177,54 +183,54 @@ program.parse(process.argv);
 - [ ] Créer `src/commands/auth.ts` :
 
 ```ts
-import inquirer from 'inquirer';
-import chalk from 'chalk';
-import { apiClient } from '../utils/api';
-import { config } from '../utils/config';
-import { logger } from '../utils/logger';
+import inquirer from "inquirer";
+import chalk from "chalk";
+import { apiClient } from "../utils/api";
+import { config } from "../utils/config";
+import { logger } from "../utils/logger";
 
 export const authCommands = {
   async login() {
-    logger.info('Login to DevFlow');
+    logger.info("Login to DevFlow");
 
     const answers = await inquirer.prompt([
       {
-        type: 'input',
-        name: 'email',
-        message: 'Email:',
-        validate: (input) => input.includes('@') || 'Invalid email',
+        type: "input",
+        name: "email",
+        message: "Email:",
+        validate: (input) => input.includes("@") || "Invalid email",
       },
       {
-        type: 'password',
-        name: 'password',
-        message: 'Password:',
-        mask: '*',
+        type: "password",
+        name: "password",
+        message: "Password:",
+        mask: "*",
       },
     ]);
 
     try {
-      const { token, user } = await apiClient.post('/auth/login', answers);
+      const { token, user } = await apiClient.post("/auth/login", answers);
 
-      config.set('token', token);
-      config.set('user', user);
+      config.set("token", token);
+      config.set("user", user);
 
       logger.success(`Logged in as ${chalk.bold(user.email)}`);
     } catch (error) {
-      logger.error('Login failed:', error.message);
+      logger.error("Login failed:", error.message);
       process.exit(1);
     }
   },
 
   async logout() {
     config.clear();
-    logger.success('Logged out');
+    logger.success("Logged out");
   },
 
   async whoami() {
-    const user = config.get('user');
+    const user = config.get("user");
 
     if (!user) {
-      logger.error('Not logged in. Run `devflow login` first.');
+      logger.error("Not logged in. Run `devflow login` first.");
       process.exit(1);
     }
 
@@ -239,12 +245,12 @@ export const authCommands = {
 - [ ] Créer `src/utils/config.ts` :
 
 ```ts
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+import fs from "fs";
+import path from "path";
+import os from "os";
 
-const CONFIG_DIR = path.join(os.homedir(), '.devflow');
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
+const CONFIG_DIR = path.join(os.homedir(), ".devflow");
+const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
 class Config {
   private data: Record<string, any> = {};
@@ -259,7 +265,7 @@ class Config {
     }
 
     if (fs.existsSync(CONFIG_FILE)) {
-      const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
+      const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
       this.data = JSON.parse(raw);
     }
   }
@@ -291,21 +297,21 @@ export const config = new Config();
 - [ ] Créer `src/utils/api.ts` :
 
 ```ts
-import axios, { AxiosInstance } from 'axios';
-import { config } from './config';
+import axios, { AxiosInstance } from "axios";
+import { config } from "./config";
 
 class ApiClient {
   private client: AxiosInstance;
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.DEVFLOW_API_URL || 'https://devflow.vercel.app/api',
+      baseURL: process.env.DEVFLOW_API_URL || "https://devflow.vercel.app/api",
       timeout: 10000,
     });
 
     // Interceptor: Add auth token
     this.client.interceptors.request.use((config) => {
-      const token = config.get('token');
+      const token = config.get("token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -317,10 +323,10 @@ class ApiClient {
       (response) => response.data,
       (error) => {
         if (error.response?.status === 401) {
-          throw new Error('Unauthorized. Run `devflow login` first.');
+          throw new Error("Unauthorized. Run `devflow login` first.");
         }
         throw new Error(error.response?.data?.message || error.message);
-      }
+      },
     );
   }
 
@@ -345,6 +351,7 @@ export const apiClient = new ApiClient();
 ```
 
 **Tests :**
+
 - [ ] Test login → token saved in ~/.devflow/config.json
 - [ ] Test whoami → affiche user email
 - [ ] Test logout → config cleared
@@ -360,10 +367,10 @@ export const apiClient = new ApiClient();
 - [ ] Créer `src/commands/tasks.ts` :
 
 ```ts
-import chalk from 'chalk';
-import inquirer from 'inquirer';
-import { apiClient } from '../utils/api';
-import { logger } from '../utils/logger';
+import chalk from "chalk";
+import inquirer from "inquirer";
+import { apiClient } from "../utils/api";
+import { logger } from "../utils/logger";
 
 export const taskCommands = {
   async add(title: string, options: any) {
@@ -374,18 +381,18 @@ export const taskCommands = {
     if (!estimate) {
       const answer = await inquirer.prompt([
         {
-          type: 'input',
-          name: 'estimate',
-          message: 'Estimated duration (minutes):',
-          default: '60',
-          validate: (input) => !isNaN(parseInt(input)) || 'Must be a number',
+          type: "input",
+          name: "estimate",
+          message: "Estimated duration (minutes):",
+          default: "60",
+          validate: (input) => !isNaN(parseInt(input)) || "Must be a number",
         },
       ]);
       estimate = parseInt(answer.estimate);
     }
 
     try {
-      const task = await apiClient.post('/tasks', {
+      const task = await apiClient.post("/tasks", {
         title,
         description: options.description,
         priority: options.priority,
@@ -398,20 +405,20 @@ export const taskCommands = {
       logger.success(`Task created: ${chalk.bold(task.title)}`);
       logger.info(`Task ID: ${task.id}`);
     } catch (error) {
-      logger.error('Failed to create task:', error.message);
+      logger.error("Failed to create task:", error.message);
       process.exit(1);
     }
   },
 
   async list(options: any) {
     try {
-      const tasks = await apiClient.get('/tasks', {
+      const tasks = await apiClient.get("/tasks", {
         status: options.status,
         priority: options.priority,
       });
 
       if (tasks.length === 0) {
-        logger.info('No tasks found.');
+        logger.info("No tasks found.");
         return;
       }
 
@@ -419,26 +426,28 @@ export const taskCommands = {
 
       tasks.forEach((task: any) => {
         const priorityIcon = {
-          sacred: '🔴',
-          important: '🟠',
-          optional: '🟢',
+          sacred: "🔴",
+          important: "🟠",
+          optional: "🟢",
         }[task.priority];
 
-        const difficultyStars = '⭐'.repeat(task.difficulty);
+        const difficultyStars = "⭐".repeat(task.difficulty);
 
         console.log(
-          `${priorityIcon} ${chalk.bold(task.title)} ${difficultyStars}`
+          `${priorityIcon} ${chalk.bold(task.title)} ${difficultyStars}`,
         );
         console.log(
-          `   ID: ${task.id} | Status: ${task.status} | ${task.estimatedDuration} min`
+          `   ID: ${task.id} | Status: ${task.status} | ${task.estimatedDuration} min`,
         );
         if (task.deadline) {
-          console.log(`   Deadline: ${new Date(task.deadline).toLocaleDateString()}`);
+          console.log(
+            `   Deadline: ${new Date(task.deadline).toLocaleDateString()}`,
+          );
         }
-        console.log('');
+        console.log("");
       });
     } catch (error) {
-      logger.error('Failed to list tasks:', error.message);
+      logger.error("Failed to list tasks:", error.message);
       process.exit(1);
     }
   },
@@ -447,29 +456,31 @@ export const taskCommands = {
     try {
       const task = await apiClient.get(`/tasks/${taskId}`);
 
-      console.log('');
+      console.log("");
       console.log(chalk.bold(task.title));
-      console.log('─'.repeat(task.title.length));
-      console.log('');
+      console.log("─".repeat(task.title.length));
+      console.log("");
       console.log(`ID:           ${task.id}`);
       console.log(`Priority:     ${task.priority}`);
-      console.log(`Difficulty:   ${'⭐'.repeat(task.difficulty)}`);
+      console.log(`Difficulty:   ${"⭐".repeat(task.difficulty)}`);
       console.log(`Status:       ${task.status}`);
       console.log(`Estimate:     ${task.estimatedDuration} min`);
       if (task.deadline) {
-        console.log(`Deadline:     ${new Date(task.deadline).toLocaleDateString()}`);
+        console.log(
+          `Deadline:     ${new Date(task.deadline).toLocaleDateString()}`,
+        );
       }
       if (task.quarter) {
         console.log(`Quarter:      ${task.quarter}`);
       }
       if (task.description) {
-        console.log('');
-        console.log('Description:');
+        console.log("");
+        console.log("Description:");
         console.log(task.description);
       }
-      console.log('');
+      console.log("");
     } catch (error) {
-      logger.error('Failed to show task:', error.message);
+      logger.error("Failed to show task:", error.message);
       process.exit(1);
     }
   },
@@ -486,7 +497,7 @@ export const taskCommands = {
 
       logger.success(`Task updated: ${chalk.bold(task.title)}`);
     } catch (error) {
-      logger.error('Failed to update task:', error.message);
+      logger.error("Failed to update task:", error.message);
       process.exit(1);
     }
   },
@@ -495,24 +506,24 @@ export const taskCommands = {
     if (!options.force) {
       const answer = await inquirer.prompt([
         {
-          type: 'confirm',
-          name: 'confirm',
-          message: 'Are you sure you want to delete this task?',
+          type: "confirm",
+          name: "confirm",
+          message: "Are you sure you want to delete this task?",
           default: false,
         },
       ]);
 
       if (!answer.confirm) {
-        logger.info('Cancelled.');
+        logger.info("Cancelled.");
         return;
       }
     }
 
     try {
       await apiClient.delete(`/tasks/${taskId}`);
-      logger.success('Task deleted.');
+      logger.success("Task deleted.");
     } catch (error) {
-      logger.error('Failed to delete task:', error.message);
+      logger.error("Failed to delete task:", error.message);
       process.exit(1);
     }
   },
@@ -520,6 +531,7 @@ export const taskCommands = {
 ```
 
 **Tests :**
+
 - [ ] Test `devflow add "SEPA Backend" -p sacred --difficulty 4 -e 180`
 - [ ] Test `devflow list` → affiche tasks
 - [ ] Test `devflow show <taskId>` → affiche détails
@@ -537,19 +549,19 @@ export const taskCommands = {
 - [ ] Créer `app/api/tasks/route.ts` :
 
 ```ts
-import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/prisma';
+import { NextRequest } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get('status');
-  const priority = searchParams.get('priority');
+  const status = searchParams.get("status");
+  const priority = searchParams.get("priority");
 
   const tasks = await prisma.task.findMany({
     where: {
@@ -558,7 +570,7 @@ export async function GET(req: NextRequest) {
       ...(priority && { priority }),
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
   });
 
@@ -568,7 +580,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const body = await req.json();
@@ -583,8 +595,8 @@ export async function POST(req: NextRequest) {
       estimatedDuration: body.estimatedDuration,
       deadline: body.deadline,
       quarter: body.quarter,
-      status: 'inbox',
-      kanbanColumn: 'inbox',
+      status: "inbox",
+      kanbanColumn: "inbox",
     },
   });
 
@@ -595,17 +607,17 @@ export async function POST(req: NextRequest) {
 - [ ] Créer `app/api/tasks/[taskId]/route.ts` :
 
 ```ts
-import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/prisma';
+import { NextRequest } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: { taskId: string } },
 ) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const task = await prisma.task.findUnique({
@@ -616,7 +628,7 @@ export async function GET(
   });
 
   if (!task) {
-    return new Response('Task not found', { status: 404 });
+    return new Response("Task not found", { status: 404 });
   }
 
   return Response.json(task);
@@ -624,11 +636,11 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: { taskId: string } },
 ) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const body = await req.json();
@@ -646,11 +658,11 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: { taskId: string } },
 ) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   await prisma.task.delete({
@@ -660,11 +672,12 @@ export async function DELETE(
     },
   });
 
-  return new Response('Task deleted', { status: 200 });
+  return new Response("Task deleted", { status: 200 });
 }
 ```
 
 **Tests :**
+
 - [ ] Test GET /api/tasks → returns tasks
 - [ ] Test POST /api/tasks → creates task
 - [ ] Test GET /api/tasks/:id → returns task
@@ -694,6 +707,7 @@ export async function DELETE(
 #### Workspace Structure
 
 - [ ] Créer workspace dir :
+
   ```bash
   mkdir -p ~/devflow-workspace/transcripts
   mkdir -p ~/devflow-workspace/.claude
@@ -725,6 +739,7 @@ Tu es un assistant qui aide à importer des tâches dans DevFlow à partir de tr
 ## Exemples
 
 ### Transcript 1
+
 ```
 User: "Bon, je dois implémenter le SEPA avec Stripe, c'est urgent et compliqué.
 Je pense que ça va prendre 3h. Il y a aussi un bug sur les dons récurrents,
@@ -733,6 +748,7 @@ c'est pas urgent, 1h."
 ```
 
 ### Parsing
+
 ```
 Tâche 1 :
 - Titre : Implémenter SEPA avec Stripe
@@ -754,6 +770,7 @@ Tâche 3 :
 ```
 
 ### Commandes CLI
+
 ```bash
 devflow add "Implémenter SEPA avec Stripe" -p sacred --difficulty 4 -e 180
 devflow add "Fix bug dons récurrents" -p important --difficulty 2 -e 30
@@ -763,6 +780,7 @@ devflow add "Refacto composant Navbar" -p optional --difficulty 3 -e 60
 ## Questions de clarification
 
 Si des infos manquent, pose des questions :
+
 - "Quelle est la priorité de [tâche] ?"
 - "Combien de temps estimes-tu pour [tâche] ?"
 - "Y a-t-il une deadline pour [tâche] ?"
@@ -770,6 +788,7 @@ Si des infos manquent, pose des questions :
 ## Output
 
 Format final :
+
 ```
 J'ai identifié 3 tâches. Voici les commandes CLI :
 
@@ -786,18 +805,21 @@ Si user valide → exécute les commandes.
 #### Exemple d'utilisation
 
 - [ ] User crée transcript :
+
   ```bash
   cd ~/devflow-workspace/transcripts
   echo "Je dois faire le SEPA (urgent, 3h), fix bug dons (30 min), refacto Navbar (1h)." > brainstorm-2026-01-05.md
   ```
 
 - [ ] User ouvre Claude Code :
+
   ```bash
   cd ~/devflow-workspace
   claude-code
   ```
 
 - [ ] User :
+
   ```
   Claude, utilise task-creator pour importer les tâches du transcript brainstorm-2026-01-05.md
   ```
@@ -811,6 +833,7 @@ Si user valide → exécute les commandes.
   6. Exécute via Bash tool
 
 **Tests :**
+
 - [ ] Test parsing transcript → tâches extraites
 - [ ] Test génération commandes CLI → syntaxe correcte
 - [ ] Test exécution → tâches créées dans DevFlow
@@ -833,14 +856,17 @@ Si user valide → exécute les commandes.
 ## Risques
 
 **Risque 1 : Parsing transcript imprécis**
+
 - **Impact :** Tâches mal créées
 - **Mitigation :** Toujours valider avec user avant exécution
 
 **Risque 2 : CLI authentication complexe**
+
 - **Impact :** User frustré
 - **Mitigation :** JWT simple, stored in ~/.devflow/config.json
 
 **Risque 3 : API rate limiting**
+
 - **Impact :** CLI bloqué
 - **Mitigation :** Ajouter retry logic avec backoff
 

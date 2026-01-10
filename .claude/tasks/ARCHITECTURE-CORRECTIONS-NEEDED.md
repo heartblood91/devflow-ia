@@ -13,6 +13,7 @@
 Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont été identifiées et corrigées. Le projet est maintenant entièrement aligné sur l'architecture PRD v5.0.
 
 **Corrections majeures appliquées:**
+
 - ✅ Architecture: Monorepo → Monolith Next.js 15
 - ✅ Auth: NextAuth → Better Auth 1.0 (22+ références corrigées)
 - ✅ Tests: Jest → Vitest + Playwright
@@ -24,10 +25,12 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ## Files Corrected (13 Total)
 
 ### ✅ 1. Phase-4-Backlog-Tasks.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ Ligne 204: Prisma import path corrigé (`@/lib/prisma` → `@/lib/db/prisma`)
 - ✅ Lignes 276-277: NextAuth → Better Auth dans `createTask`
 - ✅ Lignes 325-327: NextAuth → Better Auth dans `updateTask` et `deleteTask`
@@ -37,10 +40,12 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ---
 
 ### ✅ 2. Phase-5-Planning-WarRoom.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ `packages/core/src/usecases/` → `lib/usecases/`
 - ✅ Repository pattern supprimé (ITaskRepository, IUserRepository, ITimeBlockRepository)
 - ✅ Appels Prisma directs: `prisma.user.findUnique()`, `prisma.task.findMany()`
@@ -53,10 +58,12 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ---
 
 ### ✅ 3. Phase-5-Day-3-4-Planning-Algorithm.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ Mêmes corrections que Phase-5-Planning-WarRoom.md
 - ✅ Ligne 126: `packages/core/` → `lib/usecases/`
 - ✅ Repository pattern → Prisma direct
@@ -67,46 +74,56 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ---
 
 ### ✅ 4. Phase-5-Day-5-Confirmation-Sauvegarde.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ `getServerSession(authOptions)` → `auth.api.getSession()` (1 occurrence)
 
 ---
 
 ### ✅ 5. Phase-6-Day-1-Dashboard.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ `getServerSession(authOptions)` → `auth.api.getSession()` (1 occurrence)
 
 ---
 
 ### ✅ 6. Phase-6-Day-4-Daily-Reflection.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ `getServerSession(authOptions)` → `auth.api.getSession()` (1 occurrence)
 
 ---
 
 ### ✅ 7. Phase-6-Execution-Reflection.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ `getServerSession(authOptions)` → `auth.api.getSession()` (3 occurrences)
 
 ---
 
 ### ✅ 8. Phase-7-DevFlow-CLI.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ CLI structure: `packages/cli/` → `cli/`
 - ✅ Package name: `@devflow/cli` → `devflow-cli`
 - ✅ NextAuth → Better Auth dans 5 API endpoints
@@ -117,28 +134,34 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ---
 
 ### ✅ 9. Phase-8-Day-4-5-Chatbot-Function-Calling.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ `getServerSession(authOptions)` → `auth.api.getSession()` (1 occurrence)
 
 ---
 
 ### ✅ 10. Phase-9-Features-Avancees.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ `getServerSession(authOptions)` → `auth.api.getSession()` (3 occurrences dans export, import, subscription routes)
 
 ---
 
 ### ✅ 11. Phase-10-Tests-QA.md
+
 **Status:** ✅ Corrections applied (Critical)
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ Test structure: `packages/core, api, web, cli` → `lib/, app/api/, components/, cli/`
 - ✅ Jest → Vitest (8 corrections):
   - `jest.Mocked` → `ReturnType<typeof vi.mocked>`
@@ -153,10 +176,12 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ---
 
 ### ✅ 12. Phase-11-Polish-Docs.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ Env vars: `NEXTAUTH_SECRET/URL` → `BETTER_AUTH_SECRET/URL`
 - ✅ Architecture diagram: `packages/` → `app/, lib/, components/, cli/`
 - ✅ CLI path: `cd packages/cli` → `cd cli`
@@ -167,10 +192,12 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ---
 
 ### ✅ 13. Phase-12-Launch.md
+
 **Status:** ✅ Corrections applied
 **Date:** 2026-01-06
 
 **Corrections applied:**
+
 - ✅ Production env vars: `NEXTAUTH_SECRET/URL` → `BETTER_AUTH_SECRET/URL`
 
 **Impact:** Déploiement production avec bonnes variables
@@ -180,55 +207,66 @@ Toutes les incohérences architecturales entre le PRD v4.2 et les task files ont
 ## Files NOT Requiring Changes
 
 ### Phase-0-Cleanup-Revised.md
+
 **Status:** ✅ OK (Contextual reference only)
 **Note:** Ligne 19 mentionne "Better Auth (moderne, meilleur que NextAuth)" - C'est une référence contextuelle expliquant le choix, pas une implémentation NextAuth.
 
 ### Phase-1-Validation-Design.md
+
 **Status:** ✅ OK (No architecture references)
 
 ### Phase-2-Setup-Technique-Revised.md
+
 **Status:** ✅ OK (Contextual reference only)
 **Note:** Ligne 22 "❌ Pas de NextAuth setup (on garde Better Auth)" - Explique qu'on n'utilise PAS NextAuth.
 
 ### Phase-3-Auth-Onboarding-Revised.md
+
 **Status:** ✅ OK (Contextual reference only)
 **Note:** Ligne 20 "❌ Pas de NextAuth setup (Better Auth déjà configuré)" - Confirmation qu'on utilise Better Auth.
 
 ### Phase-5-Day-1-Weekly-View.md
+
 **Status:** ✅ OK (No incorrect references found)
 
 ### Phase-5-Day-2-War-Room-Retrospective.md
+
 **Status:** ✅ OK (No incorrect references found)
 
 ### Phase-6-Day-2-3-Timer-Focus.md
+
 **Status:** ✅ OK (No incorrect references found)
 
 ### Phase-8-Day-1-Context-Management.md
+
 **Status:** ✅ OK (No incorrect references found)
 
 ### Phase-8-Day-2-3-AI-Proactive.md
+
 **Status:** ✅ OK (No incorrect references found)
 
 ### Phase-8-DevFlow-AI.md
+
 **Status:** ✅ OK (No incorrect references found)
 
 ---
 
 ## Total Corrections Summary
 
-| Métrique | Avant | Après | Delta |
-|----------|-------|-------|-------|
-| **Fichiers avec incohérences** | 13 | 0 | -13 |
-| **NextAuth references** | 22+ | 0 | -22+ |
-| **Monorepo references** | 30+ | 0 | -30+ |
-| **Jest references** | 8 | 0 | -8 |
-| **Repository pattern refs** | 10+ | 0 | -10+ |
+| Métrique                       | Avant | Après | Delta |
+| ------------------------------ | ----- | ----- | ----- |
+| **Fichiers avec incohérences** | 13    | 0     | -13   |
+| **NextAuth references**        | 22+   | 0     | -22+  |
+| **Monorepo references**        | 30+   | 0     | -30+  |
+| **Jest references**            | 8     | 0     | -8    |
+| **Repository pattern refs**    | 10+   | 0     | -10+  |
 
 ---
 
 ## Architecture Validée (PRD v5.0)
 
 ### ✅ Structure Monolith
+
 ```
 devflow/
 ├── app/              # Next.js App Router (pages + API routes)
@@ -244,6 +282,7 @@ devflow/
 ```
 
 ### ✅ Stack Technique
+
 - **Framework:** Next.js 15 (App Router)
 - **Auth:** Better Auth 1.0
 - **Database:** Prisma + Neon PostgreSQL
@@ -252,6 +291,7 @@ devflow/
 - **AI:** OpenAI GPT-4o-mini
 
 ### ✅ Patterns Simplifiés MVP
+
 - Pas de monorepo (Turborepo supprimé)
 - Pas de repository pattern (Prisma direct)
 - Functional ES6 (pas de classes)

@@ -25,6 +25,7 @@
 #### Animations (Framer Motion)
 
 - [ ] Installer Framer Motion :
+
   ```bash
   pnpm add framer-motion
   ```
@@ -34,7 +35,7 @@
 ```tsx
 // app/layout.tsx
 
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -42,7 +43,11 @@ const pageVariants = {
   exit: { opacity: 0, y: -20 },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <motion.div
       variants={pageVariants}
@@ -80,11 +85,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 0.9 }}
-    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+    transition={{ type: "spring", damping: 20, stiffness: 300 }}
   >
-    <DialogContent>
-      {/* ... */}
-    </DialogContent>
+    <DialogContent>{/* ... */}</DialogContent>
   </motion.div>
 </Dialog>
 ```
@@ -92,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 #### Micro-interactions
 
 - [ ] Button hover effects :
+
   ```css
   .button {
     transition: all 0.2s ease;
@@ -103,27 +107,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   ```
 
 - [ ] Toast notifications (sonner) :
+
   ```bash
   pnpm add sonner
   ```
 
   ```tsx
-  import { toast } from 'sonner';
+  import { toast } from "sonner";
 
-  toast.success('Tâche créée');
-  toast.error('Erreur lors de la création');
-  toast.loading('Chargement...');
+  toast.success("Tâche créée");
+  toast.error("Erreur lors de la création");
+  toast.loading("Chargement...");
   ```
 
 - [ ] Loading skeletons :
-  ```tsx
-  import { Skeleton } from '@/components/ui/skeleton';
 
-  {isLoading ? (
-    <Skeleton className="h-20 w-full" />
-  ) : (
-    <TaskCard task={task} />
-  )}
+  ```tsx
+  import { Skeleton } from "@/components/ui/skeleton";
+
+  {
+    isLoading ? <Skeleton className="h-20 w-full" /> : <TaskCard task={task} />;
+  }
   ```
 
 #### Responsive Design
@@ -136,8 +140,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   - Timer
 
 - [ ] Ajuster breakpoints :
+
   ```tsx
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
     {/* ... */}
   </div>
   ```
@@ -163,6 +168,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   ```
 
 **Polish Checklist :**
+
 - [ ] Animations fluides (60fps)
 - [ ] Loading states partout
 - [ ] Error states affichées
@@ -180,6 +186,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 #### Semantic HTML
 
 - [ ] Utiliser balises sémantiques :
+
   ```tsx
   <header>
     <nav>
@@ -199,6 +206,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 #### ARIA Labels
 
 - [ ] Ajouter labels sur boutons icônes :
+
   ```tsx
   <Button aria-label="Supprimer tâche">
     <Trash />
@@ -214,6 +222,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 - [ ] Tester navigation clavier (Tab, Enter, Esc)
 - [ ] Focus visible :
+
   ```css
   *:focus-visible {
     outline: 2px solid hsl(var(--primary));
@@ -238,6 +247,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 - [ ] Tester avec VoiceOver (Mac) ou NVDA (Windows)
 - [ ] Alt text sur images :
+
   ```tsx
   <img src="/logo.png" alt="DevFlow logo" />
   ```
@@ -252,6 +262,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   ```
 
 **Accessibility Checklist :**
+
 - [ ] Semantic HTML partout
 - [ ] ARIA labels sur éléments interactifs
 - [ ] Keyboard navigation complète
@@ -350,19 +361,25 @@ pnpm link
 ### Commands
 
 \`\`\`bash
+
 # Login
+
 devflow login
 
 # Create task
+
 devflow add "Implement SEPA" -p sacred --difficulty 4 -e 180
 
 # List tasks
+
 devflow list
 
 # Show weekly planning
+
 devflow week
 
 # Stats
+
 devflow stats --week
 \`\`\`
 
@@ -370,26 +387,30 @@ devflow stats --week
 
 \`\`\`
 devflow/
-├── app/              # Next.js App Router
+├── app/ # Next.js App Router
 ├── lib/
-│   ├── usecases/     # Business logic
-│   ├── ai/           # AI features
-│   ├── stats/        # Stats calculations
-│   └── db/           # Prisma client
-├── components/       # React components
-└── cli/              # Node.js CLI tool
+│ ├── usecases/ # Business logic
+│ ├── ai/ # AI features
+│ ├── stats/ # Stats calculations
+│ └── db/ # Prisma client
+├── components/ # React components
+└── cli/ # Node.js CLI tool
 \`\`\`
 
 ## Testing
 
 \`\`\`bash
+
 # Unit tests
+
 pnpm test
 
 # E2E tests
+
 pnpm test:e2e
 
 # Coverage
+
 pnpm test:coverage
 \`\`\`
 
@@ -432,21 +453,22 @@ All endpoints require authentication via Better Auth session.
 List all tasks.
 
 **Query Parameters:**
+
 - `status` (optional): Filter by status (inbox/todo/doing/done)
 - `priority` (optional): Filter by priority (sacred/important/optional)
 
 **Response:**
 \`\`\`json
 [
-  {
-    "id": "clx...",
-    "title": "SEPA Backend",
-    "priority": "sacred",
-    "difficulty": 4,
-    "estimatedDuration": 180,
-    "status": "todo",
-    "createdAt": "2026-01-05T10:00:00Z"
-  }
+{
+"id": "clx...",
+"title": "SEPA Backend",
+"priority": "sacred",
+"difficulty": 4,
+"estimatedDuration": 180,
+"status": "todo",
+"createdAt": "2026-01-05T10:00:00Z"
+}
 ]
 \`\`\`
 
@@ -457,22 +479,22 @@ Create a new task.
 **Body:**
 \`\`\`json
 {
-  "title": "SEPA Backend",
-  "description": "Implement SEPA with Stripe",
-  "priority": "sacred",
-  "difficulty": 4,
-  "estimatedDuration": 180,
-  "deadline": "2026-01-10",
-  "quarter": "Q1-2026"
+"title": "SEPA Backend",
+"description": "Implement SEPA with Stripe",
+"priority": "sacred",
+"difficulty": 4,
+"estimatedDuration": 180,
+"deadline": "2026-01-10",
+"quarter": "Q1-2026"
 }
 \`\`\`
 
 **Response:**
 \`\`\`json
 {
-  "id": "clx...",
-  "title": "SEPA Backend",
-  ...
+"id": "clx...",
+"title": "SEPA Backend",
+...
 }
 \`\`\`
 
@@ -497,17 +519,17 @@ Generate weekly planning.
 **Body:**
 \`\`\`json
 {
-  "weekStartDate": "2026-01-06"
+"weekStartDate": "2026-01-06"
 }
 \`\`\`
 
 **Response:**
 \`\`\`json
 {
-  "timeBlocks": [...],
-  "totalHours": 18,
-  "bufferHours": 4,
-  "rescueSlots": 2
+"timeBlocks": [...],
+"totalHours": 18,
+"bufferHours": 4,
+"rescueSlots": 2
 }
 \`\`\`
 
@@ -542,6 +564,7 @@ Get monthly stats.
 ### Dashboard
 
 Your daily command center:
+
 - Top 3 priorities
 - Timeline (time blocks)
 - Progress bar
@@ -723,7 +746,7 @@ export class ApiError extends Error {
   constructor(
     public statusCode: number,
     message: string,
-    public code?: string
+    public code?: string,
   ) {
     super(message);
   }
@@ -738,18 +761,18 @@ export function handleApiError(error: unknown) {
           code: error.code,
         },
       },
-      { status: error.statusCode }
+      { status: error.statusCode },
     );
   }
 
   return Response.json(
     {
       error: {
-        message: 'Internal server error',
-        code: 'INTERNAL_ERROR',
+        message: "Internal server error",
+        code: "INTERNAL_ERROR",
       },
     },
-    { status: 500 }
+    { status: 500 },
   );
 }
 ```
@@ -767,6 +790,7 @@ throw new ApiError(400, 'Cette tâche dépend d'une autre tâche qui n'existe pl
 ```
 
 **Error Handling Checklist :**
+
 - [ ] Global error boundary
 - [ ] API errors standardisés
 - [ ] User-friendly messages
@@ -790,14 +814,17 @@ throw new ApiError(400, 'Cette tâche dépend d'une autre tâche qui n'existe pl
 ## Risques
 
 **Risque 1 : Animations trop lourdes**
+
 - **Impact :** Performance dégradée
 - **Mitigation :** Utiliser CSS transforms (GPU-accelerated)
 
 **Risque 2 : Documentation obsolète**
+
 - **Impact :** User confusion
 - **Mitigation :** Update docs à chaque feature change
 
 **Risque 3 : Accessibility non testée**
+
 - **Impact :** Users disabled exclus
 - **Mitigation :** Tests screen reader + keyboard navigation
 

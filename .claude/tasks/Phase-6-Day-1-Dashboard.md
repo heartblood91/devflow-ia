@@ -18,11 +18,12 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 
 - [ ] Créer `app/dashboard/page.tsx`
 - [ ] Layout 3 colonnes (desktop) → 1 col (mobile) :
+
   ```tsx
   <div className="dashboard">
     <DashboardHeader />
 
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2">
         <DailyPriorities />
         <DailyTimeline />
@@ -45,11 +46,12 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
   - Bouton Settings (icon)
 
 - [ ] Design :
+
   ```tsx
   <header className="dashboard-header">
     <div>
       <h1 className="text-4xl font-bold">
-        {format(new Date(), 'EEEE d MMMM yyyy', { locale: fr })}
+        {format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}
       </h1>
     </div>
 
@@ -73,10 +75,11 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 - [ ] Créer `components/dashboard/DailyPriorities.tsx`
 - [ ] Server Action : `getDailyPriorities(date: Date)`
 - [ ] Logic :
+
   ```ts
   export async function getDailyPriorities(date: Date) {
     const session = await auth.api.getSession();
-    if (!session?.user?.id) throw new Error('Unauthorized');
+    if (!session?.user?.id) throw new Error("Unauthorized");
 
     // Get time blocks for today
     const timeBlocks = await prisma.timeBlock.findMany({
@@ -91,9 +94,9 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
       },
       include: { task: true },
       orderBy: [
-        { task: { priority: 'desc' } },
-        { task: { difficulty: 'desc' } },
-        { startTime: 'asc' },
+        { task: { priority: "desc" } },
+        { task: { difficulty: "desc" } },
+        { startTime: "asc" },
       ],
     });
 
@@ -112,6 +115,7 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
   ```
 
 - [ ] Affichage :
+
   ```tsx
   <Card>
     <CardHeader>
@@ -146,16 +150,15 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 - [ ] Créer `components/dashboard/PriorityCard.tsx`
 - [ ] Props : `task`, `rank`, `isFrog`
 - [ ] Design :
+
   ```tsx
   <div className="priority-card border-2 border-black p-4">
     <div className="flex items-start justify-between">
       <div className="flex items-center gap-3">
-        <div className="rank text-4xl font-bold text-gray-300">
-          {rank}
-        </div>
+        <div className="rank text-4xl font-bold text-gray-300">{rank}</div>
 
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="mb-1 flex items-center gap-2">
             <Badge priority={task.priority} />
             <Badge difficulty={task.difficulty} />
             {isFrog && <span className="text-2xl">🐸</span>}
@@ -163,7 +166,7 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 
           <h3 className="text-xl font-bold">{task.title}</h3>
 
-          <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+          <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
             <div className="flex items-center gap-1">
               <Clock className="size-4" />
               {task.estimatedDuration} min
@@ -176,13 +179,11 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
         </div>
       </div>
 
-      <Button onClick={() => handleStartTask(task.id)}>
-        Commencer
-      </Button>
+      <Button onClick={() => handleStartTask(task.id)}>Commencer</Button>
     </div>
 
     {isFrog && (
-      <div className="mt-3 p-3 bg-green-50 border-l-4 border-green-500">
+      <div className="mt-3 border-l-4 border-green-500 bg-green-50 p-3">
         <p className="text-sm font-semibold">
           🐸 Eat the Frog : Commence par la tâche la plus difficile
         </p>
@@ -199,6 +200,7 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 - [ ] Current time indicator (barre verte)
 
 - [ ] Design :
+
   ```tsx
   <Card>
     <CardHeader>
@@ -213,7 +215,7 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
               {hour}
             </div>
 
-            <div className="hour-blocks flex-1 relative">
+            <div className="hour-blocks relative flex-1">
               {timeBlocks
                 .filter((tb) => tb.startTime.startsWith(hour))
                 .map((tb) => (
@@ -229,11 +231,11 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 
         {/* Current time indicator */}
         <div
-          className="current-time-line absolute left-0 right-0 border-t-4 border-green-500"
+          className="current-time-line absolute right-0 left-0 border-t-4 border-green-500"
           style={{ top: `${getCurrentTimeOffset()}px` }}
         >
-          <div className="current-time-label bg-green-500 text-white px-2 py-1 text-xs font-bold">
-            {format(new Date(), 'HH:mm')}
+          <div className="current-time-label bg-green-500 px-2 py-1 text-xs font-bold text-white">
+            {format(new Date(), "HH:mm")}
           </div>
         </div>
       </div>
@@ -250,6 +252,7 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
   - Prochaine tâche
 
 - [ ] Design :
+
   ```tsx
   <Card>
     <CardHeader>
@@ -258,14 +261,14 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 
     <CardContent>
       <div className="progress-bar mb-4">
-        <div className="flex justify-between mb-2">
+        <div className="mb-2 flex justify-between">
           <span className="text-sm font-medium">
             {completedTasks}/{totalTasks} tâches
           </span>
           <span className="text-sm font-bold">{percentage}%</span>
         </div>
 
-        <div className="h-4 bg-gray-200 border-2 border-black">
+        <div className="h-4 border-2 border-black bg-gray-200">
           <div
             className="h-full bg-green-500"
             style={{ width: `${percentage}%` }}
@@ -276,20 +279,25 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
       <div className="stats space-y-2">
         <div className="stat-row flex justify-between">
           <span className="text-sm">Temps passé</span>
-          <span className="font-bold">{completedHours}h/{totalHours}h</span>
+          <span className="font-bold">
+            {completedHours}h/{totalHours}h
+          </span>
         </div>
       </div>
 
       {nextTask && (
-        <div className="next-task mt-4 p-3 border-2 border-black">
-          <p className="text-xs uppercase font-semibold text-gray-500 mb-1">
+        <div className="next-task mt-4 border-2 border-black p-3">
+          <p className="mb-1 text-xs font-semibold text-gray-500 uppercase">
             Prochaine tâche
           </p>
           <p className="font-bold">{nextTask.title}</p>
           <p className="text-sm text-gray-600">
             {nextTask.startTime} - {nextTask.endTime}
           </p>
-          <Button className="w-full mt-2" onClick={() => handleStartTask(nextTask.id)}>
+          <Button
+            className="mt-2 w-full"
+            onClick={() => handleStartTask(nextTask.id)}
+          >
             Commencer maintenant
           </Button>
         </div>
@@ -330,12 +338,14 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 ## Design Notes
 
 **Palette :**
+
 - Background : bg-gray-50
 - Cards : bg-white border-2 border-black
 - Text : text-gray-900 (primary), text-gray-600 (secondary)
 - Accents : green-500 (success), blue-500 (info), red-500 (sacred)
 
 **Typography :**
+
 - Date : text-4xl font-bold
 - Card titles : text-2xl font-bold
 - Task titles : text-xl font-bold
@@ -343,11 +353,13 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 - Small : text-sm
 
 **Spacing :**
+
 - Gap entre cards : gap-6
 - Padding cards : p-6
 - Spacing interne : space-y-4
 
 **Buttons :**
+
 - Border-2 border-black
 - Hover : bg-black text-white (invert)
 - Transition : all 200ms

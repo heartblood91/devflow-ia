@@ -27,19 +27,20 @@ Implémenter les suggestions proactives de DevFlow AI (morning briefing, warning
   - `escalation_warning` (tâche récurrente)
 
 - [ ] Implementation :
+
   ```ts
   type ProactiveMoment =
-    | 'morning_briefing'
-    | 'before_task'
-    | 'end_task'
-    | 'overload_warning'
-    | 'pattern_detection'
-    | 'escalation_warning';
+    | "morning_briefing"
+    | "before_task"
+    | "end_task"
+    | "overload_warning"
+    | "pattern_detection"
+    | "escalation_warning";
 
   export async function generateProactiveSuggestion(
     userId: string,
     moment: ProactiveMoment,
-    additionalContext?: any
+    additionalContext?: any,
   ): Promise<string> {
     // 1. Get user context
     const context = await getUserContextCached(userId);
@@ -49,13 +50,13 @@ Implémenter les suggestions proactives de DevFlow AI (morning briefing, warning
 
     // 3. Call OpenAI
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: prompt }],
+      model: "gpt-4o-mini",
+      messages: [{ role: "system", content: prompt }],
       temperature: 0.7,
       max_tokens: 200,
     });
 
-    return completion.choices[0].message.content || '';
+    return completion.choices[0].message.content || "";
   }
   ```
 
@@ -168,12 +169,12 @@ Génère le warning.`,
 export function buildProactivePrompt(
   moment: ProactiveMoment,
   context: any,
-  additionalContext?: any
+  additionalContext?: any,
 ): string {
   let prompt = PROACTIVE_PROMPTS[moment];
 
   // Replace placeholders
-  prompt = prompt.replace('{context}', serializeContext(context));
+  prompt = prompt.replace("{context}", serializeContext(context));
 
   if (additionalContext) {
     Object.entries(additionalContext).forEach(([key, value]) => {
@@ -192,13 +193,16 @@ export function buildProactivePrompt(
 
 ```ts
 export async function triggerMorningBriefing(userId: string) {
-  const suggestion = await generateProactiveSuggestion(userId, 'morning_briefing');
+  const suggestion = await generateProactiveSuggestion(
+    userId,
+    "morning_briefing",
+  );
 
   await sendNotification(userId, {
-    title: 'Morning Briefing',
+    title: "Morning Briefing",
     body: suggestion,
-    type: 'morning_briefing',
-    url: '/dashboard',
+    type: "morning_briefing",
+    url: "/dashboard",
   });
 
   return suggestion;
@@ -207,7 +211,7 @@ export async function triggerMorningBriefing(userId: string) {
 export async function triggerBeforeTask(userId: string, taskId: string) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
 
-  const suggestion = await generateProactiveSuggestion(userId, 'before_task', {
+  const suggestion = await generateProactiveSuggestion(userId, "before_task", {
     task: {
       title: task.title,
       difficulty: task.difficulty,
@@ -216,10 +220,10 @@ export async function triggerBeforeTask(userId: string, taskId: string) {
   });
 
   await sendNotification(userId, {
-    title: 'Tâche à venir',
+    title: "Tâche à venir",
     body: suggestion,
-    type: 'before_task',
-    url: '/dashboard',
+    type: "before_task",
+    url: "/dashboard",
   });
 
   return suggestion;
@@ -231,32 +235,46 @@ export async function triggerEndTask(userId: string, taskId: string) {
   // Get next task
   const nextTask = await getNextTask(userId);
 
-  const suggestion = await generateProactiveSuggestion(userId, 'end_task', {
+  const suggestion = await generateProactiveSuggestion(userId, "end_task", {
     task: { title: task.title },
-    nextTask: nextTask ? { title: nextTask.title, startTime: nextTask.startTime } : null,
+    nextTask: nextTask
+      ? { title: nextTask.title, startTime: nextTask.startTime }
+      : null,
   });
 
   await sendNotification(userId, {
-    title: 'Tâche terminée',
+    title: "Tâche terminée",
     body: suggestion,
-    type: 'end_task',
-    url: '/dashboard',
+    type: "end_task",
+    url: "/dashboard",
   });
 
   return suggestion;
 }
 
-export async function triggerOverloadWarning(userId: string, totalHours: number, maxHours: number = 20) {
-  const suggestion = await generateProactiveSuggestion(userId, 'overload_warning', {
-    totalHours,
-    maxHours,
-  });
+export async function triggerOverloadWarning(
+  userId: string,
+  totalHours: number,
+  maxHours: number = 20,
+) {
+  const suggestion = await generateProactiveSuggestion(
+    userId,
+    "overload_warning",
+    {
+      totalHours,
+      maxHours,
+    },
+  );
 
   return suggestion; // Displayed in War Room modal, no notification
 }
 
 export async function triggerPatternDetection(userId: string) {
-  const stats = await calculateUserStats(userId, subDays(new Date(), 30), new Date());
+  const stats = await calculateUserStats(
+    userId,
+    subDays(new Date(), 30),
+    new Date(),
+  );
 
   const reflections = await prisma.dailyReflection.findMany({
     where: {
@@ -265,32 +283,43 @@ export async function triggerPatternDetection(userId: string) {
     },
   });
 
-  const suggestion = await generateProactiveSuggestion(userId, 'pattern_detection', {
-    stats,
-    reflections,
-  });
+  const suggestion = await generateProactiveSuggestion(
+    userId,
+    "pattern_detection",
+    {
+      stats,
+      reflections,
+    },
+  );
 
   return suggestion; // Displayed in stats page or War Room
 }
 
-export async function triggerEscalationWarning(userId: string, recurringTaskId: string) {
+export async function triggerEscalationWarning(
+  userId: string,
+  recurringTaskId: string,
+) {
   const recurringTask = await prisma.recurringTask.findUnique({
     where: { id: recurringTaskId },
   });
 
-  const suggestion = await generateProactiveSuggestion(userId, 'escalation_warning', {
-    task: { title: recurringTask.title },
-    skippedCount: recurringTask.skippedCount,
-    escalationThreshold: recurringTask.escalationAfterSkips,
-    escalationDay: recurringTask.escalationDay,
-    escalationTime: '14:00',
-  });
+  const suggestion = await generateProactiveSuggestion(
+    userId,
+    "escalation_warning",
+    {
+      task: { title: recurringTask.title },
+      skippedCount: recurringTask.skippedCount,
+      escalationThreshold: recurringTask.escalationAfterSkips,
+      escalationDay: recurringTask.escalationDay,
+      escalationTime: "14:00",
+    },
+  );
 
   await sendNotification(userId, {
-    title: 'Escalade imminente',
+    title: "Escalade imminente",
     body: suggestion,
-    type: 'escalation_warning',
-    url: '/settings?tab=recurring',
+    type: "escalation_warning",
+    url: "/settings?tab=recurring",
   });
 
   return suggestion;
@@ -304,12 +333,13 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
 ### 4. Cron Jobs (Vercel Cron) (3h)
 
 - [ ] Créer `app/api/cron/morning-briefing/route.ts` :
+
   ```ts
   export async function GET(req: Request) {
     // Verify cron secret
-    const authHeader = req.headers.get('authorization');
+    const authHeader = req.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return new Response('Unauthorized', { status: 401 });
+      return new Response("Unauthorized", { status: 401 });
     }
 
     // Get all active users
@@ -359,11 +389,12 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
 
 - [ ] Permettre à l'user de trigger suggestions manuellement
 - [ ] Créer `app/api/ai/suggest/route.ts` :
+
   ```ts
   export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return new Response('Unauthorized', { status: 401 });
+      return new Response("Unauthorized", { status: 401 });
     }
 
     const { moment, context } = await req.json();
@@ -371,7 +402,7 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
     const suggestion = await generateProactiveSuggestion(
       session.user.id,
       moment,
-      context
+      context,
     );
 
     return Response.json({ suggestion });
@@ -379,11 +410,12 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
   ```
 
 - [ ] Bouton "Ask AI" dans Dashboard :
+
   ```tsx
   async function handleAskAI() {
-    const res = await fetch('/api/ai/suggest', {
-      method: 'POST',
-      body: JSON.stringify({ moment: 'morning_briefing' }),
+    const res = await fetch("/api/ai/suggest", {
+      method: "POST",
+      body: JSON.stringify({ moment: "morning_briefing" }),
     });
 
     const { suggestion } = await res.json();
@@ -397,16 +429,18 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
 - [ ] Dans War Room modal, afficher overload warning si charge > 20h
 - [ ] Component `WarRoomWarning.tsx` :
   ```tsx
-  {totalHours > maxHours && (
-    <Card className="border-yellow-500 bg-yellow-50">
-      <CardHeader>
-        <h4 className="font-bold">⚠️ DevFlow AI Warning</h4>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm">{overloadWarning}</p>
-      </CardContent>
-    </Card>
-  )}
+  {
+    totalHours > maxHours && (
+      <Card className="border-yellow-500 bg-yellow-50">
+        <CardHeader>
+          <h4 className="font-bold">⚠️ DevFlow AI Warning</h4>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm">{overloadWarning}</p>
+        </CardContent>
+      </Card>
+    );
+  }
   ```
 
 ### 7. Integration Dashboard (1h)
@@ -414,7 +448,7 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
 - [ ] Afficher morning briefing dans Dashboard header
 - [ ] Component `MorningBriefingBanner.tsx` :
   ```tsx
-  <Card className="bg-blue-50 border-l-4 border-blue-500">
+  <Card className="border-l-4 border-blue-500 bg-blue-50">
     <CardContent className="flex items-center gap-3 p-4">
       <MessageCircle className="size-5 text-blue-500" />
       <p className="text-sm font-medium">{morningBriefing}</p>
@@ -426,6 +460,7 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
 
 - [ ] Limiter nombre de suggestions AI par user/jour
 - [ ] Utiliser Upstash Rate Limit :
+
   ```ts
   import { Ratelimit } from '@upstash/ratelimit';
   import { Redis } from '@upstash/redis';
@@ -472,16 +507,19 @@ export async function triggerEscalationWarning(userId: string, recurringTaskId: 
 ## Design Notes
 
 **AI Suggestions Cards :**
+
 - Border-l-4 border-blue-500
 - Background bg-blue-50
 - Icon MessageCircle
 
 **Warnings :**
+
 - Border-l-4 border-yellow-500
 - Background bg-yellow-50
 - Icon AlertCircle
 
 **Success :**
+
 - Border-l-4 border-green-500
 - Background bg-green-50
 - Icon CheckCircle

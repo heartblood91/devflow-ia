@@ -43,7 +43,9 @@
     {/* Colonne 1 : Horaires */}
     <div className="col-span-1">
       {hours.map((hour) => (
-        <div key={hour} className="hour-label">{hour}</div>
+        <div key={hour} className="hour-label">
+          {hour}
+        </div>
       ))}
     </div>
 
@@ -74,29 +76,25 @@ type TimeBlockProps = {
 
 function TimeBlock({ block, onClick }: TimeBlockProps) {
   const bgColor = {
-    sacred: 'bg-red-500',
-    important: 'bg-orange-500',
-    optional: 'bg-green-500',
-    buffer: 'bg-gray-100',
-    rescue: 'bg-yellow-400',
-  }[block.priority || 'buffer'];
+    sacred: "bg-red-500",
+    important: "bg-orange-500",
+    optional: "bg-green-500",
+    buffer: "bg-gray-100",
+    rescue: "bg-yellow-400",
+  }[block.priority || "buffer"];
 
   return (
     <div
-      className={`time-block ${bgColor} ${block.isFree ? 'border-dashed' : ''}`}
+      className={`time-block ${bgColor} ${block.isFree ? "border-dashed" : ""}`}
       style={{
         height: `${block.duration}px`, // 1 min = 1px
         top: `${block.offsetFromTop}px`,
       }}
       onClick={onClick}
     >
-      {block.taskTitle && (
-        <div className="task-title">{block.taskTitle}</div>
-      )}
+      {block.taskTitle && <div className="task-title">{block.taskTitle}</div>}
 
-      {block.isFree && (
-        <div className="free-slot">⚪ Créneau libre</div>
-      )}
+      {block.isFree && <div className="free-slot">⚪ Créneau libre</div>}
 
       {block.isRescue && (
         <div className="rescue-slot">⚠️ Secours ({block.rescueReason})</div>
@@ -111,6 +109,7 @@ function TimeBlock({ block, onClick }: TimeBlockProps) {
 ```
 
 **Tests :**
+
 - [ ] Test affichage semaine courante
 - [ ] Test navigation semaine précédente/suivante
 - [ ] Test time blocks affichés correctement
@@ -183,9 +182,9 @@ function TimeBlock({ block, onClick }: TimeBlockProps) {
 **Server Action : Générer Insights**
 
 ```ts
-'use server';
+"use server";
 
-import { openai } from '@/lib/openai';
+import { openai } from "@/lib/openai";
 
 const INSIGHTS_PROMPT = `Tu es DevFlow AI. Analyse les stats de la semaine passée et donne 3 insights actionnables.
 
@@ -206,19 +205,21 @@ Exemples :
 Génère 3 insights (max 2 lignes chacun).`;
 
 export async function generateInsights(stats: WeeklyStats) {
-  const prompt = INSIGHTS_PROMPT
-    .replace('{completedTasks}', stats.completedTasks.toString())
-    .replace('{totalTasks}', stats.totalTasks.toString())
-    .replace('{totalHours}', stats.totalHours.toString())
-    .replace('{maxHours}', stats.maxHours.toString())
-    .replace('{rescueUsed}', stats.rescueUsed.toString())
-    .replace('{rescueMax}', stats.rescueMax.toString())
-    .replace('{focusQuality}', stats.focusQuality.toString())
-    .replace('{skippedTasks}', stats.skippedTasks.toString());
+  const prompt = INSIGHTS_PROMPT.replace(
+    "{completedTasks}",
+    stats.completedTasks.toString(),
+  )
+    .replace("{totalTasks}", stats.totalTasks.toString())
+    .replace("{totalHours}", stats.totalHours.toString())
+    .replace("{maxHours}", stats.maxHours.toString())
+    .replace("{rescueUsed}", stats.rescueUsed.toString())
+    .replace("{rescueMax}", stats.rescueMax.toString())
+    .replace("{focusQuality}", stats.focusQuality.toString())
+    .replace("{skippedTasks}", stats.skippedTasks.toString());
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'system', content: prompt }],
+    model: "gpt-4o-mini",
+    messages: [{ role: "system", content: prompt }],
     temperature: 0.7,
     max_tokens: 300,
   });
@@ -250,7 +251,7 @@ function handleDragEnd(event: DragEndEvent) {
   const taskId = active.id as string;
   const targetSlot = over.id as string; // "monday-10h" etc.
 
-  const [day, time] = targetSlot.split('-');
+  const [day, time] = targetSlot.split("-");
 
   // Créer time block
   await createTimeBlock({
@@ -275,7 +276,7 @@ function handleDragEnd(event: DragEndEvent) {
 **Server Action : Calculer Charge**
 
 ```ts
-'use server';
+"use server";
 
 export async function calculateWeeklyCharge(timeBlocks: TimeBlock[]) {
   const totalMinutes = timeBlocks
@@ -308,6 +309,7 @@ export async function calculateWeeklyCharge(timeBlocks: TimeBlock[]) {
 #### Objectif
 
 Générer planning hebdomadaire optimal basé sur :
+
 - Chronotype (peak hours)
 - Priorité (Sacré en premier)
 - Difficulté (tâches difficiles sur peak hours)
@@ -342,7 +344,7 @@ Générer planning hebdomadaire optimal basé sur :
 - [ ] Créer `lib/usecases/GenerateWeeklyPlanning.ts` :
 
 ```ts
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from "@/lib/db/prisma";
 
 type GenerateWeeklyPlanningInput = {
   userId: string;
@@ -356,20 +358,23 @@ type GenerateWeeklyPlanningOutput = {
   rescueSlots: number;
 };
 
-export const generateWeeklyPlanning = async (input: GenerateWeeklyPlanningInput): Promise<GenerateWeeklyPlanningOutput> => {
+export const generateWeeklyPlanning = async (
+  input: GenerateWeeklyPlanningInput,
+): Promise<GenerateWeeklyPlanningOutput> => {
   // 1. Get user preferences
   const user = await prisma.user.findUnique({
     where: { id: input.userId },
     select: { preferences: true },
   });
-  const { chronotype, workHours, bufferPercentage, maxRescuePerWeek } = user.preferences;
+  const { chronotype, workHours, bufferPercentage, maxRescuePerWeek } =
+    user.preferences;
 
   // 2. Get tasks to plan
   const tasks = await prisma.task.findMany({
     where: {
       userId: input.userId,
-      status: 'todo',
-      priority: { in: ['sacred', 'important'] },
+      status: "todo",
+      priority: { in: ["sacred", "important"] },
     },
   });
 
@@ -439,12 +444,24 @@ const sortTasks = (tasks: Task[]): Task[] => {
   });
 };
 
-const getPeakHours = (chronotype: string, weekday: string): { start: string; end: string }[] => {
+const getPeakHours = (
+  chronotype: string,
+  weekday: string,
+): { start: string; end: string }[] => {
   const peakHoursMap = {
-    bear: [{ start: '10:00', end: '12:00' }, { start: '16:00', end: '18:00' }],
-    lion: [{ start: '08:00', end: '10:00' }, { start: '14:00', end: '16:00' }],
-    wolf: [{ start: '16:00', end: '18:00' }, { start: '20:00', end: '22:00' }],
-    dolphin: [{ start: '10:00', end: '12:00' }],
+    bear: [
+      { start: "10:00", end: "12:00" },
+      { start: "16:00", end: "18:00" },
+    ],
+    lion: [
+      { start: "08:00", end: "10:00" },
+      { start: "14:00", end: "16:00" },
+    ],
+    wolf: [
+      { start: "16:00", end: "18:00" },
+      { start: "20:00", end: "22:00" },
+    ],
+    dolphin: [{ start: "10:00", end: "12:00" }],
   };
 
   return peakHoursMap[chronotype] || peakHoursMap.bear;
@@ -459,15 +476,22 @@ const planDay = (options: {
 }): TimeBlock[] => {
   const blocks: TimeBlock[] = [];
 
-  const totalMinutes = calculateMinutes(options.workHours.start, options.workHours.end);
-  const bufferMinutes = Math.floor(totalMinutes * (options.bufferPercentage / 100));
+  const totalMinutes = calculateMinutes(
+    options.workHours.start,
+    options.workHours.end,
+  );
+  const bufferMinutes = Math.floor(
+    totalMinutes * (options.bufferPercentage / 100),
+  );
   const taskMinutes = totalMinutes - bufferMinutes;
 
   let currentTime = options.workHours.start;
   let remainingTaskMinutes = taskMinutes;
 
   for (const peakHour of options.peakHours) {
-    const difficultTasks = options.tasks.filter((t) => t.difficulty >= 4 && !t.planned);
+    const difficultTasks = options.tasks.filter(
+      (t) => t.difficulty >= 4 && !t.planned,
+    );
 
     for (const task of difficultTasks) {
       if (remainingTaskMinutes <= 0) break;
@@ -478,7 +502,7 @@ const planDay = (options: {
         date: options.day,
         startTime: currentTime,
         endTime: addMinutes(currentTime, duration),
-        type: 'deep_work',
+        type: "deep_work",
         priority: task.priority,
         taskId: task.id,
         taskTitle: task.title,
@@ -501,7 +525,7 @@ const planDay = (options: {
       date: options.day,
       startTime: currentTime,
       endTime: addMinutes(currentTime, duration),
-      type: 'shallow_work',
+      type: "shallow_work",
       priority: task.priority,
       taskId: task.id,
       taskTitle: task.title,
@@ -516,7 +540,7 @@ const planDay = (options: {
     date: options.day,
     startTime: currentTime,
     endTime: addMinutes(currentTime, bufferMinutes),
-    type: 'buffer',
+    type: "buffer",
     isFree: true,
   });
 
@@ -526,18 +550,18 @@ const planDay = (options: {
 const addRescueSlots = (
   timeBlocks: TimeBlock[],
   daysOfWeek: { date: Date; weekday: string }[],
-  maxRescue: number
+  maxRescue: number,
 ): TimeBlock[] => {
   const rescueSlots: TimeBlock[] = [];
 
-  const friday = daysOfWeek.find((d) => d.weekday === 'friday');
+  const friday = daysOfWeek.find((d) => d.weekday === "friday");
 
   if (friday && maxRescue > 0) {
     rescueSlots.push({
       date: friday.date,
-      startTime: '16:00',
-      endTime: '18:00',
-      type: 'rescue',
+      startTime: "16:00",
+      endTime: "18:00",
+      type: "rescue",
       isRescue: true,
       isFree: true,
     });
@@ -550,6 +574,7 @@ const addRescueSlots = (
 ```
 
 **Tests :**
+
 - [ ] Test génération planning → time blocks créés
 - [ ] Test tâches difficiles → peak hours
 - [ ] Test buffer time → 20% du temps total
@@ -576,15 +601,15 @@ const addRescueSlots = (
 **Server Action : Confirmer Planning**
 
 ```ts
-'use server';
+"use server";
 
-import { prisma } from '@/lib/db/prisma';
-import { auth } from '@/lib/auth/auth';
+import { prisma } from "@/lib/db/prisma";
+import { auth } from "@/lib/auth/auth";
 
 export const confirmWeeklyPlanning = async (timeBlocks: TimeBlock[]) => {
   const session = await auth.api.getSession();
   if (!session?.user?.id) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   await prisma.timeBlock.createMany({
@@ -597,7 +622,7 @@ export const confirmWeeklyPlanning = async (timeBlocks: TimeBlock[]) => {
   const taskIds = timeBlocks.filter((tb) => tb.taskId).map((tb) => tb.taskId);
   await prisma.task.updateMany({
     where: { id: { in: taskIds } },
-    data: { status: 'todo' },
+    data: { status: "todo" },
   });
 
   return { success: true };
@@ -605,6 +630,7 @@ export const confirmWeeklyPlanning = async (timeBlocks: TimeBlock[]) => {
 ```
 
 **Tests :**
+
 - [ ] Test confirm → time blocks saved
 - [ ] Test tasks status → "todo"
 - [ ] Test redirect → /weekly
@@ -628,14 +654,17 @@ export const confirmWeeklyPlanning = async (timeBlocks: TimeBlock[]) => {
 ## Risques
 
 **Risque 1 : Algorithme trop simpliste**
+
 - **Impact :** Planning pas optimal, user frustré
 - **Mitigation :** Itérer sur algorithm, ajouter feedback loop
 
 **Risque 2 : Drag & drop complexe (dépendances)**
+
 - **Impact :** Bugs, tasks hors ordre
 - **Mitigation :** Validation côté serveur, warnings visuels
 
 **Risque 3 : AI insights non pertinents**
+
 - **Impact :** User ignore les insights
 - **Mitigation :** Prompt engineering, exemples concrets
 

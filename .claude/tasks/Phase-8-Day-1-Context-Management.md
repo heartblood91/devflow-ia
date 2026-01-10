@@ -18,6 +18,7 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
 
 - [ ] Créer `lib/ai/context.ts`
 - [ ] Function `getUserContext(userId: string)` :
+
   ```ts
   export async function getUserContext(userId: string) {
     // 1. User preferences
@@ -34,12 +35,9 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
     const tasks = await prisma.task.findMany({
       where: {
         userId,
-        status: { in: ['inbox', 'todo', 'doing'] },
+        status: { in: ["inbox", "todo", "doing"] },
       },
-      orderBy: [
-        { priority: 'desc' },
-        { difficulty: 'desc' },
-      ],
+      orderBy: [{ priority: "desc" }, { difficulty: "desc" }],
       take: 20,
     });
 
@@ -66,11 +64,15 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
           gte: subDays(new Date(), 7),
         },
       },
-      orderBy: { date: 'desc' },
+      orderBy: { date: "desc" },
     });
 
     // 5. Stats (last 30 days)
-    const stats = await calculateUserStats(userId, subDays(new Date(), 30), new Date());
+    const stats = await calculateUserStats(
+      userId,
+      subDays(new Date(), 30),
+      new Date(),
+    );
 
     return {
       user: {
@@ -82,9 +84,9 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
       },
       tasks: {
         total: tasks.length,
-        sacred: tasks.filter((t) => t.priority === 'sacred').length,
-        important: tasks.filter((t) => t.priority === 'important').length,
-        optional: tasks.filter((t) => t.priority === 'optional').length,
+        sacred: tasks.filter((t) => t.priority === "sacred").length,
+        important: tasks.filter((t) => t.priority === "important").length,
+        optional: tasks.filter((t) => t.priority === "optional").length,
         list: tasks.slice(0, 10).map((t) => ({
           title: t.title,
           priority: t.priority,
@@ -94,14 +96,14 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
       },
       planning: {
         currentWeek: timeBlocks.map((tb) => ({
-          day: format(tb.date, 'EEEE'),
+          day: format(tb.date, "EEEE"),
           time: `${tb.startTime}-${tb.endTime}`,
-          task: tb.task?.title || (tb.isFree ? 'Créneau libre' : null),
+          task: tb.task?.title || (tb.isFree ? "Créneau libre" : null),
           priority: tb.priority,
         })),
       },
       reflections: reflections.map((r) => ({
-        date: format(r.date, 'yyyy-MM-dd'),
+        date: format(r.date, "yyyy-MM-dd"),
         focusQuality: r.focusQuality,
         energyLevel: r.energyLevel,
         completedTasks: r.completedTasks,
@@ -123,11 +125,12 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
 
 - [ ] Créer `lib/stats/calculateUserStats.ts`
 - [ ] Logic :
+
   ```ts
   export async function calculateUserStats(
     userId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ) {
     // 1. Get all reflections in period
     const reflections = await prisma.dailyReflection.findMany({
@@ -151,15 +154,18 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
     // 2. Calculate averages
     const avgCompletionRate =
       reflections.reduce((sum, r) => {
-        const rate = r.totalTasks > 0 ? (r.completedTasks / r.totalTasks) * 100 : 0;
+        const rate =
+          r.totalTasks > 0 ? (r.completedTasks / r.totalTasks) * 100 : 0;
         return sum + rate;
       }, 0) / reflections.length;
 
     const avgFocusQuality =
-      reflections.reduce((sum, r) => sum + r.focusQuality, 0) / reflections.length;
+      reflections.reduce((sum, r) => sum + r.focusQuality, 0) /
+      reflections.length;
 
     const avgEnergyLevel =
-      reflections.reduce((sum, r) => sum + r.energyLevel, 0) / reflections.length;
+      reflections.reduce((sum, r) => sum + r.energyLevel, 0) /
+      reflections.length;
 
     // 3. Total hours (from time blocks)
     const timeBlocks = await prisma.timeBlock.findMany({
@@ -180,10 +186,8 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
     const hourStats = new Map<string, { count: number; avgFocus: number }>();
 
     timeBlocks.forEach((tb) => {
-      const hour = tb.startTime.split(':')[0];
-      const reflection = reflections.find((r) =>
-        isSameDay(r.date, tb.date)
-      );
+      const hour = tb.startTime.split(":")[0];
+      const reflection = reflections.find((r) => isSameDay(r.date, tb.date));
 
       if (!hourStats.has(hour)) {
         hourStats.set(hour, { count: 0, avgFocus: 0 });
@@ -203,14 +207,17 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
       }))
       .sort((a, b) => b.avgFocus - a.avgFocus)[0];
 
-    const peakHours = peakHour ? `${peakHour.hour}:00-${parseInt(peakHour.hour) + 1}:00` : null;
+    const peakHours = peakHour
+      ? `${peakHour.hour}:00-${parseInt(peakHour.hour) + 1}:00`
+      : null;
 
     // 5. Most productive day
     const dayStats = new Map<string, { completionRate: number }>();
 
     reflections.forEach((r) => {
-      const day = format(r.date, 'EEEE');
-      const rate = r.totalTasks > 0 ? (r.completedTasks / r.totalTasks) * 100 : 0;
+      const day = format(r.date, "EEEE");
+      const rate =
+        r.totalTasks > 0 ? (r.completedTasks / r.totalTasks) * 100 : 0;
 
       if (!dayStats.has(day)) {
         dayStats.set(day, { completionRate: 0 });
@@ -219,9 +226,10 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
       dayStats.get(day)!.completionRate += rate;
     });
 
-    const mostProductiveDay = Array.from(dayStats.entries())
-      .map(([day, stat]) => ({ day, rate: stat.completionRate }))
-      .sort((a, b) => b.rate - a.rate)[0]?.day || null;
+    const mostProductiveDay =
+      Array.from(dayStats.entries())
+        .map(([day, stat]) => ({ day, rate: stat.completionRate }))
+        .sort((a, b) => b.rate - a.rate)[0]?.day || null;
 
     return {
       avgCompletionRate: Math.round(avgCompletionRate),
@@ -240,8 +248,9 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
 - [ ] Utiliser Redis (Upstash) ou cache in-memory simple
 
 - [ ] Implementation :
+
   ```ts
-  import { LRUCache } from 'lru-cache';
+  import { LRUCache } from "lru-cache";
 
   const contextCache = new LRUCache<string, any>({
     max: 100,
@@ -266,13 +275,17 @@ Créer le système de contexte pour DevFlow AI (accès complet aux données user
   ```ts
   export function serializeContext(context: any): string {
     return `
+  ```
+
 # User Profile
+
 - Name: ${context.user.name}
 - Chronotype: ${context.user.chronotype}
 - Work Hours: ${JSON.stringify(context.user.workHours)}
 - War Room: ${context.user.warRoomSchedule.day} ${context.user.warRoomSchedule.time}
 
 # Current Tasks (${context.tasks.total} total)
+
 - Sacred: ${context.tasks.sacred}
 - Important: ${context.tasks.important}
 - Optional: ${context.tasks.optional}
@@ -281,20 +294,25 @@ Top Tasks:
 ${context.tasks.list.map((t) => `- ${t.title} (${t.priority}, ${t.difficulty}⭐, ${t.estimatedDuration}min)`).join('\n')}
 
 # Current Week Planning
+
 ${context.planning.currentWeek.map((p) => `- ${p.day} ${p.time}: ${p.task || 'Free'}`).join('\n')}
 
 # Recent Performance (Last 7 days)
+
 ${context.reflections.map((r) => `- ${r.date}: ${r.completedTasks}/${r.totalTasks} tasks, Focus ${r.focusQuality}/5, Energy ${r.energyLevel}/5`).join('\n')}
 
 # Stats (Last 30 days)
+
 - Avg Completion Rate: ${context.stats.avgCompletionRate}%
 - Avg Focus Quality: ${context.stats.avgFocusQuality}/5
 - Avg Energy Level: ${context.stats.avgEnergyLevel}/5
 - Total Hours: ${context.stats.totalHours}h
 - Peak Hours: ${context.stats.peakHours || 'N/A'}
 - Most Productive Day: ${context.stats.mostProductiveDay || 'N/A'}
-    `.trim();
+  `.trim();
   }
+  ```
+
   ```
 
 ### 5. Tests (2h)

@@ -31,6 +31,7 @@
 - [ ] **Go/No-Go décision finale**
 
 **Critères de validation :**
+
 - Cédric comprend et valide chaque section
 - Pas de désaccord majeur sur le scope
 - Budget OK (~$90/mois)
@@ -43,6 +44,7 @@
 **Durée estimée :** 8h
 
 #### Dashboard Quotidien
+
 - [ ] Header (date, user)
 - [ ] Section "Tes priorités du jour" (3 tâches max, icône Frog)
 - [ ] Timeline de la journée (time blocks)
@@ -50,6 +52,7 @@
 - [ ] Chatbot DevFlow AI (bottom-right)
 
 #### Weekly View / War Room
+
 - [ ] Calendrier semaine (lun-dim)
 - [ ] Time blocks avec code couleur (🔴🟠🟢⚪⚠️)
 - [ ] Sidebar : liste tâches planifiées
@@ -57,6 +60,7 @@
 - [ ] Drag & drop zones
 
 #### Backlog Kanban
+
 - [ ] 4 colonnes (Inbox, À faire, En cours, Done)
 - [ ] TaskCard (titre, priorité, difficulté, deadline)
 - [ ] Filtres (priorité, difficulté, deadline, quarter)
@@ -64,6 +68,7 @@
 - [ ] Drag & drop entre colonnes
 
 #### Settings
+
 - [ ] Tabs (Profil, Horaires, War Room, Récurrentes, Notifications)
 - [ ] Section Profil (chronotype dropdown)
 - [ ] Section Horaires (par jour, customizable)
@@ -72,18 +77,21 @@
 - [ ] Section Notifications (toggles)
 
 #### Onboarding Conversationnel
+
 - [ ] Écran bienvenue
 - [ ] Interface chat (bulles)
 - [ ] Questions DevFlow AI (chronotype, horaires, War Room)
 - [ ] Progress indicator (étape 1/3, 2/3, 3/3)
 
 #### Timer
+
 - [ ] Choix mode (Pomodoro / Ultradian)
 - [ ] Timer countdown (grand, visible)
 - [ ] Boutons (Start, Pause, Stop)
 - [ ] Mode Focus (fullscreen, distraction-free)
 
 **Outils :**
+
 - Figma (compte gratuit)
 - Low-fidelity (pas de couleurs, juste wireframes)
 
@@ -94,6 +102,7 @@
 **Durée estimée :** 4h
 
 #### Flow 1 : Onboarding Complet
+
 ```
 Signup (email/password)
   ↓
@@ -106,6 +115,7 @@ Dashboard (vide, CTA "Crée ta première tâche")
 ```
 
 #### Flow 2 : War Room (Vendredi)
+
 ```
 Notification (16h45): "War Room dans 15 min"
   ↓
@@ -122,6 +132,7 @@ Confirmation "Semaine planifiée ✓"
 ```
 
 #### Flow 3 : Daily Planning (Matin)
+
 ```
 Notification (8h30): "Tes priorités du jour"
   ↓
@@ -134,6 +145,7 @@ User clique "Commencer la journée"
 ```
 
 #### Flow 4 : Execution (Journée avec Timer)
+
 ```
 User clique sur tâche "SEPA Backend"
   ↓
@@ -155,6 +167,7 @@ Tâche terminée
 ```
 
 #### Flow 5 : Import Vocal → CLI → Backlog
+
 ```
 User brainstorme (ChatGPT + Whisper)
   ↓
@@ -176,6 +189,7 @@ Tâches créées dans DevFlow
 ```
 
 **Outils :**
+
 - Miro ou Figma (flowcharts)
 - Format : User action → System response
 
@@ -188,6 +202,7 @@ Tâches créées dans DevFlow
 #### Palette de Couleurs
 
 **Priorités :**
+
 - 🔴 Sacré : `#EF4444` (red-500)
 - 🟠 Important : `#F97316` (orange-500)
 - 🟢 Facultatif : `#10B981` (green-500)
@@ -195,6 +210,7 @@ Tâches créées dans DevFlow
 - ⚠️ Créneau secours : `#FBBF24` (yellow-400)
 
 **UI Base :**
+
 - Background : `#FFFFFF` (white)
 - Surface : `#F9FAFB` (gray-50)
 - Border : `#E5E7EB` (gray-200)
@@ -202,6 +218,7 @@ Tâches créées dans DevFlow
 - Text secondary : `#6B7280` (gray-500)
 
 **Accent :**
+
 - Primary : `#3B82F6` (blue-500)
 - Success : `#10B981` (green-500)
 - Warning : `#F59E0B` (amber-500)
@@ -210,9 +227,11 @@ Tâches créées dans DevFlow
 #### Typographie
 
 **Font Family :**
+
 - Inter (Google Fonts) ou Geist (Vercel)
 
 **Scale :**
+
 - Heading 1 : 2.25rem (36px), Bold
 - Heading 2 : 1.875rem (30px), Semibold
 - Heading 3 : 1.5rem (24px), Semibold
@@ -255,6 +274,7 @@ Tâches créées dans DevFlow
   - MessageCircle (chatbot)
 
 **Outils :**
+
 - Figma (design tokens)
 - Tailwind config (tailwind.config.ts)
 
@@ -274,10 +294,12 @@ Tâches créées dans DevFlow
 ## Risques
 
 **Risque 1 : Design trop complexe**
+
 - **Impact :** Retard planning
 - **Mitigation :** Low-fidelity only, pas de high-fidelity
 
 **Risque 2 : Cédric veut ajouter des features**
+
 - **Impact :** Scope creep
 - **Mitigation :** Rappeler MVP strict, noter features pour V2
 
