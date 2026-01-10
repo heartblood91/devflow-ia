@@ -31,6 +31,7 @@ Permettre au user de valider le planning généré, l'ajuster si besoin, et le s
   - Ajouter une tâche manquante
 
 - [ ] State management :
+
   ```ts
   const [generatedBlocks, setGeneratedBlocks] = useState<TimeBlock[]>([]);
   const [manualAdjustments, setManualAdjustments] = useState<TimeBlock[]>([]);
@@ -70,13 +71,14 @@ Permettre au user de valider le planning généré, l'ajuster si besoin, et le s
 - [ ] Disabled si warnings critiques (charge > 25h)
 - [ ] onClick → call `confirmWeeklyPlanning(finalBlocks)`
 - [ ] Server Action :
+
   ```ts
-  'use server';
+  "use server";
 
   export async function confirmWeeklyPlanning(timeBlocks: TimeBlock[]) {
     const session = await auth.api.getSession();
     if (!session?.user?.id) {
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
     // 1. Delete existing blocks for next week (si replanning)
@@ -110,7 +112,7 @@ Permettre au user de valider le planning généré, l'ajuster si besoin, et le s
     const taskIds = timeBlocks.filter((tb) => tb.taskId).map((tb) => tb.taskId);
     await prisma.task.updateMany({
       where: { id: { in: taskIds } },
-      data: { status: 'todo' },
+      data: { status: "todo" },
     });
 
     return { success: true };
@@ -139,22 +141,23 @@ Permettre au user de valider le planning généré, l'ajuster si besoin, et le s
   - Au reopen : proposer "Reprendre le planning en cours ?"
 
 - [ ] Logic :
+
   ```ts
   useEffect(() => {
     // Save draft on change
-    localStorage.setItem('war-room-draft', JSON.stringify(finalBlocks));
+    localStorage.setItem("war-room-draft", JSON.stringify(finalBlocks));
   }, [finalBlocks]);
 
   useEffect(() => {
     // Load draft on mount
-    const draft = localStorage.getItem('war-room-draft');
+    const draft = localStorage.getItem("war-room-draft");
     if (draft) {
       setShowResumeDraft(true);
     }
   }, []);
 
   function handleResumeDraft() {
-    const draft = localStorage.getItem('war-room-draft');
+    const draft = localStorage.getItem("war-room-draft");
     setGeneratedBlocks(JSON.parse(draft));
     setShowResumeDraft(false);
   }
@@ -187,21 +190,25 @@ Permettre au user de valider le planning généré, l'ajuster si besoin, et le s
 ## Design Notes
 
 **Bouton "Générer Planning" :**
+
 - Primary button, gros (lg)
 - Icon Sparkles (AI)
 - Loading : spinner + "Génération en cours..."
 
 **Bouton "Confirmer Planning" :**
+
 - Success button (green)
 - Icon CheckCircle
 - Disabled state clair (opacity-50, cursor-not-allowed)
 
 **Warnings :**
+
 - Border-l-4 border-yellow-500
 - Background bg-yellow-50
 - Icon AlertCircle
 
 **Toast Success :**
+
 - Duration 5s
 - Icon CheckCircle
 - Action button : "Voir planning"

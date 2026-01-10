@@ -31,9 +31,9 @@
 
 export async function GET(req: Request) {
   // Verify cron secret
-  const authHeader = req.headers.get('authorization');
+  const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   // Get all recurring tasks with escalation enabled
@@ -52,7 +52,7 @@ export async function GET(req: Request) {
       // Find next escalation day (e.g., Friday)
       const nextEscalationDay = getNextDayOfWeek(
         new Date(),
-        recurring.escalationDay
+        recurring.escalationDay,
       );
 
       // Create time block (Sacred, non-movable)
@@ -60,9 +60,9 @@ export async function GET(req: Request) {
         data: {
           userId: recurring.userId,
           date: nextEscalationDay,
-          startTime: '14:00', // Default
-          endTime: addMinutes('14:00', recurring.estimatedDuration),
-          type: 'deep_work',
+          startTime: "14:00", // Default
+          endTime: addMinutes("14:00", recurring.estimatedDuration),
+          type: "deep_work",
           priority: recurring.escalationPriority,
           taskTitle: `${recurring.title} (Escalade)`,
           isFree: false,
@@ -71,9 +71,9 @@ export async function GET(req: Request) {
 
       // Send notification
       await sendNotification(recurring.userId, {
-        title: 'Escalade automatique',
-        body: `${recurring.title} : skipée ${recurring.skippedCount} fois. Je la force ${format(nextEscalationDay, 'EEEE')} 14h (${recurring.escalationPriority}).`,
-        type: 'escalation',
+        title: "Escalade automatique",
+        body: `${recurring.title} : skipée ${recurring.skippedCount} fois. Je la force ${format(nextEscalationDay, "EEEE")} 14h (${recurring.escalationPriority}).`,
+        type: "escalation",
       });
 
       // Reset skip count
@@ -109,6 +109,7 @@ export async function GET(req: Request) {
   - Warning si proche escalade : "⚠️ Escalade dans 1 skip"
 
 **Tests :**
+
 - [ ] Test cron → escalade détectée
 - [ ] Test time block créé (Sacred)
 - [ ] Test notification envoyée
@@ -123,11 +124,13 @@ export async function GET(req: Request) {
 #### Web Push API
 
 - [ ] Installer dependencies :
+
   ```bash
   pnpm add web-push
   ```
 
 - [ ] Générer VAPID keys :
+
   ```bash
   npx web-push generate-vapid-keys
   ```
@@ -143,13 +146,13 @@ export async function GET(req: Request) {
 - [ ] Créer `public/sw.js` :
 
 ```js
-self.addEventListener('push', (event) => {
+self.addEventListener("push", (event) => {
   const data = event.data.json();
 
   const options = {
     body: data.body,
-    icon: '/icon-192.png',
-    badge: '/badge-72.png',
+    icon: "/icon-192.png",
+    badge: "/badge-72.png",
     data: {
       url: data.url,
     },
@@ -158,12 +161,10 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url || '/')
-  );
+  event.waitUntil(clients.openWindow(event.notification.data.url || "/"));
 });
 ```
 
@@ -171,8 +172,8 @@ self.addEventListener('notificationclick', (event) => {
 
 ```tsx
 useEffect(() => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
   }
 }, []);
 ```
@@ -183,15 +184,15 @@ useEffect(() => {
 
 ```tsx
 async function handleSubscribe() {
-  if (!('Notification' in window)) {
-    toast.error('Notifications not supported');
+  if (!("Notification" in window)) {
+    toast.error("Notifications not supported");
     return;
   }
 
   const permission = await Notification.requestPermission();
 
-  if (permission !== 'granted') {
-    toast.error('Notification permission denied');
+  if (permission !== "granted") {
+    toast.error("Notification permission denied");
     return;
   }
 
@@ -205,19 +206,19 @@ async function handleSubscribe() {
   // Save subscription to DB
   await saveSubscription(subscription);
 
-  toast.success('Notifications activées');
+  toast.success("Notifications activées");
 }
 ```
 
 #### Server Action : Save Subscription
 
 ```ts
-'use server';
+"use server";
 
 export async function saveSubscription(subscription: PushSubscription) {
   const session = await auth.api.getSession();
   if (!session?.user?.id) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   await prisma.user.update({
@@ -234,12 +235,12 @@ export async function saveSubscription(subscription: PushSubscription) {
 - [ ] Créer `lib/notifications/send.ts` :
 
 ```ts
-import webpush from 'web-push';
+import webpush from "web-push";
 
 webpush.setVapidDetails(
-  'mailto:contact@devflow.app',
+  "mailto:contact@devflow.app",
   process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  process.env.VAPID_PRIVATE_KEY!,
 );
 
 export async function sendNotification(
@@ -248,7 +249,7 @@ export async function sendNotification(
     title: string;
     body: string;
     url?: string;
-  }
+  },
 ) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -262,13 +263,13 @@ export async function sendNotification(
   const payload = JSON.stringify({
     title: notification.title,
     body: notification.body,
-    url: notification.url || '/dashboard',
+    url: notification.url || "/dashboard",
   });
 
   try {
     await webpush.sendNotification(user.pushSubscription, payload);
   } catch (error) {
-    console.error('Failed to send notification:', error);
+    console.error("Failed to send notification:", error);
 
     // If subscription expired, remove it
     if (error.statusCode === 410) {
@@ -284,18 +285,20 @@ export async function sendNotification(
 #### Notification Triggers
 
 - [ ] Morning briefing (8h30) :
+
   ```ts
   await sendNotification(userId, {
-    title: 'Morning Briefing',
-    body: 'Tes priorités du jour : ...',
-    url: '/dashboard',
+    title: "Morning Briefing",
+    body: "Tes priorités du jour : ...",
+    url: "/dashboard",
   });
   ```
 
 - [ ] Before task (15 min avant) :
+
   ```ts
   await sendNotification(userId, {
-    title: 'Tâche à venir',
+    title: "Tâche à venir",
     body: `Dans 15 min : ${task.title}`,
     url: `/dashboard`,
   });
@@ -304,13 +307,14 @@ export async function sendNotification(
 - [ ] Daily reflection (18h30) :
   ```ts
   await sendNotification(userId, {
-    title: 'Daily Reflection',
-    body: 'Journée terminée. Daily reflection (5 min) ?',
-    url: '/dashboard',
+    title: "Daily Reflection",
+    body: "Journée terminée. Daily reflection (5 min) ?",
+    url: "/dashboard",
   });
   ```
 
 **Tests :**
+
 - [ ] Test subscribe → subscription saved
 - [ ] Test send notification → notification reçue
 - [ ] Test click notification → redirect vers URL
@@ -344,7 +348,15 @@ export async function sendNotification(
 - [ ] Créer `components/stats/CompletionRateChart.tsx` :
 
 ```tsx
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 function CompletionRateChart({ data }: { data: any[] }) {
   return (
@@ -370,7 +382,7 @@ function CompletionRateChart({ data }: { data: any[] }) {
 **Server Action : Get Stats**
 
 ```ts
-'use server';
+"use server";
 
 export async function getWeeklyStats(userId: string, weekStartDate: Date) {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStartDate, i));
@@ -387,14 +399,14 @@ export async function getWeeklyStats(userId: string, weekStartDate: Date) {
       });
 
       return {
-        date: format(day, 'EEE'),
+        date: format(day, "EEE"),
         completionRate: reflection
           ? (reflection.completedTasks / reflection.totalTasks) * 100
           : 0,
         focusQuality: reflection?.focusQuality || 0,
         energyLevel: reflection?.energyLevel || 0,
       };
-    })
+    }),
   );
 
   return stats;
@@ -402,6 +414,7 @@ export async function getWeeklyStats(userId: string, weekStartDate: Date) {
 ```
 
 **Tests :**
+
 - [ ] Test graphiques affichés correctement
 - [ ] Test données calculées
 - [ ] Test responsive (mobile)
@@ -420,7 +433,7 @@ export async function getWeeklyStats(userId: string, weekStartDate: Date) {
 export async function GET(req: Request) {
   const session = await auth.api.getSession();
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   // Get all user data
@@ -435,7 +448,7 @@ export async function GET(req: Request) {
   });
 
   const exportData = {
-    version: '1.0',
+    version: "1.0",
     exportedAt: new Date().toISOString(),
     user: {
       email: user.email,
@@ -450,8 +463,8 @@ export async function GET(req: Request) {
 
   return new Response(JSON.stringify(exportData, null, 2), {
     headers: {
-      'Content-Type': 'application/json',
-      'Content-Disposition': `attachment; filename="devflow-export-${format(new Date(), 'yyyy-MM-dd')}.json"`,
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="devflow-export-${format(new Date(), "yyyy-MM-dd")}.json"`,
     },
   });
 }
@@ -465,14 +478,14 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const session = await auth.api.getSession();
   if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
   const importData = await req.json();
 
   // Validate version
-  if (importData.version !== '1.0') {
-    return new Response('Invalid export version', { status: 400 });
+  if (importData.version !== "1.0") {
+    return new Response("Invalid export version", { status: 400 });
   }
 
   // Import tasks
@@ -518,6 +531,7 @@ export async function POST(req: Request) {
   - Bouton "Import données" (file upload)
 
 **Tests :**
+
 - [ ] Test export → fichier JSON téléchargé
 - [ ] Test import → données restaurées
 
@@ -530,6 +544,7 @@ export async function POST(req: Request) {
 #### Implementation (next-themes)
 
 - [ ] Installer next-themes :
+
   ```bash
   pnpm add next-themes
   ```
@@ -538,7 +553,7 @@ export async function POST(req: Request) {
 
 ```tsx
 // app/providers.tsx
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider } from "next-themes";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -552,8 +567,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
 - [ ] Créer `components/ThemeToggle.tsx` :
 
 ```tsx
-import { useTheme } from 'next-themes';
-import { Moon, Sun } from 'lucide-react';
+import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -562,10 +577,10 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
-      <Sun className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <Sun className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+      <Moon className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
     </Button>
   );
 }
@@ -575,12 +590,12 @@ export function ThemeToggle() {
 
 ```ts
 export default {
-  darkMode: 'class',
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         // ... autres couleurs
       },
     },
@@ -607,6 +622,7 @@ export default {
 ```
 
 **Tests :**
+
 - [ ] Test toggle → theme change
 - [ ] Test persistence (localStorage)
 - [ ] Test system preference detection
@@ -628,14 +644,17 @@ export default {
 ## Risques
 
 **Risque 1 : Web Push non supporté (iOS Safari)**
+
 - **Impact :** iOS users sans notifications
 - **Mitigation :** Fallback email notifications
 
 **Risque 2 : Export/Import corrompt données**
+
 - **Impact :** User perd données
 - **Mitigation :** Validation stricte, backup avant import
 
 **Risque 3 : Dark mode cassé (contraste)**
+
 - **Impact :** UX dégradée
 - **Mitigation :** Tester tous les composants en dark mode
 

@@ -30,14 +30,14 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
   const tasks = await prisma.task.findMany({
     where: {
       userId: session.user.id,
-      status: 'todo',
-      kanbanColumn: 'todo',
-      priority: { in: ['sacred', 'important'] }, // Pas les optional
+      status: "todo",
+      kanbanColumn: "todo",
+      priority: { in: ["sacred", "important"] }, // Pas les optional
     },
     orderBy: [
-      { priority: 'desc' },
-      { difficulty: 'desc' },
-      { deadline: 'asc' },
+      { priority: "desc" },
+      { difficulty: "desc" },
+      { deadline: "asc" },
     ],
   });
   ```
@@ -57,7 +57,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 - [ ] Design compact :
   ```tsx
   <div className="planning-preview">
-    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
       <div key={day} className="day-column">
         <h4>{day}</h4>
         <div className="time-slots">
@@ -78,6 +78,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 ### 4. Drag & Drop (dnd-kit) (3h)
 
 - [ ] Setup DndContext :
+
   ```tsx
   <DndContext onDragEnd={handleDragEnd}>
     <SortableContext items={backlogTasks.map((t) => t.id)}>
@@ -89,6 +90,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
   ```
 
 - [ ] Handle drop :
+
   ```ts
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -96,7 +98,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     if (!over) return;
 
     const taskId = active.id as string;
-    const [day, time] = over.id.toString().split('-'); // "monday-10:00"
+    const [day, time] = over.id.toString().split("-"); // "monday-10:00"
 
     // Ajouter task au planning
     setDroppedTasks((prev) => [
@@ -128,8 +130,9 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 - [ ] Output : `{ timeBlocks: TimeBlock[], totalHours, bufferHours, rescueSlots }`
 
 - [ ] Algorithm :
+
   ```ts
-  import { prisma } from '@/lib/db/prisma';
+  import { prisma } from "@/lib/db/prisma";
 
   type GenerateWeeklyPlanningInput = {
     userId: string;
@@ -143,7 +146,9 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     rescueSlots: number;
   };
 
-  export const generateWeeklyPlanning = async (input: GenerateWeeklyPlanningInput): Promise<GenerateWeeklyPlanningOutput> => {
+  export const generateWeeklyPlanning = async (
+    input: GenerateWeeklyPlanningInput,
+  ): Promise<GenerateWeeklyPlanningOutput> => {
     // 1. Get user preferences
     const user = await prisma.user.findUnique({
       where: { id: input.userId },
@@ -155,13 +160,13 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     const tasks = await prisma.task.findMany({
       where: {
         userId: input.userId,
-        status: 'todo',
-        priority: { in: ['sacred', 'important'] },
+        status: "todo",
+        priority: { in: ["sacred", "important"] },
       },
       orderBy: [
-        { priority: 'desc' },
-        { difficulty: 'desc' },
-        { deadline: 'asc' },
+        { priority: "desc" },
+        { difficulty: "desc" },
+        { deadline: "asc" },
       ],
     });
 
@@ -217,24 +222,26 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 ### 6. Peak Hours Logic (1h)
 
 - [ ] Créer `getPeakHours(chronotype, weekday)` :
+
   ```ts
-  const getPeakHours = (chronotype: string, weekday: string): { start: string; end: string }[] => {
+  const getPeakHours = (
+    chronotype: string,
+    weekday: string,
+  ): { start: string; end: string }[] => {
     const peakHoursMap = {
       bear: [
-        { start: '10:00', end: '12:00' },
-        { start: '16:00', end: '18:00' },
+        { start: "10:00", end: "12:00" },
+        { start: "16:00", end: "18:00" },
       ],
       lion: [
-        { start: '08:00', end: '10:00' },
-        { start: '14:00', end: '16:00' },
+        { start: "08:00", end: "10:00" },
+        { start: "14:00", end: "16:00" },
       ],
       wolf: [
-        { start: '16:00', end: '18:00' },
-        { start: '20:00', end: '22:00' },
+        { start: "16:00", end: "18:00" },
+        { start: "20:00", end: "22:00" },
       ],
-      dolphin: [
-        { start: '10:00', end: '12:00' },
-      ],
+      dolphin: [{ start: "10:00", end: "12:00" }],
     };
 
     return peakHoursMap[chronotype] || peakHoursMap.bear;
@@ -244,6 +251,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 ### 7. Plan Day Logic (3h)
 
 - [ ] Créer `planDay(options)` :
+
   ```ts
   const planDay = (options: {
     day: Date;
@@ -255,8 +263,13 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     const blocks: TimeBlock[] = [];
 
     // Calculate available minutes
-    const totalMinutes = calculateMinutes(options.workHours.start, options.workHours.end);
-    const bufferMinutes = Math.floor(totalMinutes * (options.bufferPercentage / 100));
+    const totalMinutes = calculateMinutes(
+      options.workHours.start,
+      options.workHours.end,
+    );
+    const bufferMinutes = Math.floor(
+      totalMinutes * (options.bufferPercentage / 100),
+    );
     const taskMinutes = totalMinutes - bufferMinutes;
 
     let currentTime = options.workHours.start;
@@ -265,7 +278,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     // 1. Place difficult tasks (4-5⭐) on peak hours
     for (const peakHour of options.peakHours) {
       const difficultTasks = options.tasks.filter(
-        (t) => t.difficulty >= 4 && !t.planned
+        (t) => t.difficulty >= 4 && !t.planned,
       );
 
       for (const task of difficultTasks) {
@@ -280,7 +293,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
           date: options.day,
           startTime: currentTime,
           endTime: addMinutes(currentTime, duration),
-          type: 'deep_work',
+          type: "deep_work",
           priority: task.priority,
           taskId: task.id,
           taskTitle: task.title,
@@ -293,7 +306,9 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     }
 
     // 2. Place medium tasks (3⭐) on normal hours
-    const mediumTasks = options.tasks.filter((t) => t.difficulty === 3 && !t.planned);
+    const mediumTasks = options.tasks.filter(
+      (t) => t.difficulty === 3 && !t.planned,
+    );
 
     for (const task of mediumTasks) {
       if (remainingTaskMinutes <= 0) break;
@@ -304,7 +319,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
         date: options.day,
         startTime: currentTime,
         endTime: addMinutes(currentTime, duration),
-        type: 'shallow_work',
+        type: "shallow_work",
         priority: task.priority,
         taskId: task.id,
         taskTitle: task.title,
@@ -316,7 +331,9 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     }
 
     // 3. Place easy tasks (1-2⭐) on remaining hours
-    const easyTasks = options.tasks.filter((t) => t.difficulty <= 2 && !t.planned);
+    const easyTasks = options.tasks.filter(
+      (t) => t.difficulty <= 2 && !t.planned,
+    );
 
     for (const task of easyTasks) {
       if (remainingTaskMinutes <= 0) break;
@@ -327,7 +344,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
         date: options.day,
         startTime: currentTime,
         endTime: addMinutes(currentTime, duration),
-        type: 'admin',
+        type: "admin",
         priority: task.priority,
         taskId: task.id,
         taskTitle: task.title,
@@ -344,7 +361,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
         date: options.day,
         startTime: currentTime,
         endTime: addMinutes(currentTime, bufferMinutes),
-        type: 'buffer',
+        type: "buffer",
         isFree: true,
       });
     }
@@ -387,6 +404,7 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 ## Design Notes
 
 **Planning Preview :**
+
 - 7 colonnes (jours)
 - Compact : 1 col = 80px width
 - Time slots : height 40px
@@ -394,10 +412,12 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 - Drop zone active (hover) : border-blue-500 bg-blue-50
 
 **Drag Ghost :**
+
 - Opacity 0.5 pendant drag
 - Cursor : grabbing
 
 **Charge Validation :**
+
 - Progress bar brutale : border-2, pas de rounded
 - Couleur : green si < 100%, red si > 100%
 - Texte gras : "18h/20h"

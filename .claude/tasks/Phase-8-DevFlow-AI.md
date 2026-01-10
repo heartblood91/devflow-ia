@@ -24,6 +24,7 @@
 #### Objectif
 
 DevFlow AI doit avoir accès au contexte complet :
+
 - User preferences (chronotype, horaires, War Room)
 - Tasks (backlog, en cours, terminées)
 - Time blocks (planning semaine)
@@ -35,7 +36,7 @@ DevFlow AI doit avoir accès au contexte complet :
 - [ ] Créer `lib/ai/context.ts` :
 
 ```ts
-import { prisma } from '@/lib/prisma';
+import { prisma } from "@/lib/prisma";
 
 export async function getUserContext(userId: string) {
   // 1. User preferences
@@ -52,10 +53,10 @@ export async function getUserContext(userId: string) {
   const tasks = await prisma.task.findMany({
     where: {
       userId,
-      status: { in: ['inbox', 'todo', 'doing'] },
+      status: { in: ["inbox", "todo", "doing"] },
     },
     orderBy: {
-      priority: 'desc',
+      priority: "desc",
     },
     take: 20,
   });
@@ -86,12 +87,16 @@ export async function getUserContext(userId: string) {
       },
     },
     orderBy: {
-      date: 'desc',
+      date: "desc",
     },
   });
 
   // 5. Stats (last 30 days)
-  const stats = await calculateStats(userId, subDays(new Date(), 30), new Date());
+  const stats = await calculateStats(
+    userId,
+    subDays(new Date(), 30),
+    new Date(),
+  );
 
   return {
     user: {
@@ -103,21 +108,21 @@ export async function getUserContext(userId: string) {
     },
     tasks: {
       total: tasks.length,
-      sacred: tasks.filter((t) => t.priority === 'sacred').length,
-      important: tasks.filter((t) => t.priority === 'important').length,
-      optional: tasks.filter((t) => t.priority === 'optional').length,
+      sacred: tasks.filter((t) => t.priority === "sacred").length,
+      important: tasks.filter((t) => t.priority === "important").length,
+      optional: tasks.filter((t) => t.priority === "optional").length,
       list: tasks.slice(0, 10), // Top 10
     },
     planning: {
       currentWeek: timeBlocks.map((tb) => ({
-        day: format(tb.date, 'EEEE'),
+        day: format(tb.date, "EEEE"),
         time: `${tb.startTime}-${tb.endTime}`,
         task: tb.task?.title,
         priority: tb.priority,
       })),
     },
     reflections: reflections.map((r) => ({
-      date: format(r.date, 'yyyy-MM-dd'),
+      date: format(r.date, "yyyy-MM-dd"),
       focusQuality: r.focusQuality,
       energyLevel: r.energyLevel,
       completedTasks: r.completedTasks,
@@ -135,6 +140,7 @@ export async function getUserContext(userId: string) {
 ```
 
 **Tests :**
+
 - [ ] Test getUserContext → retourne contexte complet
 - [ ] Test contexte sérialisable en JSON
 - [ ] Test performance (< 500ms)
@@ -210,18 +216,24 @@ Génère une suggestion/warning pertinente basée sur le contexte.`;
 
 export async function generateProactiveSuggestion(
   userId: string,
-  moment: 'morning_briefing' | 'before_task' | 'end_task' | 'overload_warning' | 'pattern_detection',
-  additionalContext?: any
+  moment:
+    | "morning_briefing"
+    | "before_task"
+    | "end_task"
+    | "overload_warning"
+    | "pattern_detection",
+  additionalContext?: any,
 ) {
   const context = await getUserContext(userId);
 
-  const prompt = PROACTIVE_PROMPT
-    .replace('{context}', JSON.stringify(context, null, 2))
-    .replace('{moment}', moment);
+  const prompt = PROACTIVE_PROMPT.replace(
+    "{context}",
+    JSON.stringify(context, null, 2),
+  ).replace("{moment}", moment);
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'system', content: prompt }],
+    model: "gpt-4o-mini",
+    messages: [{ role: "system", content: prompt }],
     temperature: 0.7,
     max_tokens: 200,
   });
@@ -236,24 +248,29 @@ export async function generateProactiveSuggestion(
 
 ```ts
 export async function triggerMorningBriefing(userId: string) {
-  const suggestion = await generateProactiveSuggestion(userId, 'morning_briefing');
+  const suggestion = await generateProactiveSuggestion(
+    userId,
+    "morning_briefing",
+  );
 
   await sendNotification(userId, {
-    title: 'Morning Briefing',
+    title: "Morning Briefing",
     body: suggestion,
-    type: 'morning_briefing',
+    type: "morning_briefing",
   });
 }
 
 export async function triggerBeforeTask(userId: string, taskId: string) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
 
-  const suggestion = await generateProactiveSuggestion(userId, 'before_task', { task });
+  const suggestion = await generateProactiveSuggestion(userId, "before_task", {
+    task,
+  });
 
   await sendNotification(userId, {
-    title: 'Tâche à venir',
+    title: "Tâche à venir",
     body: suggestion,
-    type: 'before_task',
+    type: "before_task",
   });
 }
 
@@ -261,6 +278,7 @@ export async function triggerBeforeTask(userId: string, taskId: string) {
 ```
 
 **Tests :**
+
 - [ ] Test morning briefing → suggestion générée
 - [ ] Test before task → warning si difficile
 - [ ] Test overload warning → détecte charge > 20h
@@ -308,7 +326,10 @@ Exemples :
 
 Génère 3-5 insights (max 2 lignes chacun).`;
 
-export async function generateWeeklyInsights(userId: string, weekStartDate: Date) {
+export async function generateWeeklyInsights(
+  userId: string,
+  weekStartDate: Date,
+) {
   const stats = await calculateWeeklyStats(userId, weekStartDate);
   const reflections = await prisma.dailyReflection.findMany({
     where: {
@@ -320,13 +341,14 @@ export async function generateWeeklyInsights(userId: string, weekStartDate: Date
     },
   });
 
-  const prompt = WEEKLY_INSIGHTS_PROMPT
-    .replace('{stats}', JSON.stringify(stats, null, 2))
-    .replace('{reflections}', JSON.stringify(reflections, null, 2));
+  const prompt = WEEKLY_INSIGHTS_PROMPT.replace(
+    "{stats}",
+    JSON.stringify(stats, null, 2),
+  ).replace("{reflections}", JSON.stringify(reflections, null, 2));
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'system', content: prompt }],
+    model: "gpt-4o-mini",
+    messages: [{ role: "system", content: prompt }],
     temperature: 0.7,
     max_tokens: 400,
   });
@@ -344,6 +366,7 @@ export async function generateWeeklyInsights(userId: string, weekStartDate: Date
   - Optimal week structure (quel jour pour War Room, etc.)
 
 **Tests :**
+
 - [ ] Test weekly insights → 3-5 insights générés
 - [ ] Test monthly insights → trends long-terme détectés
 - [ ] Test insights pertinents (basés sur vraies données)
@@ -361,40 +384,40 @@ export async function generateWeeklyInsights(userId: string, weekStartDate: Date
 ```ts
 const tools = [
   {
-    type: 'function',
+    type: "function",
     function: {
-      name: 'get_next_task',
-      description: 'Get the next task for the user',
+      name: "get_next_task",
+      description: "Get the next task for the user",
       parameters: {},
     },
   },
   {
-    type: 'function',
+    type: "function",
     function: {
-      name: 'move_task',
-      description: 'Move a task to another day',
+      name: "move_task",
+      description: "Move a task to another day",
       parameters: {
-        type: 'object',
+        type: "object",
         properties: {
-          taskId: { type: 'string', description: 'The task ID' },
-          newDate: { type: 'string', description: 'The new date (YYYY-MM-DD)' },
+          taskId: { type: "string", description: "The task ID" },
+          newDate: { type: "string", description: "The new date (YYYY-MM-DD)" },
         },
-        required: ['taskId', 'newDate'],
+        required: ["taskId", "newDate"],
       },
     },
   },
   {
-    type: 'function',
+    type: "function",
     function: {
-      name: 'get_weekly_stats',
-      description: 'Get weekly productivity stats',
+      name: "get_weekly_stats",
+      description: "Get weekly productivity stats",
       parameters: {},
     },
   },
 ];
 
 const completion = await openai.chat.completions.create({
-  model: 'gpt-4o-mini',
+  model: "gpt-4o-mini",
   messages: [...conversationHistory],
   tools,
 });
@@ -402,18 +425,18 @@ const completion = await openai.chat.completions.create({
 if (completion.choices[0].message.tool_calls) {
   const toolCall = completion.choices[0].message.tool_calls[0];
 
-  if (toolCall.function.name === 'get_next_task') {
+  if (toolCall.function.name === "get_next_task") {
     const nextTask = await getNextTask(userId);
     return `Prochaine tâche : ${nextTask.title} (${nextTask.startTime}-${nextTask.endTime})`;
   }
 
-  if (toolCall.function.name === 'move_task') {
+  if (toolCall.function.name === "move_task") {
     const { taskId, newDate } = JSON.parse(toolCall.function.arguments);
     await moveTask(taskId, newDate);
     return `Tâche déplacée au ${newDate}.`;
   }
 
-  if (toolCall.function.name === 'get_weekly_stats') {
+  if (toolCall.function.name === "get_weekly_stats") {
     const stats = await getWeeklyStats(userId);
     return `Stats semaine : ${stats.completedTasks}/${stats.totalTasks} tâches, ${stats.totalHours}h.`;
   }
@@ -421,6 +444,7 @@ if (completion.choices[0].message.tool_calls) {
 ```
 
 **Tests :**
+
 - [ ] Test "Quelle est ma prochaine tâche ?" → function call
 - [ ] Test "Déplace SEPA à demain" → task moved
 - [ ] Test "Montre mes stats" → stats affichées
@@ -442,14 +466,17 @@ if (completion.choices[0].message.tool_calls) {
 ## Risques
 
 **Risque 1 : AI suggestions non pertinentes**
+
 - **Impact :** User ignore AI
 - **Mitigation :** Feedback loop, fine-tuning prompt
 
 **Risque 2 : Cost OpenAI élevé**
+
 - **Impact :** Budget exceeded
 - **Mitigation :** Caching context, rate limiting
 
 **Risque 3 : Notifications trop intrusives**
+
 - **Impact :** User désactive
 - **Mitigation :** User peut configurer fréquence
 

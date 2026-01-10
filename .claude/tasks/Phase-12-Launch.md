@@ -33,6 +33,7 @@
 #### Vercel Production
 
 - [ ] Deploy to Vercel :
+
   ```bash
   git checkout main
   git merge develop
@@ -48,6 +49,7 @@
 
 - [ ] Create production database
 - [ ] Run migrations :
+
   ```bash
   DATABASE_URL="postgresql://..." npx prisma migrate deploy
   ```
@@ -78,6 +80,7 @@
 - [ ] Verify SSL certificate
 
 **Production Checklist :**
+
 - [ ] Production URL live (https://devflow.app)
 - [ ] Database connected
 - [ ] Migrations applied
@@ -95,14 +98,16 @@
 
 - [ ] Create Sentry account
 - [ ] Install Sentry :
+
   ```bash
   pnpm add @sentry/nextjs
   npx @sentry/wizard@latest -i nextjs
   ```
 
 - [ ] Configure `sentry.client.config.ts` :
+
   ```ts
-  import * as Sentry from '@sentry/nextjs';
+  import * as Sentry from "@sentry/nextjs";
 
   Sentry.init({
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -124,13 +129,15 @@
 #### Analytics (Vercel Analytics)
 
 - [ ] Enable Vercel Analytics :
+
   ```bash
   pnpm add @vercel/analytics
   ```
 
 - [ ] Add to layout :
+
   ```tsx
-  import { Analytics } from '@vercel/analytics/react';
+  import { Analytics } from "@vercel/analytics/react";
 
   export default function RootLayout({ children }) {
     return (
@@ -162,6 +169,7 @@
   - Storage > 80%
 
 **Monitoring Checklist :**
+
 - [ ] Sentry configured (error tracking)
 - [ ] Vercel Analytics enabled
 - [ ] Uptime monitoring (UptimeRobot)
@@ -179,6 +187,7 @@
 - [ ] Enable Neon automatic backups (daily)
 - [ ] Configure retention (7 days)
 - [ ] Test restore process :
+
   ```bash
   # Download backup
   pg_dump $DATABASE_URL > backup.sql
@@ -206,6 +215,7 @@
   - Daily reflections
 
 **Backup Checklist :**
+
 - [ ] Daily database backups (Neon)
 - [ ] 7-day retention
 - [ ] Restore process tested
@@ -254,6 +264,7 @@
 - [ ] Plan hotfix releases if needed
 
 **Launch Checklist :**
+
 - [ ] Pre-launch checklist complete
 - [ ] Launch announcement prepared
 - [ ] Monitoring active
@@ -317,6 +328,7 @@
   - Customer portal
 
 **Post-Launch Checklist :**
+
 - [ ] Week 1-2 plan documented
 - [ ] Month 1 goals defined
 - [ ] V1.1 roadmap drafted
@@ -339,18 +351,22 @@
 ## Risques
 
 **Risque 1 : Production bugs after launch**
+
 - **Impact :** User frustration, churn
 - **Mitigation :** Hotfix releases, fast response time
 
 **Risque 2 : Performance issues under load**
+
 - **Impact :** Slow app, timeouts
 - **Mitigation :** Load testing, scaling plan (Vercel auto-scales)
 
 **Risque 3 : Database overload**
+
 - **Impact :** Queries slow, app crash
 - **Mitigation :** Neon auto-scaling, connection pooling
 
 **Risque 4 : Cost overrun (OpenAI API)**
+
 - **Impact :** Budget exceeded
 - **Mitigation :** Rate limiting, caching, monitor usage
 

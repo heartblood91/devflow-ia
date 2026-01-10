@@ -200,6 +200,7 @@ All commits MUST follow the [Conventional Commits](https://www.conventionalcommi
 ```
 
 **Allowed types:**
+
 - `feat` - New feature for the user
 - `fix` - Bug fix for the user
 - `chore` - Maintenance, configuration, dependencies

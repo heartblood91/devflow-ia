@@ -25,6 +25,7 @@
 #### Coverage Status
 
 - [ ] Run coverage report :
+
   ```bash
   pnpm test:coverage
   ```
@@ -42,7 +43,7 @@
 ```ts
 // tests/usecases/GenerateWeeklyPlanning.test.ts
 
-describe('GenerateWeeklyPlanningUseCase', () => {
+describe("GenerateWeeklyPlanningUseCase", () => {
   let useCase: GenerateWeeklyPlanningUseCase;
   let mockTaskRepo: ReturnType<typeof vi.mocked<ITaskRepository>>;
   let mockUserRepo: ReturnType<typeof vi.mocked<IUserRepository>>;
@@ -56,23 +57,27 @@ describe('GenerateWeeklyPlanningUseCase', () => {
       findById: vi.fn(),
       // ...
     };
-    useCase = new GenerateWeeklyPlanningUseCase(mockTaskRepo, mockUserRepo, mockTimeBlockRepo);
+    useCase = new GenerateWeeklyPlanningUseCase(
+      mockTaskRepo,
+      mockUserRepo,
+      mockTimeBlockRepo,
+    );
   });
 
-  it('should generate planning with peak hours for difficult tasks', async () => {
+  it("should generate planning with peak hours for difficult tasks", async () => {
     // Arrange
     const user = {
-      id: '1',
+      id: "1",
       preferences: {
-        chronotype: 'bear',
+        chronotype: "bear",
         workHours: {
-          monday: { start: '08:00', end: '19:00' },
+          monday: { start: "08:00", end: "19:00" },
         },
       },
     };
     const tasks = [
-      { id: '1', difficulty: 5, priority: 'sacred', estimatedDuration: 120 },
-      { id: '2', difficulty: 2, priority: 'important', estimatedDuration: 60 },
+      { id: "1", difficulty: 5, priority: "sacred", estimatedDuration: 120 },
+      { id: "2", difficulty: 2, priority: "important", estimatedDuration: 60 },
     ];
 
     mockUserRepo.findById.mockResolvedValueOnce(user);
@@ -80,31 +85,31 @@ describe('GenerateWeeklyPlanningUseCase', () => {
 
     // Act
     const result = await useCase.execute({
-      userId: '1',
-      weekStartDate: new Date('2026-01-05'),
+      userId: "1",
+      weekStartDate: new Date("2026-01-05"),
     });
 
     // Assert
     expect(result.timeBlocks.length).toBeGreaterThan(0);
 
     // Difficult task should be on peak hours (10h-12h for bear)
-    const difficultBlock = result.timeBlocks.find((tb) => tb.taskId === '1');
-    expect(difficultBlock.startTime).toBe('10:00');
+    const difficultBlock = result.timeBlocks.find((tb) => tb.taskId === "1");
+    expect(difficultBlock.startTime).toBe("10:00");
   });
 
-  it('should add 20% buffer time', async () => {
+  it("should add 20% buffer time", async () => {
     // ... test buffer calculation
   });
 
-  it('should add 2 rescue slots on Friday', async () => {
+  it("should add 2 rescue slots on Friday", async () => {
     // ... test rescue slots
   });
 
-  it('should validate dependencies (task B after task A)', async () => {
+  it("should validate dependencies (task B after task A)", async () => {
     // ... test dependencies
   });
 
-  it('should throw error if overloaded (> 20h)', async () => {
+  it("should throw error if overloaded (> 20h)", async () => {
     // ... test overload validation
   });
 });
@@ -117,22 +122,22 @@ describe('GenerateWeeklyPlanningUseCase', () => {
 ```ts
 // tests/api/tasks/route.test.ts
 
-import { POST } from '@/app/api/tasks/route';
-import { auth } from '@/lib/auth/auth';
+import { POST } from "@/app/api/tasks/route";
+import { auth } from "@/lib/auth/auth";
 
-describe('POST /api/tasks', () => {
-  it('should create a task', async () => {
+describe("POST /api/tasks", () => {
+  it("should create a task", async () => {
     const mockSession = {
-      user: { id: '1', email: 'test@example.com' },
+      user: { id: "1", email: "test@example.com" },
     };
 
-    vi.spyOn(auth.api, 'getSession').mockResolvedValue(mockSession);
+    vi.spyOn(auth.api, "getSession").mockResolvedValue(mockSession);
 
-    const req = new Request('http://localhost:3000/api/tasks', {
-      method: 'POST',
+    const req = new Request("http://localhost:3000/api/tasks", {
+      method: "POST",
       body: JSON.stringify({
-        title: 'Test Task',
-        priority: 'important',
+        title: "Test Task",
+        priority: "important",
         difficulty: 3,
         estimatedDuration: 60,
       }),
@@ -142,14 +147,14 @@ describe('POST /api/tasks', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.title).toBe('Test Task');
+    expect(data.title).toBe("Test Task");
   });
 
-  it('should return 401 if not authenticated', async () => {
-    vi.spyOn(auth.api, 'getSession').mockResolvedValue(null);
+  it("should return 401 if not authenticated", async () => {
+    vi.spyOn(auth.api, "getSession").mockResolvedValue(null);
 
-    const req = new Request('http://localhost:3000/api/tasks', {
-      method: 'POST',
+    const req = new Request("http://localhost:3000/api/tasks", {
+      method: "POST",
       body: JSON.stringify({}),
     });
 
@@ -167,48 +172,49 @@ describe('POST /api/tasks', () => {
 ```tsx
 // tests/components/TaskCard.test.tsx
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { TaskCard } from '@/components/backlog/TaskCard';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { TaskCard } from "@/components/backlog/TaskCard";
 
-describe('TaskCard', () => {
+describe("TaskCard", () => {
   const mockTask = {
-    id: '1',
-    title: 'Test Task',
-    priority: 'important',
+    id: "1",
+    title: "Test Task",
+    priority: "important",
     difficulty: 3,
     estimatedDuration: 60,
   };
 
-  it('should render task title', () => {
+  it("should render task title", () => {
     render(<TaskCard task={mockTask} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
-    expect(screen.getByText('Test Task')).toBeInTheDocument();
+    expect(screen.getByText("Test Task")).toBeInTheDocument();
   });
 
-  it('should display priority badge', () => {
+  it("should display priority badge", () => {
     render(<TaskCard task={mockTask} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
-    expect(screen.getByText('🟠')).toBeInTheDocument(); // important
+    expect(screen.getByText("🟠")).toBeInTheDocument(); // important
   });
 
-  it('should call onEdit when edit button clicked', () => {
+  it("should call onEdit when edit button clicked", () => {
     const onEdit = vi.fn();
     render(<TaskCard task={mockTask} onEdit={onEdit} onDelete={vi.fn()} />);
 
-    fireEvent.click(screen.getByText('Éditer'));
+    fireEvent.click(screen.getByText("Éditer"));
 
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('should display difficulty stars', () => {
+  it("should display difficulty stars", () => {
     render(<TaskCard task={mockTask} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
-    expect(screen.getByText('⭐⭐⭐')).toBeInTheDocument();
+    expect(screen.getByText("⭐⭐⭐")).toBeInTheDocument();
   });
 });
 ```
 
 **Tests Coverage Goal :**
+
 - lib/ : 85%+
 - app/api/ : 80%+
 - components/ : 75%+
@@ -223,6 +229,7 @@ describe('TaskCard', () => {
 #### Setup
 
 - [ ] Installer Playwright :
+
   ```bash
   pnpm add -D @playwright/test
   npx playwright install
@@ -231,17 +238,17 @@ describe('TaskCard', () => {
 - [ ] Créer `playwright.config.ts` :
 
 ```ts
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: "./tests/e2e",
   use: {
-    baseURL: 'http://localhost:3000',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    baseURL: "http://localhost:3000",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
   webServer: {
-    command: 'pnpm dev',
+    command: "pnpm dev",
     port: 3000,
     reuseExistingServer: !process.env.CI,
   },
@@ -255,24 +262,24 @@ export default defineConfig({
 ```ts
 // tests/e2e/onboarding.spec.ts
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('complete onboarding flow', async ({ page }) => {
+test("complete onboarding flow", async ({ page }) => {
   // 1. Signup
-  await page.goto('/signup');
-  await page.fill('input[name="email"]', 'test@example.com');
-  await page.fill('input[name="password"]', 'password123');
+  await page.goto("/signup");
+  await page.fill('input[name="email"]', "test@example.com");
+  await page.fill('input[name="password"]', "password123");
   await page.click('button[type="submit"]');
 
   // 2. Onboarding
-  await expect(page).toHaveURL('/onboarding');
+  await expect(page).toHaveURL("/onboarding");
 
   // Question 1: Chronotype
-  await page.click('text=Matin');
+  await page.click("text=Matin");
   await page.click('button:has-text("Suivant")');
 
   // Question 2: Horaires
-  await page.click('text=10h-12h');
+  await page.click("text=10h-12h");
   await page.click('button:has-text("Suivant")');
 
   // Question 3: War Room
@@ -280,8 +287,8 @@ test('complete onboarding flow', async ({ page }) => {
   await page.click('button:has-text("Terminer")');
 
   // 3. Dashboard
-  await expect(page).toHaveURL('/dashboard');
-  await expect(page.locator('text=Bienvenue')).toBeVisible();
+  await expect(page).toHaveURL("/dashboard");
+  await expect(page.locator("text=Bienvenue")).toBeVisible();
 });
 ```
 
@@ -290,37 +297,39 @@ test('complete onboarding flow', async ({ page }) => {
 ```ts
 // tests/e2e/planning.spec.ts
 
-test('create task and plan week', async ({ page }) => {
-  await page.goto('/login');
-  await page.fill('input[name="email"]', 'test@example.com');
-  await page.fill('input[name="password"]', 'password123');
+test("create task and plan week", async ({ page }) => {
+  await page.goto("/login");
+  await page.fill('input[name="email"]', "test@example.com");
+  await page.fill('input[name="password"]', "password123");
   await page.click('button[type="submit"]');
 
   // 1. Create task
-  await page.goto('/backlog');
+  await page.goto("/backlog");
   await page.click('button:has-text("+ Nouvelle tâche")');
 
-  await page.fill('input[name="title"]', 'SEPA Backend');
-  await page.selectOption('select[name="priority"]', 'sacred');
-  await page.fill('input[name="estimatedDuration"]', '180');
+  await page.fill('input[name="title"]', "SEPA Backend");
+  await page.selectOption('select[name="priority"]', "sacred");
+  await page.fill('input[name="estimatedDuration"]', "180");
   await page.click('button:has-text("Créer")');
 
   // Verify task in backlog
-  await expect(page.locator('text=SEPA Backend')).toBeVisible();
+  await expect(page.locator("text=SEPA Backend")).toBeVisible();
 
   // 2. War Room
-  await page.goto('/weekly');
+  await page.goto("/weekly");
   await page.click('button:has-text("War Room")');
 
   // Drag task to Monday 10h
-  const task = page.locator('text=SEPA Backend');
+  const task = page.locator("text=SEPA Backend");
   const slot = page.locator('[data-day="monday"][data-time="10:00"]');
   await task.dragTo(slot);
 
   await page.click('button:has-text("Confirmer Planning")');
 
   // Verify task planned
-  await expect(page.locator('[data-day="monday"] >> text=SEPA Backend')).toBeVisible();
+  await expect(
+    page.locator('[data-day="monday"] >> text=SEPA Backend'),
+  ).toBeVisible();
 });
 ```
 
@@ -329,46 +338,47 @@ test('create task and plan week', async ({ page }) => {
 ```ts
 // tests/e2e/execution.spec.ts
 
-test('execute task with timer', async ({ page }) => {
-  await page.goto('/login');
+test("execute task with timer", async ({ page }) => {
+  await page.goto("/login");
   // ... login
 
-  await page.goto('/dashboard');
+  await page.goto("/dashboard");
 
   // Start task
   await page.click('button:has-text("Commencer")');
 
   // Choose timer mode
-  await page.click('text=Pomodoro');
+  await page.click("text=Pomodoro");
 
   // Verify timer running
-  await expect(page.locator('text=25:00')).toBeVisible();
+  await expect(page.locator("text=25:00")).toBeVisible();
 
   // Enter focus mode
   await page.click('button:has-text("Enter Focus Mode")');
-  await expect(page.locator('.focus-mode')).toBeVisible();
+  await expect(page.locator(".focus-mode")).toBeVisible();
 
   // Exit focus mode
-  await page.keyboard.press('Escape');
-  await expect(page.locator('.focus-mode')).not.toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".focus-mode")).not.toBeVisible();
 
   // Stop timer
   await page.click('button:has-text("Stop")');
 
   // Daily reflection
-  await page.goto('/dashboard');
+  await page.goto("/dashboard");
   await page.click('button:has-text("Daily Reflection")');
 
-  await page.click('text=4'); // Focus quality
-  await page.click('text=3'); // Energy level
-  await page.fill('textarea[name="wins"]', 'Terminé SEPA');
+  await page.click("text=4"); // Focus quality
+  await page.click("text=3"); // Energy level
+  await page.fill('textarea[name="wins"]', "Terminé SEPA");
   await page.click('button:has-text("Sauvegarder")');
 
-  await expect(page.locator('text=Reflection sauvegardée')).toBeVisible();
+  await expect(page.locator("text=Reflection sauvegardée")).toBeVisible();
 });
 ```
 
 **Tests E2E Goal :**
+
 - 5 flows critiques couverts
 - Screenshots on failure
 - Video recording on CI
@@ -382,6 +392,7 @@ test('execute task with timer', async ({ page }) => {
 #### Lighthouse CI
 
 - [ ] Installer Lighthouse CI :
+
   ```bash
   pnpm add -D @lhci/cli
   ```
@@ -392,15 +403,15 @@ test('execute task with timer', async ({ page }) => {
 module.exports = {
   ci: {
     collect: {
-      url: ['http://localhost:3000/dashboard', 'http://localhost:3000/backlog'],
+      url: ["http://localhost:3000/dashboard", "http://localhost:3000/backlog"],
       numberOfRuns: 3,
     },
     assert: {
       assertions: {
-        'categories:performance': ['error', { minScore: 0.9 }],
-        'categories:accessibility': ['error', { minScore: 0.9 }],
-        'categories:best-practices': ['error', { minScore: 0.9 }],
-        'categories:seo': ['error', { minScore: 0.9 }],
+        "categories:performance": ["error", { minScore: 0.9 }],
+        "categories:accessibility": ["error", { minScore: 0.9 }],
+        "categories:best-practices": ["error", { minScore: 0.9 }],
+        "categories:seo": ["error", { minScore: 0.9 }],
       },
     },
   },
@@ -419,14 +430,16 @@ module.exports = {
 #### Bundle Size Analysis
 
 - [ ] Analyzer Next.js bundle :
+
   ```bash
   pnpm add -D @next/bundle-analyzer
   ```
 
 - [ ] Update `next.config.js` :
+
   ```js
-  const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: process.env.ANALYZE === 'true',
+  const withBundleAnalyzer = require("@next/bundle-analyzer")({
+    enabled: process.env.ANALYZE === "true",
   });
 
   module.exports = withBundleAnalyzer({
@@ -440,6 +453,7 @@ module.exports = {
   ```
 
 **Performance Goals :**
+
 - Lighthouse Performance > 90
 - First Contentful Paint < 1.5s
 - Time to Interactive < 3.5s
@@ -454,6 +468,7 @@ module.exports = {
 #### npm audit
 
 - [ ] Run audit :
+
   ```bash
   pnpm audit
   ```
@@ -495,20 +510,20 @@ module.exports = {
 - [ ] Ajouter rate limiting (Upstash) :
 
 ```ts
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, '10 s'), // 10 requests per 10s
+  limiter: Ratelimit.slidingWindow(10, "10 s"), // 10 requests per 10s
 });
 
 export async function POST(req: Request) {
-  const ip = req.headers.get('x-forwarded-for') || 'anonymous';
+  const ip = req.headers.get("x-forwarded-for") || "anonymous";
   const { success } = await ratelimit.limit(ip);
 
   if (!success) {
-    return new Response('Too many requests', { status: 429 });
+    return new Response("Too many requests", { status: 429 });
   }
 
   // ... rest of handler
@@ -516,6 +531,7 @@ export async function POST(req: Request) {
 ```
 
 **Security Checklist :**
+
 - [ ] No known vulnerabilities (npm audit)
 - [ ] Input validation (Zod)
 - [ ] Authentication secure (bcrypt + JWT)
@@ -550,6 +566,7 @@ export async function POST(req: Request) {
 - [ ] Planning overload non détecté
 
 **Bug Fixing Process :**
+
 1. Reproduire bug
 2. Écrire test qui fail
 3. Fix bug
@@ -573,14 +590,17 @@ export async function POST(req: Request) {
 ## Risques
 
 **Risque 1 : Coverage < 80%**
+
 - **Impact :** Qualité code non garantie
 - **Mitigation :** Prioriser business logic, skip UI tests si nécessaire
 
 **Risque 2 : E2E tests flaky**
+
 - **Impact :** CI instable
 - **Mitigation :** Retries, waitForSelector, stable selectors
 
 **Risque 3 : Performance < 90**
+
 - **Impact :** UX dégradée
 - **Mitigation :** Code splitting, lazy loading, image optimization
 

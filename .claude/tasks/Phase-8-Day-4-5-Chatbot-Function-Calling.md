@@ -21,17 +21,18 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
 - [ ] Trigger : bouton bottom-right (floating)
 
 - [ ] Design :
+
   ```tsx
   export function ChatbotPanel() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState('');
+    const [input, setInput] = useState("");
 
     return (
       <>
         {/* Floating trigger button */}
         <Button
-          className="fixed bottom-6 right-6 size-14 rounded-full shadow-lg"
+          className="fixed right-6 bottom-6 size-14 rounded-full shadow-lg"
           onClick={() => setIsOpen(true)}
         >
           <MessageCircle className="size-6" />
@@ -39,17 +40,13 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
 
         {/* Slide-in panel */}
         <div
-          className={`fixed top-0 right-0 h-screen w-96 bg-white border-l-4 border-black shadow-2xl transform transition-transform ${
-            isOpen ? 'translate-x-0' : 'translate-x-full'
+          className={`fixed top-0 right-0 h-screen w-96 transform border-l-4 border-black bg-white shadow-2xl transition-transform ${
+            isOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <ChatbotHeader onClose={() => setIsOpen(false)} />
           <ChatbotMessages messages={messages} />
-          <ChatbotInput
-            value={input}
-            onChange={setInput}
-            onSend={handleSend}
-          />
+          <ChatbotInput value={input} onChange={setInput} onSend={handleSend} />
         </div>
       </>
     );
@@ -59,11 +56,12 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
 ### 2. Chatbot Components (3h)
 
 - [ ] Créer `components/chatbot/ChatbotHeader.tsx` :
+
   ```tsx
-  <div className="p-4 border-b-2 border-black">
+  <div className="border-b-2 border-black p-4">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="size-10 bg-blue-500 rounded-full flex items-center justify-center">
+        <div className="flex size-10 items-center justify-center rounded-full bg-blue-500">
           <Sparkles className="size-5 text-white" />
         </div>
         <div>
@@ -80,8 +78,9 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
   ```
 
 - [ ] Créer `components/chatbot/ChatbotMessages.tsx` :
+
   ```tsx
-  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+  <div className="flex-1 space-y-4 overflow-y-auto p-4">
     {messages.map((message, i) => (
       <MessageBubble key={i} message={message} />
     ))}
@@ -98,28 +97,29 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
   ```
 
 - [ ] Créer `components/chatbot/MessageBubble.tsx` :
+
   ```tsx
   type Message = {
-    role: 'user' | 'assistant';
+    role: "user" | "assistant";
     content: string;
     timestamp: Date;
   };
 
   function MessageBubble({ message }: { message: Message }) {
-    const isUser = message.role === 'user';
+    const isUser = message.role === "user";
 
     return (
-      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
         <div
-          className={`max-w-[80%] p-3 rounded-lg ${
+          className={`max-w-[80%] rounded-lg p-3 ${
             isUser
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 border-2 border-black text-black'
+              ? "bg-blue-500 text-white"
+              : "border-2 border-black bg-gray-100 text-black"
           }`}
         >
           <p className="text-sm">{message.content}</p>
-          <p className="text-xs opacity-70 mt-1">
-            {format(message.timestamp, 'HH:mm')}
+          <p className="mt-1 text-xs opacity-70">
+            {format(message.timestamp, "HH:mm")}
           </p>
         </div>
       </div>
@@ -128,14 +128,15 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
   ```
 
 - [ ] Créer `components/chatbot/ChatbotInput.tsx` :
+
   ```tsx
-  <div className="p-4 border-t-2 border-black">
+  <div className="border-t-2 border-black p-4">
     <div className="flex gap-2">
       <Input
         placeholder="Pose une question..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && onSend()}
+        onKeyDown={(e) => e.key === "Enter" && onSend()}
       />
       <Button onClick={onSend}>
         <Send />
@@ -143,25 +144,25 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
     </div>
 
     {/* Quick actions */}
-    <div className="flex flex-wrap gap-2 mt-2">
+    <div className="mt-2 flex flex-wrap gap-2">
       <Button
         variant="outline"
         size="sm"
-        onClick={() => onChange('Quelle est ma prochaine tâche ?')}
+        onClick={() => onChange("Quelle est ma prochaine tâche ?")}
       >
         Prochaine tâche
       </Button>
       <Button
         variant="outline"
         size="sm"
-        onClick={() => onChange('Montre mes stats de la semaine')}
+        onClick={() => onChange("Montre mes stats de la semaine")}
       >
         Stats
       </Button>
       <Button
         variant="outline"
         size="sm"
-        onClick={() => onChange('Déplace ma tâche à demain')}
+        onClick={() => onChange("Déplace ma tâche à demain")}
       >
         Déplacer tâche
       </Button>
@@ -172,6 +173,7 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
 ### 3. Basic Conversation API (2h)
 
 - [ ] Créer `app/api/chatbot/route.ts` :
+
   ```ts
   export async function POST(req: Request) {
     const session = await auth.api.getSession();
@@ -186,16 +188,19 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
 
     // System prompt
     const systemPrompt = `Tu es DevFlow AI, un assistant productivité pour développeurs.
+  ```
 
 Contexte user :
 ${serializeContext(context)}
 
 Ton rôle :
+
 - Répondre aux questions sur le planning, les tâches, les stats
 - Donner des conseils productivité
 - Aider à prioriser
 
 Ton style :
+
 - Concis (max 3-4 phrases)
 - Friendly, dev-oriented
 - Actionnable (pas de bullshit)
@@ -221,8 +226,10 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
     const assistantMessage = completion.choices[0].message.content;
 
     return Response.json({ message: assistantMessage });
-  }
-  ```
+
+}
+
+````
 
 ---
 
@@ -232,85 +239,86 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
 
 - [ ] Créer `lib/ai/tools.ts`
 - [ ] Définir tools pour function calling :
-  ```ts
-  export const CHATBOT_TOOLS = [
-    {
-      type: 'function',
-      function: {
-        name: 'get_next_task',
-        description: "Get the user's next scheduled task",
-        parameters: {},
-      },
+```ts
+export const CHATBOT_TOOLS = [
+  {
+    type: 'function',
+    function: {
+      name: 'get_next_task',
+      description: "Get the user's next scheduled task",
+      parameters: {},
     },
-    {
-      type: 'function',
-      function: {
-        name: 'get_task_details',
-        description: 'Get details of a specific task by title or ID',
-        parameters: {
-          type: 'object',
-          properties: {
-            taskIdentifier: {
-              type: 'string',
-              description: 'Task title or ID',
-            },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_task_details',
+      description: 'Get details of a specific task by title or ID',
+      parameters: {
+        type: 'object',
+        properties: {
+          taskIdentifier: {
+            type: 'string',
+            description: 'Task title or ID',
           },
-          required: ['taskIdentifier'],
         },
+        required: ['taskIdentifier'],
       },
     },
-    {
-      type: 'function',
-      function: {
-        name: 'move_task',
-        description: 'Move a task to another day',
-        parameters: {
-          type: 'object',
-          properties: {
-            taskId: {
-              type: 'string',
-              description: 'The task ID',
-            },
-            newDate: {
-              type: 'string',
-              description: 'The new date (YYYY-MM-DD)',
-            },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'move_task',
+      description: 'Move a task to another day',
+      parameters: {
+        type: 'object',
+        properties: {
+          taskId: {
+            type: 'string',
+            description: 'The task ID',
           },
-          required: ['taskId', 'newDate'],
+          newDate: {
+            type: 'string',
+            description: 'The new date (YYYY-MM-DD)',
+          },
         },
+        required: ['taskId', 'newDate'],
       },
     },
-    {
-      type: 'function',
-      function: {
-        name: 'get_weekly_stats',
-        description: "Get the user's productivity stats for the current week",
-        parameters: {},
-      },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_weekly_stats',
+      description: "Get the user's productivity stats for the current week",
+      parameters: {},
     },
-    {
-      type: 'function',
-      function: {
-        name: 'get_daily_progress',
-        description: "Get today's progress (tasks completed, time spent)",
-        parameters: {},
-      },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_daily_progress',
+      description: "Get today's progress (tasks completed, time spent)",
+      parameters: {},
     },
-    {
-      type: 'function',
-      function: {
-        name: 'suggest_break',
-        description: 'Suggest when to take a break based on current task and energy',
-        parameters: {},
-      },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'suggest_break',
+      description: 'Suggest when to take a break based on current task and energy',
+      parameters: {},
     },
-  ];
-  ```
+  },
+];
+````
 
 ### 5. Implement Tool Functions (3h)
 
 - [ ] Créer `lib/ai/toolFunctions.ts`
 - [ ] Implémenter chaque fonction :
+
   ```ts
   export async function getNextTask(userId: string) {
     const now = new Date();
@@ -322,14 +330,14 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
           gte: startOfDay(now),
           lt: endOfDay(now),
         },
-        startTime: { gte: format(now, 'HH:mm') },
+        startTime: { gte: format(now, "HH:mm") },
       },
       include: { task: true },
-      orderBy: { startTime: 'asc' },
+      orderBy: { startTime: "asc" },
     });
 
     if (!nextBlock || !nextBlock.task) {
-      return { message: 'Aucune tâche planifiée pour le reste de la journée.' };
+      return { message: "Aucune tâche planifiée pour le reste de la journée." };
     }
 
     return {
@@ -348,7 +356,7 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
         userId,
         OR: [
           { id: taskIdentifier },
-          { title: { contains: taskIdentifier, mode: 'insensitive' } },
+          { title: { contains: taskIdentifier, mode: "insensitive" } },
         ],
       },
     });
@@ -369,7 +377,11 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
     };
   }
 
-  export async function moveTask(userId: string, taskId: string, newDate: string) {
+  export async function moveTask(
+    userId: string,
+    taskId: string,
+    newDate: string,
+  ) {
     // Find time block for this task
     const block = await prisma.timeBlock.findFirst({
       where: {
@@ -379,7 +391,7 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
     });
 
     if (!block) {
-      return { message: 'Tâche non planifiée.' };
+      return { message: "Tâche non planifiée." };
     }
 
     // Update block date
@@ -388,7 +400,9 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
       data: { date: new Date(newDate) },
     });
 
-    return { message: `Tâche déplacée au ${format(new Date(newDate), 'EEEE d MMMM')}.` };
+    return {
+      message: `Tâche déplacée au ${format(new Date(newDate), "EEEE d MMMM")}.`,
+    };
   }
 
   export async function getWeeklyStats(userId: string) {
@@ -429,23 +443,26 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
     const energyLevel = reflection?.energyLevel || 3;
 
     if (energyLevel <= 2) {
-      return { message: 'Energy level bas (2/5). Prends une pause de 15-20 min maintenant.' };
+      return {
+        message:
+          "Energy level bas (2/5). Prends une pause de 15-20 min maintenant.",
+      };
     }
 
-    return { message: 'Energy level OK. Continue ton focus, pause dans 45 min.' };
+    return {
+      message: "Energy level OK. Continue ton focus, pause dans 45 min.",
+    };
   }
   ```
 
 ### 6. Function Calling Integration (2h)
 
 - [ ] Update `app/api/chatbot/route.ts` avec function calling :
+
   ```ts
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...messages,
-    ],
+    model: "gpt-4o-mini",
+    messages: [{ role: "system", content: systemPrompt }, ...messages],
     tools: CHATBOT_TOOLS,
     temperature: 0.7,
     max_tokens: 300,
@@ -463,37 +480,44 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
     let functionResult;
 
     switch (functionName) {
-      case 'get_next_task':
+      case "get_next_task":
         functionResult = await getNextTask(session.user.id);
         break;
-      case 'get_task_details':
-        functionResult = await getTaskDetails(session.user.id, functionArgs.taskIdentifier);
+      case "get_task_details":
+        functionResult = await getTaskDetails(
+          session.user.id,
+          functionArgs.taskIdentifier,
+        );
         break;
-      case 'move_task':
-        functionResult = await moveTask(session.user.id, functionArgs.taskId, functionArgs.newDate);
+      case "move_task":
+        functionResult = await moveTask(
+          session.user.id,
+          functionArgs.taskId,
+          functionArgs.newDate,
+        );
         break;
-      case 'get_weekly_stats':
+      case "get_weekly_stats":
         functionResult = await getWeeklyStats(session.user.id);
         break;
-      case 'get_daily_progress':
+      case "get_daily_progress":
         functionResult = await getDailyProgress(session.user.id);
         break;
-      case 'suggest_break':
+      case "suggest_break":
         functionResult = await suggestBreak(session.user.id);
         break;
       default:
-        functionResult = { error: 'Unknown function' };
+        functionResult = { error: "Unknown function" };
     }
 
     // Call AI again with function result
     const secondCompletion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: "system", content: systemPrompt },
         ...messages,
         responseMessage,
         {
-          role: 'tool',
+          role: "tool",
           tool_call_id: toolCall.id,
           content: JSON.stringify(functionResult),
         },
@@ -502,7 +526,9 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
       max_tokens: 300,
     });
 
-    return Response.json({ message: secondCompletion.choices[0].message.content });
+    return Response.json({
+      message: secondCompletion.choices[0].message.content,
+    });
   }
 
   // No function call, return AI response directly
@@ -536,18 +562,21 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
 ## Design Notes
 
 **Chatbot Panel :**
+
 - Width : 384px (w-96)
 - Border-l-4 border-black
 - Shadow-2xl
 - Slide-in animation smooth (300ms)
 
 **Message Bubbles :**
+
 - User : bg-blue-500 text-white, align right
 - Assistant : bg-gray-100 border-2 border-black, align left
 - Max-width : 80%
 - Rounded-lg
 
 **Floating Button :**
+
 - Size : 56px (size-14)
 - Rounded-full
 - Shadow-lg
@@ -555,6 +584,7 @@ Assistant: "Energy level bas ? Prends une pause de 10 min, ou reporte la tâche 
 - Hover : scale-110
 
 **Quick Actions :**
+
 - Small buttons (size-sm)
 - Variant outline
 - Gap-2, flex-wrap

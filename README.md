@@ -64,6 +64,7 @@ BETTER_AUTH_URL=http://localhost:3000
 ### 4. (Optional) Configure OAuth providers
 
 For GitHub OAuth:
+
 ```bash
 # Add to .env:
 GITHUB_CLIENT_ID=<your-github-client-id>
@@ -71,6 +72,7 @@ GITHUB_CLIENT_SECRET=<your-github-client-secret>
 ```
 
 For Google OAuth:
+
 ```bash
 # Add to .env:
 GOOGLE_CLIENT_ID=<your-google-client-id>

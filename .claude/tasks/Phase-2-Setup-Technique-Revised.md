@@ -187,6 +187,7 @@ enum Frequency {
 ```
 
 - [ ] Ajouter relations au model User (déjà existant) :
+
   ```prisma
   model User {
     // ... champs existants (Phase 0)
@@ -199,6 +200,7 @@ enum Frequency {
   ```
 
 - [ ] Générer migration :
+
   ```bash
   npx prisma migrate dev --name add-devflow-models
   ```
@@ -209,6 +211,7 @@ enum Frequency {
   ```
 
 **Critères de validation :**
+
 - [ ] Migration appliquée sur Neon
 - [ ] Tous les models créés
 - [ ] Relations fonctionnelles
@@ -221,27 +224,28 @@ enum Frequency {
 **Vitest est déjà configuré (Phase 0). On vérifie juste le coverage target.**
 
 - [ ] Vérifier `vitest.config.ts` a coverage configuré :
+
   ```ts
-  import { defineConfig } from 'vitest/config';
-  import react from '@vitejs/plugin-react';
-  import path from 'path';
+  import { defineConfig } from "vitest/config";
+  import react from "@vitejs/plugin-react";
+  import path from "path";
 
   export default defineConfig({
     plugins: [react()],
     test: {
-      environment: 'jsdom',
+      environment: "jsdom",
       globals: true,
-      setupFiles: ['./tests/setup.ts'],
+      setupFiles: ["./tests/setup.ts"],
       coverage: {
-        provider: 'v8',
-        reporter: ['text', 'html', 'lcov'],
+        provider: "v8",
+        reporter: ["text", "html", "lcov"],
         exclude: [
-          'node_modules/',
-          'tests/',
-          '**/*.config.*',
-          '**/.*',
-          'dist/',
-          '.next/',
+          "node_modules/",
+          "tests/",
+          "**/*.config.*",
+          "**/.*",
+          "dist/",
+          ".next/",
         ],
         thresholds: {
           lines: 80,
@@ -253,18 +257,20 @@ enum Frequency {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './'),
+        "@": path.resolve(__dirname, "./"),
       },
     },
   });
   ```
 
 - [ ] Si manquant, installer coverage :
+
   ```bash
   pnpm add -D @vitest/coverage-v8
   ```
 
 - [ ] Add script `package.json` :
+
   ```json
   {
     "scripts": {
@@ -308,8 +314,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -347,8 +353,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -375,8 +381,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -394,6 +400,7 @@ jobs:
   - `CODECOV_TOKEN` (optionnel)
 
 **Critères de validation :**
+
 - [ ] Push déclenche CI
 - [ ] Lint passe
 - [ ] Type check passe
@@ -422,9 +429,10 @@ jobs:
 
 - [ ] Déployer branche main → Production
 
-- [ ] Configurer preview deployments (branches feature/*)
+- [ ] Configurer preview deployments (branches feature/\*)
 
 **Critères de validation :**
+
 - [ ] App déployée sur Vercel
 - [ ] Prisma migrations s'exécutent
 - [ ] Better Auth fonctionne en prod
@@ -435,8 +443,9 @@ jobs:
 ### 2.5 Prisma Client Helper (1h)
 
 - [ ] Créer `lib/db/prisma.ts` (si pas déjà fait Phase 0) :
+
   ```ts
-  import { PrismaClient } from '@prisma/client';
+  import { PrismaClient } from "@prisma/client";
 
   const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
@@ -444,14 +453,21 @@ jobs:
 
   export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== "production") {
     globalForPrisma.prisma = prisma;
   }
   ```
 
 - [ ] Créer types helpers `lib/db/types.ts` :
+
   ```ts
-  import type { Task, User, TimeBlock, DailyReflection, RecurringTask } from '@prisma/client';
+  import type {
+    Task,
+    User,
+    TimeBlock,
+    DailyReflection,
+    RecurringTask,
+  } from "@prisma/client";
 
   export type { Task, User, TimeBlock, DailyReflection, RecurringTask };
 
@@ -497,14 +513,17 @@ jobs:
 ## Risques
 
 **Risque 1 : Prisma migrations en production**
+
 - **Impact :** Downtime si migration échoue
 - **Mitigation :** Toujours tester sur staging DB d'abord
 
 **Risque 2 : Coverage 80% difficile à atteindre**
+
 - **Impact :** CI bloqué
 - **Mitigation :** Commencer avec threshold plus bas (60%), augmenter progressivement
 
 **Risque 3 : Vercel cold starts (Neon)**
+
 - **Impact :** Première requête lente
 - **Mitigation :** Acceptable pour MVP, optimiser en Phase 10 si besoin
 

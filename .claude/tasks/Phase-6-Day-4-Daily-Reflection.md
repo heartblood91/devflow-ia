@@ -23,12 +23,13 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
   - Auto-popup si journée terminée (toutes tasks done)
 
 - [ ] Design :
+
   ```tsx
   <Dialog open={isOpen} onOpenChange={setIsOpen}>
     <DialogContent className="max-w-2xl">
       <DialogHeader>
         <DialogTitle>
-          Daily Reflection - {format(new Date(), 'EEEE d MMMM')}
+          Daily Reflection - {format(new Date(), "EEEE d MMMM")}
         </DialogTitle>
       </DialogHeader>
 
@@ -38,9 +39,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
         <Button variant="ghost" onClick={handleSkip}>
           Skip
         </Button>
-        <Button onClick={handleSave}>
-          Sauvegarder
-        </Button>
+        <Button onClick={handleSave}>Sauvegarder</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -50,6 +49,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
 
 - [ ] Server Action : `calculateDailyStats(userId, date)`
 - [ ] Logic :
+
   ```ts
   export async function calculateDailyStats(userId: string, date: Date) {
     // 1. Get time blocks for today
@@ -66,7 +66,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
 
     // 2. Tasks completed vs total
     const tasks = timeBlocks.filter((tb) => tb.task).map((tb) => tb.task);
-    const completedTasks = tasks.filter((t) => t.status === 'done').length;
+    const completedTasks = tasks.filter((t) => t.status === "done").length;
     const totalTasks = tasks.length;
 
     // 3. Total hours worked
@@ -96,6 +96,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
   - Struggles (optionnel) : Textarea
 
 - [ ] Design :
+
   ```tsx
   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
     {/* Auto Stats */}
@@ -119,7 +120,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
     {/* Focus Quality */}
     <div>
       <Label>Focus Quality (1-5)</Label>
-      <div className="flex items-center gap-4 mt-2">
+      <div className="mt-2 flex items-center gap-4">
         <Slider
           min={1}
           max={5}
@@ -128,9 +129,9 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
           onValueChange={([value]) => setFocusQuality(value)}
           className="flex-1"
         />
-        <span className="text-2xl font-bold w-8">{focusQuality}</span>
+        <span className="w-8 text-2xl font-bold">{focusQuality}</span>
       </div>
-      <p className="text-xs text-gray-500 mt-1">
+      <p className="mt-1 text-xs text-gray-500">
         1 = Très distrait, 5 = Hyper focus
       </p>
     </div>
@@ -138,7 +139,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
     {/* Energy Level */}
     <div>
       <Label>Energy Level (1-5)</Label>
-      <div className="flex items-center gap-4 mt-2">
+      <div className="mt-2 flex items-center gap-4">
         <Slider
           min={1}
           max={5}
@@ -147,9 +148,9 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
           onValueChange={([value]) => setEnergyLevel(value)}
           className="flex-1"
         />
-        <span className="text-2xl font-bold w-8">{energyLevel}</span>
+        <span className="w-8 text-2xl font-bold">{energyLevel}</span>
       </div>
-      <p className="text-xs text-gray-500 mt-1">
+      <p className="mt-1 text-xs text-gray-500">
         1 = Épuisé, 5 = Plein d'énergie
       </p>
     </div>
@@ -184,31 +185,32 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
 
 - [ ] Server Action : `generateDailyInsights(data)`
 - [ ] Prompt GPT-4o-mini :
+
   ```ts
   const DAILY_INSIGHTS_PROMPT = `Tu es DevFlow AI. Analyse la journée de l'user et donne 1-2 insights actionnables.
-
+  
   Stats :
   - Tâches : ${data.completedTasks}/${data.totalTasks} (${data.completionRate}%)
   - Temps total : ${data.totalHours}h
   - Focus quality : ${data.focusQuality}/5
   - Energy level : ${data.energyLevel}/5
-  - Wins : ${data.wins || 'Aucun'}
-  - Struggles : ${data.struggles || 'Aucune'}
-
+  - Wins : ${data.wins || "Aucun"}
+  - Struggles : ${data.struggles || "Aucune"}
+  
   Ton style : concis, actionnable, positif, dev-oriented, pas de bullshit.
-
+  
   Exemples :
-
+  
   "Belle journée ! 5/5 tâches terminées, focus au top (5/5). Continue comme ça."
-
+  
   "3/5 tâches terminées. Normal, tu as sous-estimé la complexité. Multiplie tes estimations par 1.3."
-
+  
   "Focus quality bas (2/5). Identifie les distractions (Slack ? Meetings ?) et bloque-les demain."
-
+  
   "Energy level bas (2/5). Dors plus ce soir ou réduis la charge demain."
-
+  
   "Win : SEPA Backend terminé. Struggle : Trop de meetings. Bloque des créneaux No-Meeting demain."
-
+  
   Génère 1-2 insights (max 2 lignes chacun).`;
 
   export async function generateDailyInsights(data: {
@@ -221,19 +223,21 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
     wins: string;
     struggles: string;
   }) {
-    const prompt = DAILY_INSIGHTS_PROMPT
-      .replace('${data.completedTasks}', data.completedTasks.toString())
-      .replace('${data.totalTasks}', data.totalTasks.toString())
-      .replace('${data.completionRate}', data.completionRate.toFixed(0))
-      .replace('${data.totalHours}', data.totalHours)
-      .replace('${data.focusQuality}', data.focusQuality.toString())
-      .replace('${data.energyLevel}', data.energyLevel.toString())
-      .replace('${data.wins}', data.wins || 'Aucun')
-      .replace('${data.struggles}', data.struggles || 'Aucune');
+    const prompt = DAILY_INSIGHTS_PROMPT.replace(
+      "${data.completedTasks}",
+      data.completedTasks.toString(),
+    )
+      .replace("${data.totalTasks}", data.totalTasks.toString())
+      .replace("${data.completionRate}", data.completionRate.toFixed(0))
+      .replace("${data.totalHours}", data.totalHours)
+      .replace("${data.focusQuality}", data.focusQuality.toString())
+      .replace("${data.energyLevel}", data.energyLevel.toString())
+      .replace("${data.wins}", data.wins || "Aucun")
+      .replace("${data.struggles}", data.struggles || "Aucune");
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: prompt }],
+      model: "gpt-4o-mini",
+      messages: [{ role: "system", content: prompt }],
       temperature: 0.7,
       max_tokens: 150,
     });
@@ -246,6 +250,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
 
 - [ ] Server Action : `saveDailyReflection(data)`
 - [ ] Logic :
+
   ```ts
   export async function saveDailyReflection(data: {
     date: Date;
@@ -256,7 +261,7 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
   }) {
     const session = await auth.api.getSession();
     if (!session?.user?.id) {
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
     // 1. Calculate auto stats
@@ -284,8 +289,8 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
         totalTasks: stats.totalTasks,
         focusQuality: data.focusQuality,
         energyLevel: data.energyLevel,
-        wins: data.wins.split('\n').filter(Boolean),
-        struggles: data.struggles.split('\n').filter(Boolean),
+        wins: data.wins.split("\n").filter(Boolean),
+        struggles: data.struggles.split("\n").filter(Boolean),
         insights,
       },
       create: {
@@ -295,8 +300,8 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
         totalTasks: stats.totalTasks,
         focusQuality: data.focusQuality,
         energyLevel: data.energyLevel,
-        wins: data.wins.split('\n').filter(Boolean),
-        struggles: data.struggles.split('\n').filter(Boolean),
+        wins: data.wins.split("\n").filter(Boolean),
+        struggles: data.struggles.split("\n").filter(Boolean),
         insights,
       },
     });
@@ -314,16 +319,18 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
 
 - [ ] Design :
   ```tsx
-  {isSaved && (
-    <Card className="bg-blue-50 border-l-4 border-blue-500">
-      <CardHeader>
-        <h3 className="font-bold">DevFlow AI Insights</h3>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm">{insights}</p>
-      </CardContent>
-    </Card>
-  )}
+  {
+    isSaved && (
+      <Card className="border-l-4 border-blue-500 bg-blue-50">
+        <CardHeader>
+          <h3 className="font-bold">DevFlow AI Insights</h3>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm">{insights}</p>
+        </CardContent>
+      </Card>
+    );
+  }
   ```
 
 ### 7. Skip Flow (30min)
@@ -360,27 +367,32 @@ Implémenter la réflexion quotidienne de fin de journée avec AI insights.
 ## Design Notes
 
 **Modal :**
+
 - Max-w-2xl
 - Border-2 border-black
 - Padding généreux (p-6)
 
 **Sliders :**
+
 - Brutaux : track border-2 border-black
 - Thumb gros (size-6), border-2
 - Valeur affichée à droite (text-2xl font-bold)
 
 **Textareas :**
+
 - Border-2 border-black
 - Focus : border-blue-500
 - Placeholder gris clair
 - Rows : 3 (compact)
 
 **AI Insights Card :**
+
 - Border-l-4 border-blue-500
 - Background bg-blue-50
 - Icon MessageCircle
 
 **Success Toast :**
+
 - Duration 3s
 - Icon CheckCircle
 - Green

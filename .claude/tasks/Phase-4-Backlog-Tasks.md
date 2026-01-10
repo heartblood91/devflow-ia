@@ -42,14 +42,15 @@
 - [ ] State management (useState ou Zustand) :
   ```ts
   type Filters = {
-    priority: Priority | 'all';
-    difficulty: number | 'all';
-    deadline: 'all' | 'week' | 'month' | 'quarter';
-    quarter: string | 'all';
+    priority: Priority | "all";
+    difficulty: number | "all";
+    deadline: "all" | "week" | "month" | "quarter";
+    quarter: string | "all";
   };
   ```
 
 **Tests :**
+
 - [ ] Test filtres appliqués → tasks filtrées
 - [ ] Test reset → toutes les tasks affichées
 
@@ -66,9 +67,11 @@
 ```tsx
 <Card>
   <CardHeader>
-    <Badge priority={task.priority} />  {/* 🔴 🟠 🟢 */}
+    <Badge priority={task.priority} /> {/* 🔴 🟠 🟢 */}
     <Badge difficulty={task.difficulty} /> {/* 1⭐ - 5⭐ */}
-    {task.deadline && <Badge variant="outline">{formatDate(task.deadline)}</Badge>}
+    {task.deadline && (
+      <Badge variant="outline">{formatDate(task.deadline)}</Badge>
+    )}
   </CardHeader>
 
   <CardContent>
@@ -81,9 +84,7 @@
     </div>
 
     {task.subtasks?.length > 0 && (
-      <div className="subtasks">
-        {task.subtasks.length} sous-tâches
-      </div>
+      <div className="subtasks">{task.subtasks.length} sous-tâches</div>
     )}
 
     {task.dependencies?.length > 0 && (
@@ -94,8 +95,12 @@
   </CardContent>
 
   <CardFooter>
-    <Button variant="ghost" onClick={onEdit}>Éditer</Button>
-    <Button variant="ghost" onClick={onDelete}>Supprimer</Button>
+    <Button variant="ghost" onClick={onEdit}>
+      Éditer
+    </Button>
+    <Button variant="ghost" onClick={onDelete}>
+      Supprimer
+    </Button>
   </CardFooter>
 </Card>
 ```
@@ -113,6 +118,7 @@ type TaskCardProps = {
 ```
 
 **Tests :**
+
 - [ ] Test affichage task avec toutes les props
 - [ ] Test click edit → ouvre modal
 - [ ] Test click delete → confirmation
@@ -135,6 +141,7 @@ type TaskCardProps = {
 #### Drag & Drop (dnd-kit ou react-beautiful-dnd)
 
 - [ ] Installer dnd-kit :
+
   ```bash
   pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
   ```
@@ -142,8 +149,11 @@ type TaskCardProps = {
 - [ ] Implémenter DndContext :
 
 ```tsx
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 function KanbanBoard({ tasks }: { tasks: Task[] }) {
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -160,7 +170,7 @@ function KanbanBoard({ tasks }: { tasks: Task[] }) {
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-4 gap-4">
-        {['inbox', 'todo', 'doing', 'done'].map((column) => (
+        {["inbox", "todo", "doing", "done"].map((column) => (
           <KanbanColumn
             key={column}
             column={column as KanbanColumn}
@@ -174,21 +184,29 @@ function KanbanBoard({ tasks }: { tasks: Task[] }) {
 ```
 
 - [ ] Créer `components/backlog/KanbanColumn.tsx` :
+
   ```tsx
-  function KanbanColumn({ column, tasks }: { column: KanbanColumn; tasks: Task[] }) {
+  function KanbanColumn({
+    column,
+    tasks,
+  }: {
+    column: KanbanColumn;
+    tasks: Task[];
+  }) {
     return (
       <div className="kanban-column">
         <h2>{column}</h2>
-        <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext
+          items={tasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
           {tasks.map((task) => (
             <TaskCard key={task.id} task={task} />
           ))}
         </SortableContext>
 
         {tasks.length === 0 && (
-          <div className="empty-state">
-            Aucune tâche dans cette colonne
-          </div>
+          <div className="empty-state">Aucune tâche dans cette colonne</div>
         )}
       </div>
     );
@@ -198,18 +216,22 @@ function KanbanBoard({ tasks }: { tasks: Task[] }) {
 **Server Action :**
 
 - [ ] Créer `updateTaskColumn` Server Action :
+
   ```ts
-  'use server';
+  "use server";
 
-  import { prisma } from '@/lib/db/prisma';
+  import { prisma } from "@/lib/db/prisma";
 
-  export async function updateTaskColumn(taskId: string, newColumn: KanbanColumn) {
+  export async function updateTaskColumn(
+    taskId: string,
+    newColumn: KanbanColumn,
+  ) {
     await prisma.task.update({
       where: { id: taskId },
       data: {
         kanbanColumn: newColumn,
-        status: newColumn === 'done' ? 'done' : 'todo',
-        completedAt: newColumn === 'done' ? new Date() : null,
+        status: newColumn === "done" ? "done" : "todo",
+        completedAt: newColumn === "done" ? new Date() : null,
       },
     });
 
@@ -218,6 +240,7 @@ function KanbanBoard({ tasks }: { tasks: Task[] }) {
   ```
 
 **Tests :**
+
 - [ ] Test drag task → colonne mise à jour en DB
 - [ ] Test status auto-update (done → completedAt)
 - [ ] Test empty state affichée si colonne vide
@@ -250,12 +273,12 @@ function KanbanBoard({ tasks }: { tasks: Task[] }) {
 #### Validation Schema (Zod)
 
 ```ts
-import { z } from 'zod';
+import { z } from "zod";
 
 const taskSchema = z.object({
-  title: z.string().min(1, 'Titre requis').max(100),
+  title: z.string().min(1, "Titre requis").max(100),
   description: z.string().max(500).optional(),
-  priority: z.enum(['sacred', 'important', 'optional']),
+  priority: z.enum(["sacred", "important", "optional"]),
   difficulty: z.number().min(1).max(5),
   estimatedDuration: z.number().min(1).max(480), // max 8h
   deadline: z.date().optional(),
@@ -270,16 +293,17 @@ type TaskFormData = z.infer<typeof taskSchema>;
 #### Server Actions
 
 - [ ] Créer `createTask` :
-  ```ts
-  'use server';
 
-  import { prisma } from '@/lib/db/prisma';
-  import { auth } from '@/lib/auth/auth';
+  ```ts
+  "use server";
+
+  import { prisma } from "@/lib/db/prisma";
+  import { auth } from "@/lib/auth/auth";
 
   export async function createTask(data: TaskFormData) {
     const session = await auth.api.getSession();
     if (!session?.user?.id) {
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
     const task = await prisma.task.create({
@@ -292,8 +316,8 @@ type TaskFormData = z.infer<typeof taskSchema>;
         estimatedDuration: data.estimatedDuration,
         deadline: data.deadline,
         quarter: data.quarter,
-        status: 'inbox',
-        kanbanColumn: 'inbox',
+        status: "inbox",
+        kanbanColumn: "inbox",
         dependencies: data.dependencies || [],
       },
     });
@@ -306,10 +330,12 @@ type TaskFormData = z.infer<typeof taskSchema>;
           title,
           priority: data.priority,
           difficulty: data.difficulty,
-          estimatedDuration: Math.floor(data.estimatedDuration / data.subtasks.length),
+          estimatedDuration: Math.floor(
+            data.estimatedDuration / data.subtasks.length,
+          ),
           parentTaskId: task.id,
-          status: 'inbox',
-          kanbanColumn: 'inbox',
+          status: "inbox",
+          kanbanColumn: "inbox",
         })),
       });
     }
@@ -319,16 +345,20 @@ type TaskFormData = z.infer<typeof taskSchema>;
   ```
 
 - [ ] Créer `updateTask` :
+
   ```ts
-  'use server';
+  "use server";
 
-  import { prisma } from '@/lib/db/prisma';
-  import { auth } from '@/lib/auth/auth';
+  import { prisma } from "@/lib/db/prisma";
+  import { auth } from "@/lib/auth/auth";
 
-  export async function updateTask(taskId: string, data: Partial<TaskFormData>) {
+  export async function updateTask(
+    taskId: string,
+    data: Partial<TaskFormData>,
+  ) {
     const session = await auth.api.getSession();
     if (!session?.user?.id) {
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
     const task = await prisma.task.update({
@@ -341,17 +371,19 @@ type TaskFormData = z.infer<typeof taskSchema>;
     return { success: true, task };
   }
   ```
-- [ ] Créer `deleteTask` :
-  ```ts
-  'use server';
 
-  import { prisma } from '@/lib/db/prisma';
-  import { auth } from '@/lib/auth/auth';
+- [ ] Créer `deleteTask` :
+
+  ```ts
+  "use server";
+
+  import { prisma } from "@/lib/db/prisma";
+  import { auth } from "@/lib/auth/auth";
 
   export async function deleteTask(taskId: string) {
     const session = await auth.api.getSession();
     if (!session?.user?.id) {
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
     await prisma.task.delete({
@@ -374,6 +406,7 @@ type TaskFormData = z.infer<typeof taskSchema>;
   - Affiche warning si dépendance cyclique détectée
 
 **Tests :**
+
 - [ ] Test create task → task en DB
 - [ ] Test create avec sous-tâches → sous-tâches créées
 - [ ] Test update task → modifications saved
@@ -396,9 +429,9 @@ User entre titre + description → AI suggère difficulté (1-5)
 - [ ] Créer Server Action `suggestDifficulty` :
 
 ```ts
-'use server';
+"use server";
 
-import { openai } from '@/lib/openai';
+import { openai } from "@/lib/openai";
 
 const DIFFICULTY_PROMPT = `Tu es un assistant qui analyse la complexité de tâches de développement.
 
@@ -423,11 +456,14 @@ Réponds UNIQUEMENT avec un nombre (1-5), rien d'autre.`;
 
 export async function suggestDifficulty(title: string, description?: string) {
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     messages: [
       {
-        role: 'system',
-        content: DIFFICULTY_PROMPT.replace('{title}', title).replace('{description}', description || ''),
+        role: "system",
+        content: DIFFICULTY_PROMPT.replace("{title}", title).replace(
+          "{description}",
+          description || "",
+        ),
       },
     ],
     temperature: 0.3,
@@ -435,7 +471,7 @@ export async function suggestDifficulty(title: string, description?: string) {
   });
 
   const difficultyStr = completion.choices[0].message.content?.trim();
-  const difficulty = parseInt(difficultyStr || '3', 10);
+  const difficulty = parseInt(difficultyStr || "3", 10);
 
   return Math.min(Math.max(difficulty, 1), 5); // Clamp 1-5
 }
@@ -447,6 +483,7 @@ export async function suggestDifficulty(title: string, description?: string) {
   - Auto-fill slider avec suggestion
 
 **Tests :**
+
 - [ ] Test suggestion simple task → 1-2
 - [ ] Test suggestion complexe → 4-5
 - [ ] Test fallback si API fail → default 3
@@ -469,14 +506,17 @@ export async function suggestDifficulty(title: string, description?: string) {
 ## Risques
 
 **Risque 1 : Performance drag & drop (> 100 tasks)**
+
 - **Impact :** Lag, UX dégradée
 - **Mitigation :** Virtualisation (react-window), pagination colonnes
 
 **Risque 2 : Dépendances cycliques non détectées**
+
 - **Impact :** Bug planning (boucle infinie)
 - **Mitigation :** Validation côté serveur (graph traversal)
 
 **Risque 3 : AI suggestions incorrectes**
+
 - **Impact :** User frustré
 - **Mitigation :** Toujours éditable manuellement, feedback loop
 

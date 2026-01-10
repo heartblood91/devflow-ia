@@ -40,7 +40,7 @@
   <CardHeader>
     <h2>Tes priorités du jour</h2>
     <p className="text-muted-foreground">
-      {format(new Date(), 'EEEE d MMMM yyyy', { locale: fr })}
+      {format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}
     </p>
   </CardHeader>
 
@@ -76,12 +76,12 @@
 **Server Action : Get Daily Priorities**
 
 ```ts
-'use server';
+"use server";
 
 export async function getDailyPriorities(date: Date) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   // Get time blocks for today
@@ -99,7 +99,7 @@ export async function getDailyPriorities(date: Date) {
       task: true,
     },
     orderBy: {
-      startTime: 'asc',
+      startTime: "asc",
     },
   });
 
@@ -148,7 +148,7 @@ export async function getDailyPriorities(date: Date) {
     style={{ top: `${getCurrentTimeOffset()}px` }}
   >
     <div className="line" />
-    <div className="time">{format(new Date(), 'HH:mm')}</div>
+    <div className="time">{format(new Date(), "HH:mm")}</div>
   </div>
 </div>
 ```
@@ -172,12 +172,16 @@ export async function getDailyPriorities(date: Date) {
     <div className="stats">
       <div className="stat">
         <CheckCircle className="text-green-500" />
-        <span>{completedTasks} / {totalTasks} tâches</span>
+        <span>
+          {completedTasks} / {totalTasks} tâches
+        </span>
       </div>
 
       <div className="stat">
         <Clock />
-        <span>{completedHours}h / {totalHours}h</span>
+        <span>
+          {completedHours}h / {totalHours}h
+        </span>
       </div>
     </div>
 
@@ -198,6 +202,7 @@ export async function getDailyPriorities(date: Date) {
 ```
 
 **Tests :**
+
 - [ ] Test affichage priorités (max 3)
 - [ ] Test timeline affiche tous les blocks
 - [ ] Test current time indicator position
@@ -227,17 +232,19 @@ export async function getDailyPriorities(date: Date) {
   <div className="timer-display">
     <h1 className="countdown">{formatTime(timeRemaining)}</h1>
     <p className="task-title">{currentTask.title}</p>
-    <p className="mode">{mode} - {phase}</p>
+    <p className="mode">
+      {mode} - {phase}
+    </p>
   </div>
 
   <div className="controls">
-    {status === 'idle' && (
+    {status === "idle" && (
       <Button size="lg" onClick={handleStart}>
         <Play /> Start
       </Button>
     )}
 
-    {status === 'running' && (
+    {status === "running" && (
       <>
         <Button size="lg" variant="secondary" onClick={handlePause}>
           <Pause /> Pause
@@ -248,7 +255,7 @@ export async function getDailyPriorities(date: Date) {
       </>
     )}
 
-    {status === 'paused' && (
+    {status === "paused" && (
       <>
         <Button size="lg" onClick={handleResume}>
           <Play /> Resume
@@ -262,7 +269,7 @@ export async function getDailyPriorities(date: Date) {
 
   <div className="actions">
     <Button variant="ghost" onClick={handleToggleFocusMode}>
-      {isFocusMode ? 'Exit Focus Mode' : 'Enter Focus Mode'}
+      {isFocusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
     </Button>
   </div>
 </div>
@@ -273,14 +280,14 @@ export async function getDailyPriorities(date: Date) {
 - [ ] Créer hook `useTimer` :
 
 ```ts
-type TimerMode = 'pomodoro' | 'ultradian';
-type TimerPhase = 'work' | 'break';
-type TimerStatus = 'idle' | 'running' | 'paused' | 'completed';
+type TimerMode = "pomodoro" | "ultradian";
+type TimerPhase = "work" | "break";
+type TimerStatus = "idle" | "running" | "paused" | "completed";
 
 function useTimer(mode: TimerMode, taskId: string) {
   const [timeRemaining, setTimeRemaining] = useState(0);
-  const [phase, setPhase] = useState<TimerPhase>('work');
-  const [status, setStatus] = useState<TimerStatus>('idle');
+  const [phase, setPhase] = useState<TimerPhase>("work");
+  const [status, setStatus] = useState<TimerStatus>("idle");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const durations = {
@@ -290,7 +297,7 @@ function useTimer(mode: TimerMode, taskId: string) {
 
   const start = () => {
     setTimeRemaining(durations[mode][phase]);
-    setStatus('running');
+    setStatus("running");
 
     intervalRef.current = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -307,11 +314,11 @@ function useTimer(mode: TimerMode, taskId: string) {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    setStatus('paused');
+    setStatus("paused");
   };
 
   const resume = () => {
-    setStatus('running');
+    setStatus("running");
     start();
   };
 
@@ -319,7 +326,7 @@ function useTimer(mode: TimerMode, taskId: string) {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    setStatus('idle');
+    setStatus("idle");
 
     // Log time spent
     await logTimeSpent(taskId, calculateTimeSpent());
@@ -329,16 +336,16 @@ function useTimer(mode: TimerMode, taskId: string) {
     // Play sound notification
     playNotificationSound();
 
-    if (phase === 'work') {
+    if (phase === "work") {
       // Work phase completed → break
-      setPhase('break');
-      toast.success(`Pause ${mode === 'pomodoro' ? '5' : '20'} min`);
+      setPhase("break");
+      toast.success(`Pause ${mode === "pomodoro" ? "5" : "20"} min`);
       await logWorkSession(taskId, durations[mode].work);
     } else {
       // Break completed → ask to continue or finish
-      setPhase('work');
-      setStatus('completed');
-      toast.info('Pause terminée. Continuer ?');
+      setPhase("work");
+      setStatus("completed");
+      toast.info("Pause terminée. Continuer ?");
     }
   };
 
@@ -365,8 +372,9 @@ function useTimer(mode: TimerMode, taskId: string) {
 **Server Actions :**
 
 - [ ] `logWorkSession` :
+
   ```ts
-  'use server';
+  "use server";
 
   export async function logWorkSession(taskId: string, duration: number) {
     // Update task with time spent
@@ -389,7 +397,7 @@ function useTimer(mode: TimerMode, taskId: string) {
   - Bloque notifications (Web Notifications API)
 
 ```tsx
-<div className={`focus-mode ${isFocusMode ? 'active' : ''}`}>
+<div className={`focus-mode ${isFocusMode ? "active" : ""}`}>
   <div className="focus-content">
     <h1 className="countdown">{formatTime(timeRemaining)}</h1>
     <p className="task-title">{currentTask.title}</p>
@@ -406,6 +414,7 @@ function useTimer(mode: TimerMode, taskId: string) {
 ```
 
 **Tests :**
+
 - [ ] Test timer countdown (Pomodoro 25 min)
 - [ ] Test timer countdown (Ultradian 90 min)
 - [ ] Test pause/resume
@@ -433,24 +442,38 @@ function useTimer(mode: TimerMode, taskId: string) {
 <Dialog open={isOpen} onOpenChange={setIsOpen}>
   <DialogContent>
     <DialogHeader>
-      <DialogTitle>Daily Reflection - {format(new Date(), 'EEEE d MMMM')}</DialogTitle>
+      <DialogTitle>
+        Daily Reflection - {format(new Date(), "EEEE d MMMM")}
+      </DialogTitle>
     </DialogHeader>
 
     <div className="reflection-form">
       {/* Stats auto-générées */}
       <div className="stats">
-        <p>Tâches complétées : {completedTasks} / {totalTasks}</p>
+        <p>
+          Tâches complétées : {completedTasks} / {totalTasks}
+        </p>
         <p>Temps total : {totalHours}h</p>
       </div>
 
       {/* Questions */}
       <div className="questions">
         <FormField label="Focus Quality (1-5)">
-          <Slider min={1} max={5} value={focusQuality} onChange={setFocusQuality} />
+          <Slider
+            min={1}
+            max={5}
+            value={focusQuality}
+            onChange={setFocusQuality}
+          />
         </FormField>
 
         <FormField label="Energy Level (1-5)">
-          <Slider min={1} max={5} value={energyLevel} onChange={setEnergyLevel} />
+          <Slider
+            min={1}
+            max={5}
+            value={energyLevel}
+            onChange={setEnergyLevel}
+          />
         </FormField>
 
         <FormField label="Wins (optionnel)">
@@ -483,9 +506,7 @@ function useTimer(mode: TimerMode, taskId: string) {
       <Button variant="ghost" onClick={handleSkip}>
         Skip
       </Button>
-      <Button onClick={handleSave}>
-        Sauvegarder
-      </Button>
+      <Button onClick={handleSave}>Sauvegarder</Button>
     </DialogFooter>
   </DialogContent>
 </Dialog>
@@ -494,7 +515,7 @@ function useTimer(mode: TimerMode, taskId: string) {
 **Server Action : Sauvegarder Reflection**
 
 ```ts
-'use server';
+"use server";
 
 export async function saveDailyReflection(data: {
   date: Date;
@@ -505,7 +526,7 @@ export async function saveDailyReflection(data: {
 }) {
   const session = await auth.api.getSession();
   if (!session?.user?.id) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   // Get auto stats
@@ -529,8 +550,8 @@ export async function saveDailyReflection(data: {
       totalTasks: stats.totalTasks,
       focusQuality: data.focusQuality,
       energyLevel: data.energyLevel,
-      wins: data.wins.split('\n').filter(Boolean),
-      struggles: data.struggles.split('\n').filter(Boolean),
+      wins: data.wins.split("\n").filter(Boolean),
+      struggles: data.struggles.split("\n").filter(Boolean),
       insights,
     },
   });
@@ -552,8 +573,8 @@ Stats :
 - Tâches : ${data.completedTasks}/${data.totalTasks}
 - Focus : ${data.focusQuality}/5
 - Énergie : ${data.energyLevel}/5
-- Wins : ${data.wins || 'Aucun'}
-- Struggles : ${data.struggles || 'Aucune'}
+- Wins : ${data.wins || "Aucun"}
+- Struggles : ${data.struggles || "Aucune"}
 
 Ton style : concis, actionnable, positif.
 
@@ -565,8 +586,8 @@ Exemples :
 Génère 1-2 insights (max 2 lignes).`;
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'system', content: prompt }],
+    model: "gpt-4o-mini",
+    messages: [{ role: "system", content: prompt }],
     temperature: 0.7,
     max_tokens: 150,
   });
@@ -576,6 +597,7 @@ Génère 1-2 insights (max 2 lignes).`;
 ```
 
 **Tests :**
+
 - [ ] Test reflection → sauvegardée en DB
 - [ ] Test AI insights générés
 - [ ] Test skip → pas de sauvegarde
@@ -611,6 +633,7 @@ Génère 1-2 insights (max 2 lignes).`;
   - Quick actions (boutons pré-définis)
 
 - [ ] Créer `app/api/chatbot/route.ts` :
+
   ```ts
   export async function POST(req: Request) {
     const { message } = await req.json();
@@ -620,11 +643,11 @@ Génère 1-2 insights (max 2 lignes).`;
     const context = await getUserContext(session.user.id);
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: "gpt-4o-mini",
       messages: [
-        { role: 'system', content: CHATBOT_PROMPT },
-        { role: 'user', content: JSON.stringify(context) },
-        { role: 'user', content: message },
+        { role: "system", content: CHATBOT_PROMPT },
+        { role: "user", content: JSON.stringify(context) },
+        { role: "user", content: message },
       ],
     });
 
@@ -633,6 +656,7 @@ Génère 1-2 insights (max 2 lignes).`;
   ```
 
 **Tests :**
+
 - [ ] Test question "Prochaine tâche" → réponse correcte
 - [ ] Test action "Déplace à demain" → task moved
 - [ ] Test stats request → affichage stats
@@ -656,14 +680,17 @@ Génère 1-2 insights (max 2 lignes).`;
 ## Risques
 
 **Risque 1 : Timer pas précis (drift)**
+
 - **Impact :** User perd confiance
 - **Mitigation :** Utiliser Date.now() pour calcul précis
 
 **Risque 2 : Focus mode bloqué (bug exit)**
+
 - **Impact :** User bloqué en fullscreen
 - **Mitigation :** Toujours avoir ESC key fonctionnel
 
 **Risque 3 : Daily reflection trop longue**
+
 - **Impact :** User skip
 - **Mitigation :** Max 2 min (questions simples)
 
