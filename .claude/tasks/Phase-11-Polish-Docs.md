@@ -321,8 +321,8 @@ pnpm install
 2. Configure environment variables:
    \`\`\`
    DATABASE_URL="postgresql://..."
-   NEXTAUTH_SECRET="..."
-   NEXTAUTH_URL="http://localhost:3000"
+   BETTER_AUTH_SECRET="..."
+   BETTER_AUTH_URL="http://localhost:3000"
    OPENAI_API_KEY="sk-..."
    \`\`\`
 
@@ -343,7 +343,7 @@ pnpm install
 ### Install CLI
 
 \`\`\`bash
-cd packages/cli
+cd cli
 pnpm link
 \`\`\`
 
@@ -370,11 +370,14 @@ devflow stats --week
 
 \`\`\`
 devflow/
-├── packages/
-│   ├── core/          # Business logic (Clean Architecture)
-│   ├── api/           # Next.js API + Server Actions
-│   ├── web/           # Next.js frontend
-│   └── cli/           # Node.js CLI tool
+├── app/              # Next.js App Router
+├── lib/
+│   ├── usecases/     # Business logic
+│   ├── ai/           # AI features
+│   ├── stats/        # Stats calculations
+│   └── db/           # Prisma client
+├── components/       # React components
+└── cli/              # Node.js CLI tool
 \`\`\`
 
 ## Testing
@@ -418,7 +421,7 @@ Base URL: `https://devflow.vercel.app/api`
 
 ## Authentication
 
-All endpoints require authentication via NextAuth session.
+All endpoints require authentication via Better Auth session.
 
 ## Endpoints
 

@@ -74,7 +74,7 @@ Permettre au user de valider le planning généré, l'ajuster si besoin, et le s
   'use server';
 
   export async function confirmWeeklyPlanning(timeBlocks: TimeBlock[]) {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession();
     if (!session?.user?.id) {
       throw new Error('Unauthorized');
     }

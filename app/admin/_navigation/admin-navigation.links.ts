@@ -22,11 +22,6 @@ const ADMIN_LINKS: NavigationGroup[] = [
         Icon: MessageSquare,
         label: "Feedback",
       },
-      {
-        href: `${ADMIN_PATH}/feedback`,
-        Icon: MessageSquare,
-        label: "Feedback",
-      },
     ],
   },
 ] satisfies NavigationGroup[];

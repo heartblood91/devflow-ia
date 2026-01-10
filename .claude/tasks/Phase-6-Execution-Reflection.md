@@ -503,7 +503,7 @@ export async function saveDailyReflection(data: {
   wins: string;
   struggles: string;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession();
   if (!session?.user?.id) {
     throw new Error('Unauthorized');
   }

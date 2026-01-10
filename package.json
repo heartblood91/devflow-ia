@@ -32,6 +32,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.30",
     "@hookform/resolvers": "^5.2.2",
+    "@node-rs/bcrypt": "^1.10.7",
     "@prisma/client": "^6.16.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

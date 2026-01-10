@@ -215,7 +215,7 @@ async function handleSubscribe() {
 'use server';
 
 export async function saveSubscription(subscription: PushSubscription) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession();
   if (!session?.user?.id) {
     throw new Error('Unauthorized');
   }
@@ -418,7 +418,7 @@ export async function getWeeklyStats(userId: string, weekStartDate: Date) {
 
 ```ts
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession();
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }
@@ -463,7 +463,7 @@ export async function GET(req: Request) {
 
 ```ts
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession();
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }

@@ -3,8 +3,8 @@
  * DevFlow Database Seed
  *
  * Seeds the database with test data for development:
- * - Admin user for testing /admin access
- * - Regular user for testing /app access
+ * - Admin user for testing /admin access (admin@devflow.app / admin@devflow.apP)
+ * - Regular user for testing /app access (test@devflow.app / test@devflow.apP)
  * - Sample feedback entries
  */
 
@@ -12,6 +12,52 @@ import { PrismaClient } from "@/generated/prisma";
 import { nanoid } from "nanoid";
 
 const prisma = new PrismaClient();
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+async function createUserViaSignup(
+  email: string,
+  name: string,
+  password: string,
+  role: string,
+) {
+  // Use Better Auth's signup endpoint to create user with proper password hashing
+  const response = await fetch(`${BASE_URL}/api/auth/sign-up/email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+      name,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to create user ${email}: ${error}`);
+  }
+
+  // Get the created user and update their role
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new Error(`User ${email} not found after signup`);
+  }
+
+  // Update user role and mark email as verified
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      role,
+      emailVerified: true,
+    },
+  });
+
+  return updatedUser;
+}
 
 async function main() {
   console.log("🌱 Seeding DevFlow database...");
@@ -23,37 +69,25 @@ async function main() {
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
 
-  // Create Admin User
-  console.log("👤 Creating admin user...");
-  const adminUser = await prisma.user.create({
-    data: {
-      id: nanoid(),
-      name: "Admin DevFlow",
-      email: "admin@devflow.app",
-      emailVerified: true,
-      image: null,
-      role: "admin",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  });
-  console.log(`✅ Admin user created: ${adminUser.email}`);
+  // Create Test User (role: user)
+  console.log("👤 Creating test user...");
+  const testUser = await createUserViaSignup(
+    "test@devflow.app",
+    "Test DevFlow",
+    "test@devflow.apP",
+    "user",
+  );
+  console.log(`✅ Test user created: ${testUser.email} / test@devflow.apP`);
 
-  // Create Regular User
-  console.log("👤 Creating regular user...");
-  const regularUser = await prisma.user.create({
-    data: {
-      id: nanoid(),
-      name: "Test User",
-      email: "user@devflow.app",
-      emailVerified: true,
-      image: null,
-      role: "user",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  });
-  console.log(`✅ Regular user created: ${regularUser.email}`);
+  // Create Admin User (role: admin)
+  console.log("👤 Creating admin user...");
+  const adminUser = await createUserViaSignup(
+    "admin@devflow.app",
+    "Admin DevFlow",
+    "admin@devflow.apP",
+    "admin",
+  );
+  console.log(`✅ Admin user created: ${adminUser.email} / admin@devflow.apP`);
 
   // Create Sample Feedbacks
   console.log("💬 Creating sample feedbacks...");
@@ -64,7 +98,7 @@ async function main() {
         review: 5,
         message: "DevFlow looks amazing! Can't wait to use it for my projects.",
         email: "happy@example.com",
-        userId: regularUser.id,
+        userId: testUser.id,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -93,14 +127,9 @@ async function main() {
 
   console.log("\n🎉 Seeding completed successfully!\n");
   console.log("📝 Test Accounts:");
-  console.log(
-    "   Admin: admin@devflow.app (no password set - use signup flow)",
-  );
-  console.log("   User:  user@devflow.app (no password set - use signup flow)");
-  console.log("\n💡 Note: Better Auth handles password hashing during signup.");
-  console.log(
-    "   Use the signup flow to set passwords for these test users.\n",
-  );
+  console.log("   👤 Test:  test@devflow.app  / test@devflow.apP");
+  console.log("   🔑 Admin: admin@devflow.app / admin@devflow.apP");
+  console.log("\n💡 You can now sign in with these credentials.\n");
 }
 
 main()

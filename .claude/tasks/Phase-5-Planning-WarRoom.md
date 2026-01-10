@@ -339,9 +339,11 @@ Générer planning hebdomadaire optimal basé sur :
 
 #### Implementation
 
-- [ ] Créer `packages/core/src/usecases/GenerateWeeklyPlanning.ts` :
+- [ ] Créer `lib/usecases/GenerateWeeklyPlanning.ts` :
 
 ```ts
+import { prisma } from '@/lib/db/prisma';
+
 type GenerateWeeklyPlanningInput = {
   userId: string;
   weekStartDate: Date;
@@ -354,145 +356,120 @@ type GenerateWeeklyPlanningOutput = {
   rescueSlots: number;
 };
 
-export class GenerateWeeklyPlanningUseCase {
-  constructor(
-    private taskRepository: ITaskRepository,
-    private userRepository: IUserRepository,
-    private timeBlockRepository: ITimeBlockRepository
-  ) {}
+export const generateWeeklyPlanning = async (input: GenerateWeeklyPlanningInput): Promise<GenerateWeeklyPlanningOutput> => {
+  // 1. Get user preferences
+  const user = await prisma.user.findUnique({
+    where: { id: input.userId },
+    select: { preferences: true },
+  });
+  const { chronotype, workHours, bufferPercentage, maxRescuePerWeek } = user.preferences;
 
-  async execute(input: GenerateWeeklyPlanningInput): Promise<GenerateWeeklyPlanningOutput> {
-    // 1. Get user preferences
-    const user = await this.userRepository.findById(input.userId);
-    const { chronotype, workHours, bufferPercentage, maxRescuePerWeek } = user.preferences;
-
-    // 2. Get tasks to plan
-    const tasks = await this.taskRepository.findByUserId(input.userId, {
+  // 2. Get tasks to plan
+  const tasks = await prisma.task.findMany({
+    where: {
+      userId: input.userId,
       status: 'todo',
-      priority: ['sacred', 'important'],
+      priority: { in: ['sacred', 'important'] },
+    },
+  });
+
+  // 3. Sort tasks by priority, difficulty, deadline
+  const sortedTasks = sortTasks(tasks);
+
+  // 4. Generate time blocks for each day
+  const timeBlocks: TimeBlock[] = [];
+  const daysOfWeek = getWeekDays(input.weekStartDate);
+
+  for (const day of daysOfWeek) {
+    const dayWorkHours = workHours[day.weekday]; // { start: "08:00", end: "19:00" }
+    if (!dayWorkHours) continue; // Day off
+
+    const peakHours = getPeakHours(chronotype, day.weekday);
+
+    const dayBlocks = planDay({
+      day: day.date,
+      workHours: dayWorkHours,
+      peakHours,
+      tasks: sortedTasks,
+      bufferPercentage,
     });
 
-    // 3. Sort tasks by priority, difficulty, deadline
-    const sortedTasks = this.sortTasks(tasks);
+    timeBlocks.push(...dayBlocks);
+  }
 
-    // 4. Generate time blocks for each day
-    const timeBlocks: TimeBlock[] = [];
-    const daysOfWeek = this.getWeekDays(input.weekStartDate);
+  // 5. Add rescue slots (vendredi après-midi)
+  const rescueSlots = addRescueSlots(timeBlocks, daysOfWeek, maxRescuePerWeek);
+  timeBlocks.push(...rescueSlots);
 
-    for (const day of daysOfWeek) {
-      const dayWorkHours = workHours[day.weekday]; // { start: "08:00", end: "19:00" }
-      if (!dayWorkHours) continue; // Day off
+  // 6. Validate dependencies
+  const validatedBlocks = validateDependencies(timeBlocks, tasks);
 
-      const peakHours = this.getPeakHours(chronotype, day.weekday);
+  // 7. Save to DB
+  await prisma.timeBlock.createMany({
+    data: validatedBlocks.map((block) => ({
+      ...block,
+      userId: input.userId,
+    })),
+  });
 
-      const dayBlocks = this.planDay({
-        day: day.date,
-        workHours: dayWorkHours,
-        peakHours,
-        tasks: sortedTasks,
-        bufferPercentage,
-      });
+  return {
+    timeBlocks: validatedBlocks,
+    totalHours: calculateTotalHours(validatedBlocks),
+    bufferHours: calculateBufferHours(validatedBlocks),
+    rescueSlots: rescueSlots.length,
+  };
+};
 
-      timeBlocks.push(...dayBlocks);
+const sortTasks = (tasks: Task[]): Task[] => {
+  return tasks.sort((a, b) => {
+    const priorityOrder = { sacred: 3, important: 2, optional: 1 };
+    if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
     }
 
-    // 5. Add rescue slots (vendredi après-midi)
-    const rescueSlots = this.addRescueSlots(timeBlocks, daysOfWeek, maxRescuePerWeek);
-    timeBlocks.push(...rescueSlots);
-
-    // 6. Validate dependencies
-    const validatedBlocks = this.validateDependencies(timeBlocks, tasks);
-
-    // 7. Save to DB
-    await this.timeBlockRepository.bulkCreate(validatedBlocks);
-
-    return {
-      timeBlocks: validatedBlocks,
-      totalHours: this.calculateTotalHours(validatedBlocks),
-      bufferHours: this.calculateBufferHours(validatedBlocks),
-      rescueSlots: rescueSlots.length,
-    };
-  }
-
-  private sortTasks(tasks: Task[]): Task[] {
-    return tasks.sort((a, b) => {
-      // Priority
-      const priorityOrder = { sacred: 3, important: 2, optional: 1 };
-      if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
-      }
-
-      // Difficulty
-      if (a.difficulty !== b.difficulty) {
-        return b.difficulty - a.difficulty;
-      }
-
-      // Deadline (closest first)
-      if (a.deadline && b.deadline) {
-        return a.deadline.getTime() - b.deadline.getTime();
-      }
-
-      return 0;
-    });
-  }
-
-  private getPeakHours(chronotype: string, weekday: string): { start: string; end: string }[] {
-    const peakHoursMap = {
-      bear: [{ start: '10:00', end: '12:00' }, { start: '16:00', end: '18:00' }],
-      lion: [{ start: '08:00', end: '10:00' }, { start: '14:00', end: '16:00' }],
-      wolf: [{ start: '16:00', end: '18:00' }, { start: '20:00', end: '22:00' }],
-      dolphin: [{ start: '10:00', end: '12:00' }], // Variable
-    };
-
-    return peakHoursMap[chronotype] || peakHoursMap.bear;
-  }
-
-  private planDay(options: {
-    day: Date;
-    workHours: { start: string; end: string };
-    peakHours: { start: string; end: string }[];
-    tasks: Task[];
-    bufferPercentage: number;
-  }): TimeBlock[] {
-    const blocks: TimeBlock[] = [];
-
-    // Calculate total available minutes
-    const totalMinutes = this.calculateMinutes(options.workHours.start, options.workHours.end);
-    const bufferMinutes = Math.floor(totalMinutes * (options.bufferPercentage / 100));
-    const taskMinutes = totalMinutes - bufferMinutes;
-
-    let currentTime = options.workHours.start;
-    let remainingTaskMinutes = taskMinutes;
-
-    // Place difficult tasks on peak hours first
-    for (const peakHour of options.peakHours) {
-      const difficultTasks = options.tasks.filter((t) => t.difficulty >= 4 && !t.planned);
-
-      for (const task of difficultTasks) {
-        if (remainingTaskMinutes <= 0) break;
-
-        const duration = Math.min(task.estimatedDuration, remainingTaskMinutes);
-
-        blocks.push({
-          date: options.day,
-          startTime: currentTime,
-          endTime: this.addMinutes(currentTime, duration),
-          type: 'deep_work',
-          priority: task.priority,
-          taskId: task.id,
-          taskTitle: task.title,
-        });
-
-        currentTime = this.addMinutes(currentTime, duration);
-        remainingTaskMinutes -= duration;
-        task.planned = true;
-      }
+    if (a.difficulty !== b.difficulty) {
+      return b.difficulty - a.difficulty;
     }
 
-    // Place medium/easy tasks on remaining hours
-    const remainingTasks = options.tasks.filter((t) => !t.planned);
+    if (a.deadline && b.deadline) {
+      return a.deadline.getTime() - b.deadline.getTime();
+    }
 
-    for (const task of remainingTasks) {
+    return 0;
+  });
+};
+
+const getPeakHours = (chronotype: string, weekday: string): { start: string; end: string }[] => {
+  const peakHoursMap = {
+    bear: [{ start: '10:00', end: '12:00' }, { start: '16:00', end: '18:00' }],
+    lion: [{ start: '08:00', end: '10:00' }, { start: '14:00', end: '16:00' }],
+    wolf: [{ start: '16:00', end: '18:00' }, { start: '20:00', end: '22:00' }],
+    dolphin: [{ start: '10:00', end: '12:00' }],
+  };
+
+  return peakHoursMap[chronotype] || peakHoursMap.bear;
+};
+
+const planDay = (options: {
+  day: Date;
+  workHours: { start: string; end: string };
+  peakHours: { start: string; end: string }[];
+  tasks: Task[];
+  bufferPercentage: number;
+}): TimeBlock[] => {
+  const blocks: TimeBlock[] = [];
+
+  const totalMinutes = calculateMinutes(options.workHours.start, options.workHours.end);
+  const bufferMinutes = Math.floor(totalMinutes * (options.bufferPercentage / 100));
+  const taskMinutes = totalMinutes - bufferMinutes;
+
+  let currentTime = options.workHours.start;
+  let remainingTaskMinutes = taskMinutes;
+
+  for (const peakHour of options.peakHours) {
+    const difficultTasks = options.tasks.filter((t) => t.difficulty >= 4 && !t.planned);
+
+    for (const task of difficultTasks) {
       if (remainingTaskMinutes <= 0) break;
 
       const duration = Math.min(task.estimatedDuration, remainingTaskMinutes);
@@ -500,56 +477,76 @@ export class GenerateWeeklyPlanningUseCase {
       blocks.push({
         date: options.day,
         startTime: currentTime,
-        endTime: this.addMinutes(currentTime, duration),
-        type: 'shallow_work',
+        endTime: addMinutes(currentTime, duration),
+        type: 'deep_work',
         priority: task.priority,
         taskId: task.id,
         taskTitle: task.title,
       });
 
-      currentTime = this.addMinutes(currentTime, duration);
+      currentTime = addMinutes(currentTime, duration);
       remainingTaskMinutes -= duration;
       task.planned = true;
     }
+  }
 
-    // Add buffer time (free slots)
+  const remainingTasks = options.tasks.filter((t) => !t.planned);
+
+  for (const task of remainingTasks) {
+    if (remainingTaskMinutes <= 0) break;
+
+    const duration = Math.min(task.estimatedDuration, remainingTaskMinutes);
+
     blocks.push({
       date: options.day,
       startTime: currentTime,
-      endTime: this.addMinutes(currentTime, bufferMinutes),
-      type: 'buffer',
-      isFree: true,
+      endTime: addMinutes(currentTime, duration),
+      type: 'shallow_work',
+      priority: task.priority,
+      taskId: task.id,
+      taskTitle: task.title,
     });
 
-    return blocks;
+    currentTime = addMinutes(currentTime, duration);
+    remainingTaskMinutes -= duration;
+    task.planned = true;
   }
 
-  private addRescueSlots(
-    timeBlocks: TimeBlock[],
-    daysOfWeek: { date: Date; weekday: string }[],
-    maxRescue: number
-  ): TimeBlock[] {
-    const rescueSlots: TimeBlock[] = [];
+  blocks.push({
+    date: options.day,
+    startTime: currentTime,
+    endTime: addMinutes(currentTime, bufferMinutes),
+    type: 'buffer',
+    isFree: true,
+  });
 
-    // Default: vendredi 16h-18h
-    const friday = daysOfWeek.find((d) => d.weekday === 'friday');
+  return blocks;
+};
 
-    if (friday && maxRescue > 0) {
-      rescueSlots.push({
-        date: friday.date,
-        startTime: '16:00',
-        endTime: '18:00',
-        type: 'rescue',
-        isRescue: true,
-        isFree: true,
-      });
-    }
+const addRescueSlots = (
+  timeBlocks: TimeBlock[],
+  daysOfWeek: { date: Date; weekday: string }[],
+  maxRescue: number
+): TimeBlock[] => {
+  const rescueSlots: TimeBlock[] = [];
 
-    return rescueSlots.slice(0, maxRescue);
+  const friday = daysOfWeek.find((d) => d.weekday === 'friday');
+
+  if (friday && maxRescue > 0) {
+    rescueSlots.push({
+      date: friday.date,
+      startTime: '16:00',
+      endTime: '18:00',
+      type: 'rescue',
+      isRescue: true,
+      isFree: true,
+    });
   }
 
-  // Helper methods: calculateMinutes, addMinutes, validateDependencies, etc.
-}
+  return rescueSlots.slice(0, maxRescue);
+};
+
+// Helper functions: calculateMinutes, addMinutes, validateDependencies, getWeekDays, etc.
 ```
 
 **Tests :**
@@ -581,13 +578,15 @@ export class GenerateWeeklyPlanningUseCase {
 ```ts
 'use server';
 
-export async function confirmWeeklyPlanning(timeBlocks: TimeBlock[]) {
-  const session = await getServerSession(authOptions);
+import { prisma } from '@/lib/db/prisma';
+import { auth } from '@/lib/auth/auth';
+
+export const confirmWeeklyPlanning = async (timeBlocks: TimeBlock[]) => {
+  const session = await auth.api.getSession();
   if (!session?.user?.id) {
     throw new Error('Unauthorized');
   }
 
-  // Save all time blocks
   await prisma.timeBlock.createMany({
     data: timeBlocks.map((tb) => ({
       userId: session.user.id,
@@ -595,7 +594,6 @@ export async function confirmWeeklyPlanning(timeBlocks: TimeBlock[]) {
     })),
   });
 
-  // Update tasks status → "todo" (planifiées)
   const taskIds = timeBlocks.filter((tb) => tb.taskId).map((tb) => tb.taskId);
   await prisma.task.updateMany({
     where: { id: { in: taskIds } },
@@ -603,7 +601,7 @@ export async function confirmWeeklyPlanning(timeBlocks: TimeBlock[]) {
   });
 
   return { success: true };
-}
+};
 ```
 
 **Tests :**

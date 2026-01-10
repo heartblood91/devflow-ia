@@ -62,8 +62,8 @@
 - [ ] Configure production variables :
   ```
   DATABASE_URL="postgresql://..."
-  NEXTAUTH_SECRET="..." (generate new)
-  NEXTAUTH_URL="https://devflow.app"
+  BETTER_AUTH_SECRET="..." (generate new)
+  BETTER_AUTH_URL="https://devflow.app"
   OPENAI_API_KEY="sk-..."
   VAPID_PUBLIC_KEY="..."
   VAPID_PRIVATE_KEY="..."

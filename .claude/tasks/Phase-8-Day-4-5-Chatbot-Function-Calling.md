@@ -174,7 +174,7 @@ Créer le chatbot DevFlow AI conversationnel avec function calling (actions).
 - [ ] Créer `app/api/chatbot/route.ts` :
   ```ts
   export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession();
     if (!session?.user?.id) {
       return new Response('Unauthorized', { status: 401 });
     }
