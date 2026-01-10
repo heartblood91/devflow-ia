@@ -13,12 +13,6 @@ export function Header() {
         Docs
       </Link>
       <Link
-        href="/about"
-        className={buttonVariants({ variant: "ghost", size: "sm" })}
-      >
-        About
-      </Link>
-      <Link
         href="/contact"
         className={buttonVariants({ variant: "ghost", size: "sm" })}
       >

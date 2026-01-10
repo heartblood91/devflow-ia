@@ -18,8 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoadingButton } from "@/features/form/submit-button";
-import { authClient } from "@/lib/auth-client";
-import { unwrapSafePromise } from "@/lib/promises";
+import { getServerUrl } from "@/lib/server-url";
 import { useMutation } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -39,17 +38,32 @@ export function ForgetPasswordPage() {
 
   const forgetPasswordMutation = useMutation({
     mutationFn: async (values: { email: string }) => {
-      return unwrapSafePromise(
-        authClient.forgetPassword({
-          email: values.email,
-          redirectTo: "/auth/reset-password",
-        }),
+      const response = await fetch(
+        `${getServerUrl()}/api/auth/forget-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: values.email,
+            redirectTo: "/auth/reset-password",
+          }),
+        },
       );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message ?? "Failed to send reset email");
+      }
+
+      return response.json();
     },
     onError: (error) => {
       toast.error(error.message);
     },
     onSuccess: () => {
+      toast.success("Password reset email sent! Check your inbox.");
       router.push("/auth/verify");
     },
   });

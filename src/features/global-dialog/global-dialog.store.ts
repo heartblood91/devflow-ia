@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
-export type DialogType = "user-plan";
+// DevFlow: No global dialogs for MVP, extend this type as needed
+export type DialogType = string;
 
 export const useGlobalDialogStore = create<{
   openDialog: DialogType | null;

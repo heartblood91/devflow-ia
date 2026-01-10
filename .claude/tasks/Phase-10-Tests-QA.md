@@ -31,11 +31,11 @@
 
 - [ ] Identifier modules < 80% coverage
 - [ ] Prioriser :
-  1. Business logic (packages/core)
-  2. API routes (packages/api)
-  3. Components critiques (packages/web)
+  1. Business logic (lib/usecases, lib/ai, lib/stats)
+  2. API routes (app/api)
+  3. Components critiques (components/)
 
-#### Business Logic (packages/core)
+#### Business Logic (lib/usecases, lib/ai, lib/stats)
 
 - [ ] Tests use cases :
 
@@ -44,16 +44,16 @@
 
 describe('GenerateWeeklyPlanningUseCase', () => {
   let useCase: GenerateWeeklyPlanningUseCase;
-  let mockTaskRepo: jest.Mocked<ITaskRepository>;
-  let mockUserRepo: jest.Mocked<IUserRepository>;
+  let mockTaskRepo: ReturnType<typeof vi.mocked<ITaskRepository>>;
+  let mockUserRepo: ReturnType<typeof vi.mocked<IUserRepository>>;
 
   beforeEach(() => {
     mockTaskRepo = {
-      findByUserId: jest.fn(),
+      findByUserId: vi.fn(),
       // ...
     };
     mockUserRepo = {
-      findById: jest.fn(),
+      findById: vi.fn(),
       // ...
     };
     useCase = new GenerateWeeklyPlanningUseCase(mockTaskRepo, mockUserRepo, mockTimeBlockRepo);
@@ -75,8 +75,8 @@ describe('GenerateWeeklyPlanningUseCase', () => {
       { id: '2', difficulty: 2, priority: 'important', estimatedDuration: 60 },
     ];
 
-    mockUserRepo.findById.mockResolvedValue(user);
-    mockTaskRepo.findByUserId.mockResolvedValue(tasks);
+    mockUserRepo.findById.mockResolvedValueOnce(user);
+    mockTaskRepo.findByUserId.mockResolvedValueOnce(tasks);
 
     // Act
     const result = await useCase.execute({
@@ -118,6 +118,7 @@ describe('GenerateWeeklyPlanningUseCase', () => {
 // tests/api/tasks/route.test.ts
 
 import { POST } from '@/app/api/tasks/route';
+import { auth } from '@/lib/auth/auth';
 
 describe('POST /api/tasks', () => {
   it('should create a task', async () => {
@@ -125,7 +126,7 @@ describe('POST /api/tasks', () => {
       user: { id: '1', email: 'test@example.com' },
     };
 
-    jest.spyOn(require('next-auth'), 'getServerSession').mockResolvedValue(mockSession);
+    vi.spyOn(auth.api, 'getSession').mockResolvedValue(mockSession);
 
     const req = new Request('http://localhost:3000/api/tasks', {
       method: 'POST',
@@ -145,7 +146,7 @@ describe('POST /api/tasks', () => {
   });
 
   it('should return 401 if not authenticated', async () => {
-    jest.spyOn(require('next-auth'), 'getServerSession').mockResolvedValue(null);
+    vi.spyOn(auth.api, 'getSession').mockResolvedValue(null);
 
     const req = new Request('http://localhost:3000/api/tasks', {
       method: 'POST',
@@ -179,20 +180,20 @@ describe('TaskCard', () => {
   };
 
   it('should render task title', () => {
-    render(<TaskCard task={mockTask} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<TaskCard task={mockTask} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
     expect(screen.getByText('Test Task')).toBeInTheDocument();
   });
 
   it('should display priority badge', () => {
-    render(<TaskCard task={mockTask} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<TaskCard task={mockTask} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
     expect(screen.getByText('🟠')).toBeInTheDocument(); // important
   });
 
   it('should call onEdit when edit button clicked', () => {
-    const onEdit = jest.fn();
-    render(<TaskCard task={mockTask} onEdit={onEdit} onDelete={jest.fn()} />);
+    const onEdit = vi.fn();
+    render(<TaskCard task={mockTask} onEdit={onEdit} onDelete={vi.fn()} />);
 
     fireEvent.click(screen.getByText('Éditer'));
 
@@ -200,7 +201,7 @@ describe('TaskCard', () => {
   });
 
   it('should display difficulty stars', () => {
-    render(<TaskCard task={mockTask} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<TaskCard task={mockTask} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
     expect(screen.getByText('⭐⭐⭐')).toBeInTheDocument();
   });
@@ -208,10 +209,10 @@ describe('TaskCard', () => {
 ```
 
 **Tests Coverage Goal :**
-- packages/core : 85%+
-- packages/api : 80%+
-- packages/web : 75%+
-- packages/cli : 80%+
+- lib/ : 85%+
+- app/api/ : 80%+
+- components/ : 75%+
+- cli/ : 80%+
 
 ---
 
@@ -473,11 +474,11 @@ module.exports = {
   - [ ] Sanitize HTML si nécessaire (DOMPurify)
 
 - [ ] CSRF (Cross-Site Request Forgery) :
-  - ✅ NextAuth protège automatiquement (CSRF token)
+  - ✅ Better Auth protège automatiquement (CSRF token)
 
 - [ ] Authentication :
   - [ ] Password hashing (bcrypt)
-  - [ ] JWT signed (NextAuth)
+  - [ ] JWT signed (Better Auth)
   - [ ] Session expiration (7 days)
 
 - [ ] Authorization :

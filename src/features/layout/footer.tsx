@@ -21,7 +21,7 @@ export function Footer() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-8 sm:grid-cols-2">
                 <div className="flex flex-col gap-3">
                   <h4 className="font-medium">Product</h4>
                   <nav className="flex flex-col gap-2">
@@ -30,41 +30,7 @@ export function Footer() {
                       variant="link"
                       className="h-auto justify-start p-0"
                     >
-                      <Link href="/posts">Blog</Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="link"
-                      className="h-auto justify-start p-0"
-                    >
                       <Link href="/docs">Documentation</Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="link"
-                      className="h-auto justify-start p-0"
-                    >
-                      <Link href="/orgs">Dashboard</Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="link"
-                      className="h-auto justify-start p-0"
-                    >
-                      <Link href="/account">Account</Link>
-                    </Button>
-                  </nav>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <h4 className="font-medium">Company</h4>
-                  <nav className="flex flex-col gap-2">
-                    <Button
-                      asChild
-                      variant="link"
-                      className="h-auto justify-start p-0"
-                    >
-                      <Link href="/about">About</Link>
                     </Button>
                     <Button
                       asChild

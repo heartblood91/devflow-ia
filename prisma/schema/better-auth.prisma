@@ -16,10 +16,6 @@ model User {
   sessions      Session[]
   accounts      Account[]
   feedbacks     Feedback[]
-  subscription  Subscription?
-  
-  // Stripe integration
-  stripeCustomerId String?
 
   role       String?
   banned     Boolean?
@@ -77,17 +73,3 @@ model Verification {
   @@map("verification")
 }
 
-model Subscription {
-  id                   String  @id
-  plan                 String
-  referenceId          String  @unique
-  user                 User    @relation(fields: [referenceId], references: [id], onDelete: Cascade)
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  status               String?
-  periodStart          DateTime?
-  periodEnd            DateTime?
-  cancelAtPeriodEnd    Boolean?
-
-  @@map("subscription")
-}

@@ -25,7 +25,7 @@
 #### Structure
 
 ```
-packages/cli/
+cli/
 ├── src/
 │   ├── commands/
 │   │   ├── auth.ts        # login, logout, whoami
@@ -49,7 +49,7 @@ packages/cli/
 
 - [ ] Installer dependencies :
   ```bash
-  cd packages/cli
+  cd cli
   pnpm add commander chalk inquirer axios dotenv
   pnpm add -D @types/inquirer @types/node tsx
   ```
@@ -149,7 +149,7 @@ program.parse(process.argv);
 - [ ] Créer `package.json` scripts :
   ```json
   {
-    "name": "@devflow/cli",
+    "name": "devflow-cli",
     "version": "1.0.0",
     "bin": {
       "devflow": "./dist/index.js"
@@ -538,12 +538,11 @@ export const taskCommands = {
 
 ```ts
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/prisma';
-import { authOptions } from '../auth/[...nextauth]/route';
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }
@@ -567,7 +566,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }
@@ -596,11 +595,15 @@ export async function POST(req: NextRequest) {
 - [ ] Créer `app/api/tasks/[taskId]/route.ts` :
 
 ```ts
+import { NextRequest } from 'next/server';
+import { auth } from '@/lib/auth/auth';
+import { prisma } from '@/lib/prisma';
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { taskId: string } }
 ) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }
@@ -623,7 +626,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { taskId: string } }
 ) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }
@@ -645,7 +648,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { taskId: string } }
 ) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: req.headers });
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });
   }

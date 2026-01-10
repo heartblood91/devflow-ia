@@ -1,0 +1,9 @@
+# DevFlow AI Chatbot Components
+
+This folder will contain chatbot-related components:
+- Chat interface
+- Message bubbles
+- Proactive suggestions
+- AI insights display
+
+@todo Phase 8: Implement chatbot components

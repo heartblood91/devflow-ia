@@ -21,7 +21,7 @@ const config: PlaywrightTestConfig = {
   retries: 1,
   // Add delay between retries
   workers: 3,
-  globalTeardown: require.resolve("./e2e/global-teardown.ts"),
+  globalTeardown: "./e2e/global-teardown.ts",
   // Enable console logs in CI
   reporter: process.env.CI ? [["list"], ["html"]] : "list",
   use: {
@@ -50,15 +50,14 @@ const config: PlaywrightTestConfig = {
   },
   testDir: "e2e",
   // Only start the web server if PLAYWRIGHT_TEST_BASE_URL is not set
-  ...(SERVER_URL
+  ...(process.env.PLAYWRIGHT_TEST_BASE_URL
     ? {}
     : {
         webServer: {
-          command: "pnpm run build; pnpm run start",
+          command: "pnpm run build && pnpm run start",
           url: SERVER_URL,
           timeout: 120 * 1000,
-          reuseExistingServer:
-            process.env.NODE_ENV === "development" ? !process.env.CI : true,
+          reuseExistingServer: !process.env.CI,
         },
       }),
 };

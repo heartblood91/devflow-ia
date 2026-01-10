@@ -1,20 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import type { DialogType } from "./global-dialog.store";
 import { useGlobalDialogStore } from "./global-dialog.store";
 
-const UserDialogPlan = dynamic(
-  async () =>
-    import("./user-plan-dialog").then((mod) => ({
-      default: mod.UserPlanDialog,
-    })),
-  { ssr: false },
-);
-
-const DialogTypeMap: Record<DialogType, React.ComponentType> = {
-  "user-plan": UserDialogPlan,
-};
+const DialogTypeMap: Record<DialogType, React.ComponentType> = {};
 
 /**
  * This component is used to display the global dialog.

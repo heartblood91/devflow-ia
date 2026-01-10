@@ -75,7 +75,7 @@ Créer le Dashboard quotidien : priorités du jour, timeline, progression.
 - [ ] Logic :
   ```ts
   export async function getDailyPriorities(date: Date) {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession();
     if (!session?.user?.id) throw new Error('Unauthorized');
 
     // Get time blocks for today

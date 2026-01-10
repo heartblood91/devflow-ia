@@ -159,6 +159,7 @@ export default [
       "src/generated",
       ".claude",
       ".conductor",
+      "cli",
     ],
   },
 ];

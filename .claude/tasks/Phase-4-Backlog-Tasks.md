@@ -201,7 +201,7 @@ function KanbanBoard({ tasks }: { tasks: Task[] }) {
   ```ts
   'use server';
 
-  import { prisma } from '@/lib/prisma';
+  import { prisma } from '@/lib/db/prisma';
 
   export async function updateTaskColumn(taskId: string, newColumn: KanbanColumn) {
     await prisma.task.update({
@@ -273,11 +273,11 @@ type TaskFormData = z.infer<typeof taskSchema>;
   ```ts
   'use server';
 
-  import { prisma } from '@/lib/prisma';
-  import { getServerSession } from 'next-auth';
+  import { prisma } from '@/lib/db/prisma';
+  import { auth } from '@/lib/auth/auth';
 
   export async function createTask(data: TaskFormData) {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession();
     if (!session?.user?.id) {
       throw new Error('Unauthorized');
     }
@@ -318,10 +318,42 @@ type TaskFormData = z.infer<typeof taskSchema>;
   }
   ```
 
-- [ ] Créer `updateTask` (même structure, avec where: { id })
+- [ ] Créer `updateTask` :
+  ```ts
+  'use server';
+
+  import { prisma } from '@/lib/db/prisma';
+  import { auth } from '@/lib/auth/auth';
+
+  export async function updateTask(taskId: string, data: Partial<TaskFormData>) {
+    const session = await auth.api.getSession();
+    if (!session?.user?.id) {
+      throw new Error('Unauthorized');
+    }
+
+    const task = await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        ...data,
+      },
+    });
+
+    return { success: true, task };
+  }
+  ```
 - [ ] Créer `deleteTask` :
   ```ts
+  'use server';
+
+  import { prisma } from '@/lib/db/prisma';
+  import { auth } from '@/lib/auth/auth';
+
   export async function deleteTask(taskId: string) {
+    const session = await auth.api.getSession();
+    if (!session?.user?.id) {
+      throw new Error('Unauthorized');
+    }
+
     await prisma.task.delete({
       where: { id: taskId },
     });

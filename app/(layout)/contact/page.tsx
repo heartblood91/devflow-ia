@@ -15,12 +15,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: `Contact ${SiteConfig.title}`,
   description:
-    "Get in touch with the NOW.TS team. We're here to help with any questions about testimonial collection, platform features, or technical support.",
-  keywords: ["contact", "support", "help", "testimonials", "questions"],
+    "Get in touch with the DevFlow team. We're here to help with any questions about productivity features, platform usage, or technical support.",
+  keywords: ["contact", "support", "help", "productivity", "devflow"],
   openGraph: {
     title: `Contact ${SiteConfig.title}`,
     description:
-      "Get in touch with the NOW.TS team. We're here to help with any questions about testimonial collection, platform features, or technical support.",
+      "Get in touch with the DevFlow team. We're here to help with any questions about productivity features, platform usage, or technical support.",
     url: `${SiteConfig.prodUrl}/contact`,
     type: "website",
   },
@@ -46,9 +46,9 @@ export default function ContactPage() {
               variant="p"
               className="text-muted-foreground mt-6 text-lg/8"
             >
-              Have questions about NOW.TS? Need help with testimonial collection
-              or want to share feedback? I'm here to help and always excited to
-              hear from our community.
+              Have questions about DevFlow? Need help with productivity features
+              or want to share feedback? We're here to help and always excited
+              to hear from our community.
             </Typography>
             <dl className="text-muted-foreground mt-10 flex flex-col gap-4 text-base/7">
               <div className="flex gap-x-4">
@@ -71,7 +71,7 @@ export default function ContactPage() {
                 </dt>
                 <dd>
                   <a
-                    href="mailto:melvyn@nowts.com"
+                    href={`mailto:${env.NEXT_PUBLIC_EMAIL_CONTACT}`}
                     className="hover:text-foreground transition-colors"
                   >
                     {env.NEXT_PUBLIC_EMAIL_CONTACT}

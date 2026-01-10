@@ -6,7 +6,6 @@ import { cleanup } from "@testing-library/react";
 import { fetch } from "cross-fetch";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import type { Resend } from "resend";
-import type Stripe from "stripe";
 import { beforeEach, vi } from "vitest";
 import { mockDeep, mockReset } from "vitest-mock-extended";
 
@@ -112,23 +111,17 @@ vi.mock("next/navigation", async () => {
 });
 
 const prisma = mockDeep<PrismaClient>();
-const stripe = mockDeep<Stripe>();
 const authClient = mockDeep<AuthClientType>();
 const resend = mockDeep<Resend>();
 global.fetch = fetch;
 
 vi.mock("@/lib/prisma", () => ({ prisma }));
-vi.mock("@/lib/stripe", () => ({ stripe }));
 vi.mock("@/lib/auth-client", () => ({ authClient }));
 vi.mock("@/lib/mail/resend", () => ({ resend }));
 vi.mock("@/lib/env", () => ({ env: {} }));
 vi.mock("@/lib/auth/auth-user", () => ({
   getUser: vi.fn(),
   getRequiredUser: vi.fn(),
-}));
-vi.mock("@/lib/organizations/get-org", () => ({
-  getCurrentOrg: vi.fn(),
-  getRequiredCurrentOrg: vi.fn(),
 }));
 
 // Define the type for our global helper
@@ -142,7 +135,6 @@ declare global {
 beforeEach(() => {
   // Reset mocks
   mockReset(prisma);
-  mockReset(stripe);
   mockReset(authClient);
 
   // Reset localStorage mock

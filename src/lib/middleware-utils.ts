@@ -1,21 +1,11 @@
 import { auth } from "@/lib/auth";
-import { SiteConfig } from "@/site-config";
-import { getSessionCookie } from "better-auth/cookies";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export const handleRootRedirect = (request: NextRequest) => {
-  if (!SiteConfig.features.enableLandingRedirection) return null;
-
-  const session = getSessionCookie(request, {
-    cookiePrefix: SiteConfig.appId,
-  });
-
-  if (!session) return null;
-
-  const url = request.nextUrl.clone();
-  url.pathname = "/app";
-  return NextResponse.redirect(url);
+export const handleRootRedirect = (_request: NextRequest) => {
+  // DevFlow: Let app/page.tsx handle the redirect logic
+  // This allows for server-side user check and proper redirect
+  return null;
 };
 
 export const isAppRoute = (pathname: string) => {

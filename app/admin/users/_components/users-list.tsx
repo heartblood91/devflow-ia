@@ -26,8 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { authClient } from "@/lib/auth-client";
-import { dayjs } from "@/lib/dayjs";
 import { unwrapSafePromise } from "@/lib/promises";
+import { formatDistance } from "date-fns";
 import { useMutation } from "@tanstack/react-query";
 import {
   Ban,
@@ -210,7 +210,11 @@ export function UsersList({
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell>{dayjs(user.createdAt).fromNow()}</TableCell>
+                  <TableCell>
+                    {formatDistance(user.createdAt, new Date(), {
+                      addSuffix: true,
+                    })}
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

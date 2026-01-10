@@ -123,19 +123,36 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 
 ### 5. Use Case : Generate Planning (4h)
 
-- [ ] Créer `packages/core/src/usecases/GenerateWeeklyPlanning.ts`
+- [ ] Créer `lib/usecases/GenerateWeeklyPlanning.ts`
 - [ ] Input : `{ userId, weekStartDate }`
 - [ ] Output : `{ timeBlocks: TimeBlock[], totalHours, bufferHours, rescueSlots }`
 
 - [ ] Algorithm :
   ```ts
-  async execute(input: GenerateWeeklyPlanningInput): Promise<GenerateWeeklyPlanningOutput> {
+  import { prisma } from '@/lib/db/prisma';
+
+  type GenerateWeeklyPlanningInput = {
+    userId: string;
+    weekStartDate: Date;
+  };
+
+  type GenerateWeeklyPlanningOutput = {
+    timeBlocks: TimeBlock[];
+    totalHours: number;
+    bufferHours: number;
+    rescueSlots: number;
+  };
+
+  export const generateWeeklyPlanning = async (input: GenerateWeeklyPlanningInput): Promise<GenerateWeeklyPlanningOutput> => {
     // 1. Get user preferences
-    const user = await this.userRepo.findById(input.userId);
+    const user = await prisma.user.findUnique({
+      where: { id: input.userId },
+      select: { preferences: true },
+    });
     const { chronotype, workHours, bufferPercentage } = user.preferences;
 
     // 2. Get tasks to plan (Sacred + Important only)
-    const tasks = await this.taskRepo.findMany({
+    const tasks = await prisma.task.findMany({
       where: {
         userId: input.userId,
         status: 'todo',
@@ -150,15 +167,15 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
 
     // 3. Generate time blocks for each day
     const timeBlocks: TimeBlock[] = [];
-    const daysOfWeek = this.getWeekDays(input.weekStartDate);
+    const daysOfWeek = getWeekDays(input.weekStartDate);
 
     for (const day of daysOfWeek) {
       const dayWorkHours = workHours[day.weekday];
       if (!dayWorkHours) continue; // Day off
 
-      const peakHours = this.getPeakHours(chronotype, day.weekday);
+      const peakHours = getPeakHours(chronotype, day.weekday);
 
-      const dayBlocks = this.planDay({
+      const dayBlocks = planDay({
         day: day.date,
         workHours: dayWorkHours,
         peakHours,
@@ -170,15 +187,23 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
     }
 
     // 4. Add rescue slots (vendredi 16h-18h)
-    const rescueSlots = this.addRescueSlots(timeBlocks, daysOfWeek, 2);
+    const rescueSlots = addRescueSlots(timeBlocks, daysOfWeek, 2);
     timeBlocks.push(...rescueSlots);
 
     // 5. Validate dependencies
-    const validatedBlocks = this.validateDependencies(timeBlocks, tasks);
+    const validatedBlocks = validateDependencies(timeBlocks, tasks);
 
-    // 6. Calculate metrics
-    const totalHours = this.calculateTotalHours(validatedBlocks);
-    const bufferHours = this.calculateBufferHours(validatedBlocks);
+    // 6. Save to DB
+    await prisma.timeBlock.createMany({
+      data: validatedBlocks.map((block) => ({
+        ...block,
+        userId: input.userId,
+      })),
+    });
+
+    // 7. Calculate metrics
+    const totalHours = calculateTotalHours(validatedBlocks);
+    const bufferHours = calculateBufferHours(validatedBlocks);
 
     return {
       timeBlocks: validatedBlocks,
@@ -186,14 +211,14 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
       bufferHours,
       rescueSlots: rescueSlots.length,
     };
-  }
+  };
   ```
 
 ### 6. Peak Hours Logic (1h)
 
 - [ ] Créer `getPeakHours(chronotype, weekday)` :
   ```ts
-  private getPeakHours(chronotype: string, weekday: string) {
+  const getPeakHours = (chronotype: string, weekday: string): { start: string; end: string }[] => {
     const peakHoursMap = {
       bear: [
         { start: '10:00', end: '12:00' },
@@ -208,29 +233,29 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
         { start: '20:00', end: '22:00' },
       ],
       dolphin: [
-        { start: '10:00', end: '12:00' }, // Variable
+        { start: '10:00', end: '12:00' },
       ],
     };
 
     return peakHoursMap[chronotype] || peakHoursMap.bear;
-  }
+  };
   ```
 
 ### 7. Plan Day Logic (3h)
 
 - [ ] Créer `planDay(options)` :
   ```ts
-  private planDay(options: {
+  const planDay = (options: {
     day: Date;
     workHours: { start: string; end: string };
     peakHours: { start: string; end: string }[];
     tasks: Task[];
     bufferPercentage: number;
-  }): TimeBlock[] {
+  }): TimeBlock[] => {
     const blocks: TimeBlock[] = [];
 
     // Calculate available minutes
-    const totalMinutes = this.calculateMinutes(options.workHours.start, options.workHours.end);
+    const totalMinutes = calculateMinutes(options.workHours.start, options.workHours.end);
     const bufferMinutes = Math.floor(totalMinutes * (options.bufferPercentage / 100));
     const taskMinutes = totalMinutes - bufferMinutes;
 
@@ -247,21 +272,21 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
         if (remainingTaskMinutes <= 0) break;
 
         // Check if we're in peak hour range
-        if (!this.isTimeBetween(currentTime, peakHour.start, peakHour.end)) continue;
+        if (!isTimeBetween(currentTime, peakHour.start, peakHour.end)) continue;
 
         const duration = Math.min(task.estimatedDuration, remainingTaskMinutes);
 
         blocks.push({
           date: options.day,
           startTime: currentTime,
-          endTime: this.addMinutes(currentTime, duration),
+          endTime: addMinutes(currentTime, duration),
           type: 'deep_work',
           priority: task.priority,
           taskId: task.id,
           taskTitle: task.title,
         });
 
-        currentTime = this.addMinutes(currentTime, duration);
+        currentTime = addMinutes(currentTime, duration);
         remainingTaskMinutes -= duration;
         task.planned = true;
       }
@@ -278,14 +303,14 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
       blocks.push({
         date: options.day,
         startTime: currentTime,
-        endTime: this.addMinutes(currentTime, duration),
+        endTime: addMinutes(currentTime, duration),
         type: 'shallow_work',
         priority: task.priority,
         taskId: task.id,
         taskTitle: task.title,
       });
 
-      currentTime = this.addMinutes(currentTime, duration);
+      currentTime = addMinutes(currentTime, duration);
       remainingTaskMinutes -= duration;
       task.planned = true;
     }
@@ -301,14 +326,14 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
       blocks.push({
         date: options.day,
         startTime: currentTime,
-        endTime: this.addMinutes(currentTime, duration),
+        endTime: addMinutes(currentTime, duration),
         type: 'admin',
         priority: task.priority,
         taskId: task.id,
         taskTitle: task.title,
       });
 
-      currentTime = this.addMinutes(currentTime, duration);
+      currentTime = addMinutes(currentTime, duration);
       remainingTaskMinutes -= duration;
       task.planned = true;
     }
@@ -318,14 +343,14 @@ Implémenter la partie planification de la War Room : drag & drop tasks + algori
       blocks.push({
         date: options.day,
         startTime: currentTime,
-        endTime: this.addMinutes(currentTime, bufferMinutes),
+        endTime: addMinutes(currentTime, bufferMinutes),
         type: 'buffer',
         isFree: true,
       });
     }
 
     return blocks;
-  }
+  };
   ```
 
 ### 8. Validation Charge (1h)
