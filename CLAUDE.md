@@ -2,9 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## About the project <NAME>
+## About the project DevFlow
 
-If you read this, ask question about the project to fill this part. You need to describe what is the purpose of the project, main feature and goals.
+DevFlow is a productivity system designed for 10x developers. It aggregates scientifically validated productivity concepts into a single application:
+
+- **Time-blocking with chronotype optimization** - Schedule deep work during your biological peak hours
+- **Weekly War Room** - Sunday planning ritual to set objectives and allocate time
+- **Daily Reflection with AI insights** - Evening review with AI-generated suggestions
+- **Focus Timer** - Pomodoro (25/5) or Ultradian (90/20) rhythms
+- **DevFlow AI** - Proactive chatbot assistant that learns your patterns
+- **DevFlow CLI** - Rapid task import from terminal
+
+**Goal:** Help developers achieve sustainable high productivity without burnout by combining proven productivity techniques with AI insights.
 
 ## Development Commands
 
@@ -32,7 +41,6 @@ If you read this, ask question about the project to fill this part. You need to 
 ### Development Tools
 
 - `pnpm email` - Email development server
-- `pnpm stripe-webhooks` - Listen for Stripe webhooks
 - `pnpm knip` - Run knip for unused code detection
 
 ## Architecture Overview
@@ -43,9 +51,9 @@ If you read this, ask question about the project to fill this part. You need to 
 - **Language**: TypeScript (strict mode)
 - **Styling**: TailwindCSS v4 with Shadcn/UI components
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Better Auth with organization support
+- **Authentication**: Better Auth (no organizations for MVP)
 - **Email**: React Email with Resend
-- **Payments**: Stripe integration
+- **AI**: Vercel AI SDK with OpenAI
 - **Testing**: Vitest for unit tests, Playwright for e2e
 - **Package Manager**: pnpm
 
@@ -53,9 +61,17 @@ If you read this, ask question about the project to fill this part. You need to 
 
 - `app/` - Next.js App Router pages and layouts
 - `src/components/` - UI components (Shadcn/UI in `ui/`, custom in `nowts/`)
-- `src/features/` - Feature-specific components and logic
+  - `src/components/dashboard/` - Dashboard components
+  - `src/components/backlog/` - Backlog/Kanban components
+  - `src/components/weekly/` - Weekly planning components
+  - `src/components/timer/` - Focus timer components
+  - `src/components/chatbot/` - DevFlow AI chatbot components
 - `src/lib/` - Utilities, configurations, and services
+  - `src/lib/actions/` - Server Actions (business logic)
+  - `src/lib/ai/` - DevFlow AI context and prompts
+  - `src/lib/stats/` - Statistics calculations for insights
 - `src/hooks/` - Custom React hooks
+- `cli/` - DevFlow CLI (separate npm package)
 - `emails/` - Email templates using React Email
 - `prisma/` - Database schema and migrations
 - `e2e/` - End-to-end tests
@@ -63,9 +79,12 @@ If you read this, ask question about the project to fill this part. You need to 
 
 ### Key Features
 
-- **Multi-tenant Organizations**: Full organization management with roles and permissions
-- **Authentication**: Email/password, magic links, OAuth (GitHub, Google)
-- **Billing**: Stripe subscriptions with plan management
+- **Authentication**: Email/password, OAuth (GitHub, Google) - Better Auth
+- **Task Management**: Backlog, prioritization, time-blocking
+- **Weekly Planning**: War Room interface for setting objectives
+- **Focus Timer**: Pomodoro/Ultradian timer with focus mode
+- **AI Insights**: Daily reflections with AI-powered suggestions
+- **DevFlow CLI**: Command-line interface for rapid task capture
 - **Dialog System**: Global dialog manager for modals and confirmations
 - **Forms**: React Hook Form with Zod validation and server actions
 - **Email System**: Transactional emails with React Email
@@ -116,13 +135,13 @@ If you read this, ask question about the project to fill this part. You need to 
 - Use `getUser()` for optional user (server-side)
 - Use `getRequiredUser()` for required user (server-side)
 - Use `useSession()` from auth-client.ts (client-side)
-- Use `getCurrentOrgCache()` to get the current org
+- **Note:** No organization/multi-tenant features in MVP
 
 ### Database
 
 - Prisma ORM with PostgreSQL
 - Database hooks for user creation setup
-- Organization-based data access patterns
+- User-based data access patterns (no organizations)
 
 ### Dialog System
 
@@ -167,6 +186,85 @@ If you read this, ask question about the project to fill this part. You need to 
 ## Files naming
 
 - All server actions should be suffix by `.action.ts` eg. `user.action.ts`, `dashboard.action.ts`
+
+## Git Commit Conventions
+
+### Format: Conventional Commits
+
+All commits MUST follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+```
+
+**Allowed types:**
+- `feat` - New feature for the user
+- `fix` - Bug fix for the user
+- `chore` - Maintenance, configuration, dependencies
+- `docs` - Documentation changes
+- `refactor` - Code refactoring (no functional change)
+- `test` - Adding or updating tests
+- `style` - Code style changes (formatting, missing semicolons, etc.)
+- `perf` - Performance improvements
+
+**Examples of good commits:**
+
+```bash
+feat(backlog): add drag-and-drop for task prioritization
+
+Implement drag-and-drop using @dnd-kit/core to allow users to reorder tasks
+in the backlog by priority. Tasks are automatically saved to the database
+on drop.
+
+feat(timer): add Pomodoro timer with notifications
+
+fix(auth): prevent session expiration during active work
+
+chore(deps): update Next.js to 15.1.0
+
+refactor(dashboard): extract TaskCard component for reusability
+
+test(backlog): add unit tests for task prioritization logic
+
+docs(readme): update setup instructions for DevFlow
+```
+
+**Examples of bad commits:**
+
+```bash
+# ❌ Too vague
+update stuff
+
+# ❌ No type
+added new feature for tasks
+
+# ❌ Too long subject (> 72 chars)
+feat(backlog): add drag-and-drop functionality for task prioritization in the backlog with automatic saving
+
+# ❌ Multiple concerns
+feat(auth): add login page and fix timer bug
+```
+
+### Commit Rules
+
+1. **NO commits without review** - You MUST wait for user approval before committing
+2. **Atomic commits** - One logical change per commit
+3. **Subject line** - Max 72 characters, imperative mood ("add" not "added")
+4. **Body** - Explain WHAT and WHY, not HOW (code explains HOW)
+5. **Breaking changes** - Must include `BREAKING CHANGE:` in the footer
+
+### No Git Hooks (Husky)
+
+We do NOT use Husky or pre-commit hooks. Quality is the developer's responsibility:
+
+- Run `pnpm lint` before committing
+- Run `pnpm test:ci` before committing
+- Run `pnpm ts` before committing
+- Use `pnpm clean` to run all checks at once
+
+**Philosophy:** We trust developers to maintain quality rather than enforce it through automation. This encourages mindfulness and ownership.
 
 ## Debugging and complexe tasks
 

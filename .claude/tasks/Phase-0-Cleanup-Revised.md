@@ -1,6 +1,6 @@
-# Phase 0 : Cleanup Boilerplate (Adapté DevFlow)
+# Phase 0 : Cleanup Boilerplate + Setup DevFlow
 
-**Durée :** 2h max
+**Durée :** 1-2 jours
 **Statut :** 🟡 À faire
 **Priorité :** CRITIQUE (avant toute feature)
 
@@ -8,546 +8,528 @@
 
 ## Objectif
 
-Nettoyer la boilerplate NOW.TS pour transformer en DevFlow MVP :
-- ❌ Supprimer tout le marketing/landing inutile
-- ❌ Supprimer Stripe/Billing (Phase 9 plus tard)
-- ❌ Supprimer blog/changelog public
-- ✅ Garder : Better Auth, Vitest, Docs, Admin, Contact, Feedback
-- ✅ Sécuriser : Accès app principal = connexion requise
+Nettoyer la boilerplate Next.js 15, retirer le superflu (multi-tenant, marketing), et préparer la structure pour DevFlow.
 
 ---
 
-## Audit Résumé
+## Architecture Confirmée
 
-| Élément | Status | Action |
-|---------|--------|--------|
-| Landing page massive (270 lignes) | ❌ | Supprimer |
-| Blog/Posts system | ❌ | Supprimer |
-| Changelog public | ❌ | Supprimer |
-| Pricing/Plans | ❌ | Supprimer |
-| Stripe/Billing | ❌ | Supprimer (MVP) |
-| About page | ❌ | Supprimer |
-| Contact/Feedback | ✅ | **GARDER** |
-| Docs system | ✅ | **GARDER** |
-| Admin panel | ✅ | **GARDER** |
-| Better Auth | ✅ | **GARDER** |
-| Vitest + Playwright | ✅ | **GARDER** |
+**✅ ON GARDE :**
+- Next.js 15 (App Router) - monolith, pas de monorepo
+- Better Auth (moderne, meilleur que NextAuth)
+- Vitest + Playwright (déjà configuré)
+- Prisma + Neon
+- shadcn/ui + Tailwind
+- Email system (utile pour notifications)
 
-**Estimation cleanup :** ~95 fichiers, ~5000 lignes → 2h max
+**❌ ON RETIRE :**
+- Features multi-tenant / organizations
+- Pages marketing / landing page
+- Stripe billing (on le fera simple en Phase 9)
+- Components/pages inutiles pour DevFlow
+
+**📁 Structure DevFlow (simple) :**
+```
+app/                    # Next.js App Router
+  ├── (auth)/          # Auth pages
+  ├── dashboard/       # Dashboard quotidien
+  ├── backlog/         # Kanban tasks
+  ├── weekly/          # Planning hebdo + War Room
+  ├── settings/        # User settings
+  └── api/             # API routes
+
+lib/
+  ├── actions/         # Server Actions (business logic)
+  ├── ai/              # DevFlow AI (prompts, context, proactive)
+  ├── stats/           # Calculs stats/insights
+  ├── auth/            # Better Auth config
+  ├── db/              # Prisma client
+  └── utils/           # Helpers
+
+components/
+  ├── ui/              # shadcn/ui components
+  ├── dashboard/       # Dashboard components
+  ├── backlog/         # Backlog components
+  ├── weekly/          # Weekly view components
+  ├── timer/           # Timer + Focus Mode
+  └── chatbot/         # DevFlow AI chatbot
+
+cli/                   # DevFlow CLI (séparé, simple npm package)
+  ├── src/
+  │   ├── commands/
+  │   └── index.ts
+  └── package.json
+
+prisma/
+  └── schema.prisma    # Database schema
+```
 
 ---
 
 ## Tasks
 
-### 1. Supprimer Pages Marketing (30min)
+### 1. Audit Boilerplate Actuel (1h)
 
-#### 1.1 Landing Pages
+- [ ] Lire structure complète :
+  ```bash
+  tree -L 3 -I 'node_modules|.next|dist'
+  ```
 
-```bash
-# Supprimer landing page actuelle
-rm app/page.tsx
-rm -rf app/home/
+- [ ] Identifier fichiers/dossiers à supprimer :
+  - Features multi-tenant (organizations, teams, invites)
+  - Pages marketing (landing, pricing, docs, blog)
+  - Components marketing/landing
+  - API routes inutiles
+  - Stripe setup (on le fera nous-mêmes)
 
-# Supprimer about
-rm -rf app/(layout)/about/
-```
+- [ ] Lister dans un fichier `CLEANUP.md` :
+  ```markdown
+  # To Delete
+  - app/organizations/
+  - app/marketing/
+  - app/pricing/
+  - components/marketing/
+  - lib/stripe/ (sauf si vraiment minimal)
+  - ...
+  ```
 
-#### 1.2 Blog/Posts System
+### 2. Cleanup Files (2h)
 
-```bash
-rm -rf app/(layout)/posts/
-rm -rf src/features/posts/
-rm -rf content/posts/ # Si existe
-```
+- [ ] Supprimer dossiers inutiles :
+  ```bash
+  # Exemples (adapter selon ton audit)
+  rm -rf app/organizations
+  rm -rf app/marketing
+  rm -rf app/pricing
+  rm -rf app/blog
+  rm -rf app/docs
+  rm -rf components/marketing
+  rm -rf components/landing
+  ```
 
-#### 1.3 Changelog Public
+- [ ] Supprimer pages auth inutiles (garder uniquement login/signup) :
+  ```bash
+  # Si tu as forgot-password, verify-email, etc. et pas besoin
+  # les garder si tu en as besoin
+  ```
 
-```bash
-rm -rf app/(layout)/changelog/
-rm -rf src/features/changelog/
-rm -rf content/changelog/ # Si existe
-```
+- [ ] Nettoyer `public/` :
+  ```bash
+  # Garder uniquement :
+  # - favicon.ico
+  # - logo.png (à remplacer par logo DevFlow)
+  # Virer le reste
+  ```
 
-#### 1.4 Features Landing
+### 3. Cleanup Dependencies (1h)
 
-```bash
-rm -rf src/features/landing/
-rm -rf src/features/plans/
-rm -rf src/features/nowts/ # Spécifique NOW.TS (testimonials?)
-```
+- [ ] Audit `package.json`
+- [ ] Retirer packages inutiles :
+  ```bash
+  # Exemples courants (selon ta boilerplate)
+  pnpm remove @stripe/stripe-js  # si pas utilisé (on le fera Phase 9)
+  pnpm remove mixpanel-browser   # analytics tiers
+  pnpm remove @vercel/analytics  # si pas utilisé
+  # ... autres packages inutiles
+  ```
 
----
+- [ ] Vérifier dependencies essentielles présentes :
+  ```json
+  {
+    "dependencies": {
+      "next": "^15.x",
+      "react": "^19.x",
+      "better-auth": "^1.x",
+      "@prisma/client": "^5.x",
+      "tailwindcss": "^3.x",
+      "lucide-react": "latest",
+      "zod": "^3.x",
+      "react-hook-form": "^7.x",
+      "date-fns": "^3.x",
+      "sonner": "^1.x"  // pour toasts
+    },
+    "devDependencies": {
+      "typescript": "^5.x",
+      "prisma": "^5.x",
+      "vitest": "^2.x",
+      "playwright": "^1.x",
+      "eslint": "^9.x",
+      "prettier": "^3.x"
+    }
+  }
+  ```
 
-### 2. Supprimer Stripe/Billing (20min)
+- [ ] Ajouter si manquant :
+  ```bash
+  pnpm add openai  # Pour DevFlow AI
+  pnpm add @dnd-kit/core @dnd-kit/sortable  # Pour drag & drop
+  pnpm add recharts  # Pour stats graphiques
+  ```
 
-#### 2.1 Pages & Routes
+- [ ] Run cleanup :
+  ```bash
+  pnpm install
+  ```
 
-```bash
-# Pages billing
-rm -rf app/(logged-in)/(account-layout)/account/billing/
+### 4. Cleanup Prisma Schema (1h)
 
-# Payment pages
-rm -rf app/(layout)/payment/
+- [ ] Ouvrir `prisma/schema.prisma`
+- [ ] Supprimer models multi-tenant :
+  ```prisma
+  // SUPPRIMER (exemples) :
+  model Organization { }
+  model Team { }
+  model Invite { }
+  model Subscription { }  // On le fera simple en Phase 9
+  ```
 
-# Webhooks
-rm -rf app/api/webhooks/stripe/
-```
+- [ ] Garder uniquement User minimal :
+  ```prisma
+  datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+  }
 
-#### 2.2 Features & Lib
+  generator client {
+    provider = "prisma-client-js"
+  }
 
-```bash
-# Features
-rm -rf src/features/plans/
-rm src/features/global-dialog/user-plan-dialog.tsx
+  model User {
+    id            String   @id @default(cuid())
+    email         String   @unique
+    name          String?
+    image         String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 
-# Lib
-rm src/lib/stripe.ts
-rm -rf src/lib/auth/stripe/
-rm src/lib/user/get-user-subscription.ts
-```
+    // Better Auth fields (garder ceux nécessaires)
+    emailVerified Boolean  @default(false)
 
----
+    // DevFlow preferences (JSON pour flexibilité MVP)
+    preferences   Json?    @default("{}")
 
-### 3. Cleanup Prisma Schema (15min)
+    @@map("users")
+  }
 
-#### 3.1 Retirer Subscription Model
+  // On ajoutera Task, TimeBlock, etc. en Phase 2
+  ```
 
-**Fichier :** `prisma/schema/better-auth.prisma`
+- [ ] Reset DB :
+  ```bash
+  npx prisma migrate reset --force
+  npx prisma migrate dev --name init-devflow
+  npx prisma generate
+  ```
 
-```prisma
-# ❌ SUPPRIMER tout le model Subscription
-model Subscription {
-  id                   String  @id
-  plan                 String
-  referenceId          String  @unique
-  user                 User    @relation(fields: [referenceId], references: [id], onDelete: Cascade)
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  status               String?
-  periodStart          DateTime?
-  periodEnd            DateTime?
-  cancelAtPeriodEnd    Boolean?
+### 5. Setup DevFlow Folders (1h)
 
-  @@map("subscription")
-}
-```
+- [ ] Créer structure :
+  ```bash
+  mkdir -p lib/actions
+  mkdir -p lib/ai
+  mkdir -p lib/stats
+  mkdir -p components/dashboard
+  mkdir -p components/backlog
+  mkdir -p components/weekly
+  mkdir -p components/timer
+  mkdir -p components/chatbot
+  mkdir -p cli/src/commands
+  ```
 
-#### 3.2 Nettoyer User Model
+- [ ] Créer placeholders :
+  ```bash
+  # lib/actions/tasks.ts (placeholder)
+  touch lib/actions/tasks.ts
 
-**Fichier :** `prisma/schema/better-auth.prisma`
+  # lib/ai/context.ts (placeholder)
+  touch lib/ai/context.ts
 
-```diff
-model User {
-  id              String   @id
-  name            String
-  email           String
-  emailVerified   Boolean
-  image           String?
-  createdAt       DateTime
-  updatedAt       DateTime
-  resendContactId String?
+  # lib/stats/calculate.ts (placeholder)
+  touch lib/stats/calculate.ts
+  ```
 
-  // Outgoing
-  sessions      Session[]
-  accounts      Account[]
-  feedbacks     Feedback[]
-- subscription  Subscription?
+### 6. Setup Craftsmanship Conventions (1h)
 
-- // Stripe integration
-- stripeCustomerId String?
+#### ESLint
 
-  role       String?
-  banned     Boolean?
-  banReason  String?
-  banExpires DateTime?
+- [ ] Vérifier que ESLint fonctionne :
+  ```bash
+  pnpm lint
+  ```
 
-  @@unique([email])
-  @@map("user")
-}
-```
+#### Prettier
 
-#### 3.3 Garder Feedback Model
+- [ ] Vérifier que Prettier fonctionne :
+  ```bash
+  pnpm format
+  ```
 
-**Fichier :** `prisma/schema/schema.prisma`
+#### Git Commit Conventions
 
-```prisma
-# ✅ GARDER (utile pour contact/support)
-model Feedback {
-  id      String  @id @default(nanoid(11))
-  review  Int
-  message String
-  email   String?
-  userId  String?
-  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+- [ ] Ajouter conventions de commit dans `CLAUDE.md` :
+  - Format: Conventional Commits
+  - Types autorisés: feat, fix, chore, docs, refactor, test, style
+  - Exemples de bons commits
+  - Interdiction de commit sans review
+  - Pas de Husky - responsabilité du développeur
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
+**Note:** Pas de Husky. On préfère la responsabilité individuelle aux hooks automatiques.
 
-#### 3.4 Migration
+### 7. Design System ⏭️ SKIPPED
 
-```bash
-# Reset DB si nécessaire
-npx prisma migrate reset --force
+**Decision:** Pas de design system custom pour le MVP. On utilise Tailwind standard + shadcn/ui.
 
-# Créer nouvelle migration
-npx prisma migrate dev --name cleanup-stripe-subscription
+**Raison:** Le design system custom ralentit le développement MVP. Les couleurs de priorité (sacred/important/optional) seront gérées directement avec Tailwind (red-500, orange-500, blue-500) dans les composants.
 
-# Générer client
-npx prisma generate
-```
+### 8. Setup Vitest (Smoke Test) (1h)
 
----
+- [ ] Vérifier `vitest.config.ts` existe et configuré
+- [ ] Si manquant, créer :
+  ```ts
+  import { defineConfig } from 'vitest/config';
+  import react from '@vitejs/plugin-react';
+  import path from 'path';
 
-### 4. Cleanup Dependencies npm (15min)
-
-#### 4.1 Retirer Packages Inutiles
-
-```bash
-pnpm remove stripe
-pnpm remove recharts # Si pas utilisé ailleurs
-pnpm remove markdown-to-jsx # Si blog supprimé
-pnpm remove next-mdx-remote-client # Si blog supprimé
-pnpm remove remark-gfm # Si blog supprimé
-pnpm remove rehype-autolink-headings # Si blog supprimé
-pnpm remove rehype-slug # Si blog supprimé
-pnpm remove front-matter # Si changelog/blog supprimé
-```
-
-⚠️ **ATTENTION** : Vérifier avant de supprimer :
-- `@shikijs/rehype` → Utilisé par docs (code highlighting)
-- `markdown-to-jsx` → Utilisé par docs
-- Si docs utilise markdown, GARDER ces packages
-
-#### 4.2 Vérifier Usage
-
-```bash
-# Vérifier si recharts utilisé ailleurs
-grep -r "recharts" src/
-
-# Vérifier markdown libs
-grep -r "markdown-to-jsx\|next-mdx-remote" src/
-```
-
----
-
-### 5. Update Configs (15min)
-
-#### 5.1 Site Config
-
-**Fichier :** `src/site-config.ts`
-
-```typescript
-export const SiteConfig = {
-  title: "DevFlow",
-  description: "Productivity system for developers - Time-blocking, AI insights, War Room",
-  prodUrl: "https://devflow.app", // TODO: Update domain
-  appId: "devflow",
-  domain: "devflow.app", // TODO: Update domain
-  appIcon: "/images/icon.png",
-  company: {
-    name: "DevFlow",
-    address: "France", // Update if needed
-  },
-  brand: {
-    primary: "#007291", // TODO: DevFlow brand color
-  },
-  team: {
-    image: "https://...", // TODO: Your profile
-    website: "https://...", // TODO: Your website
-    twitter: "https://...", // TODO: Your twitter
-    name: "Cédric", // TODO: Your name
-  },
-  features: {
-    enableImageUpload: false as boolean,
-    /**
-     * DevFlow : L'app principale nécessite une connexion
-     * Si user non connecté → redirige vers /auth/signin
-     * Pas de landing page publique
-     */
-    enableLandingRedirection: false as boolean,
-  },
-};
-```
-
-#### 5.2 Middleware (Sécurité)
-
-**Fichier :** `src/lib/middleware-utils.ts`
-
-Vérifier que l'accès `/app` nécessite une connexion (déjà en place) :
-
-```typescript
-export const isAppRoute = (pathname: string) => {
-  return pathname.startsWith("/app/app"); // ✅ Déjà protégé
-};
-```
-
-#### 5.3 Root Redirect
-
-**Fichier :** `src/lib/middleware-utils.ts`
-
-```typescript
-export const handleRootRedirect = (request: NextRequest) => {
-  // DevFlow : Si connecté → /app, sinon → /auth/signin
-  const session = getSessionCookie(request, {
-    cookiePrefix: SiteConfig.appId,
+  export default defineConfig({
+    plugins: [react()],
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['./tests/setup.ts'],
+    },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './'),
+      },
+    },
   });
+  ```
 
-  const url = request.nextUrl.clone();
+- [ ] Créer `tests/setup.ts` :
+  ```ts
+  import { expect, afterEach } from 'vitest';
+  import { cleanup } from '@testing-library/react';
+  import * as matchers from '@testing-library/jest-dom/matchers';
 
-  if (session) {
-    url.pathname = "/app";
-    return NextResponse.redirect(url);
-  }
+  expect.extend(matchers);
 
-  // Non connecté → signin
-  url.pathname = "/auth/signin";
-  return NextResponse.redirect(url);
-};
-```
+  afterEach(() => {
+    cleanup();
+  });
+  ```
 
-#### 5.4 Créer Simple Landing (Optionnel)
+- [ ] Créer smoke test `tests/smoke.test.ts` :
+  ```ts
+  import { describe, it, expect } from 'vitest';
 
-Si besoin d'une landing page minimale :
+  describe('Smoke test', () => {
+    it('should pass', () => {
+      expect(true).toBe(true);
+    });
+  });
+  ```
 
-**Fichier :** `app/page.tsx`
+- [ ] Run tests :
+  ```bash
+  pnpm test:ci
+  # Devrait passer ✅
+  ```
 
-```typescript
-import { redirect } from "next/navigation";
-import { getUser } from "@/lib/user/get-user";
+### 9. Environment Variables (30min)
 
-export default async function RootPage() {
-  const user = await getUser();
+- [ ] Audit `.env.example`
+- [ ] Garder uniquement nécessaire :
+  ```
+  # Database
+  DATABASE_URL="postgresql://..."
 
-  if (user) {
-    redirect("/app");
-  }
+  # Better Auth
+  BETTER_AUTH_SECRET="..."
+  BETTER_AUTH_URL="http://localhost:3000"
 
-  redirect("/auth/signin");
-}
-```
+  # Email (Resend ou autre)
+  RESEND_API_KEY="..."
 
-Ou créer une vraie landing simple (à décider).
+  # OpenAI (Phase 3+)
+  # OPENAI_API_KEY="sk-..."
 
----
+  # Cron secret (Phase 8+)
+  # CRON_SECRET="..."
+  ```
 
-### 6. Cleanup Features (20min)
+- [ ] Copier vers `.env` :
+  ```bash
+  cp .env.example .env
+  # Configurer les vraies valeurs
+  ```
 
-#### 6.1 Supprimer Features Inutiles
+### 10. README Cleanup (30min)
 
-```bash
-# Déjà fait dans Task 1
-rm -rf src/features/landing/
-rm -rf src/features/posts/
-rm -rf src/features/changelog/
-rm -rf src/features/plans/
-rm -rf src/features/nowts/
-```
+- [ ] Retirer contenu boilerplate
+- [ ] Écrire README DevFlow minimal :
+  ```markdown
+  # DevFlow
 
-#### 6.2 Cleanup Images
+  > Productivity system for 10x developers
 
-```bash
-# Vérifier public/images et supprimer assets landing
-ls -la public/images/
-# Supprimer placeholder*.gif, testimonials, etc.
-rm public/images/placeholder*.gif # Si existent
-```
+  ## What is DevFlow?
 
-#### 6.3 Cleanup Navigation
+  DevFlow is a productivity app that aggregates scientifically validated concepts:
+  - Time-blocking with chronotype optimization
+  - Weekly War Room (planning)
+  - Daily Reflection with AI insights
+  - Timer (Pomodoro / Ultradian)
+  - DevFlow AI (proactive assistant)
+  - DevFlow CLI (rapid task import)
 
-**Fichier :** `src/features/navigation/*`
+  ## Tech Stack
 
-Vérifier et retirer les liens vers :
-- `/posts`
-- `/changelog`
-- `/pricing`
-- `/about`
+  - Next.js 15 (App Router)
+  - Better Auth
+  - Prisma + Neon (PostgreSQL)
+  - shadcn/ui + Tailwind CSS
+  - OpenAI GPT-4o-mini
+  - Vitest + Playwright
 
-Garder uniquement :
-- `/app` (protected)
-- `/docs` (public)
-- `/contact` (public)
-- `/admin` (protected, admin only)
+  ## Setup
 
----
+  1. Install dependencies:
+     \`\`\`bash
+     pnpm install
+     \`\`\`
 
-### 7. Structure Finale Vérification (10min)
+  2. Setup database:
+     \`\`\`bash
+     cp .env.example .env
+     # Configure DATABASE_URL in .env
+     npx prisma migrate dev
+     \`\`\`
 
-#### 7.1 Structure App Finale
+  3. Run dev server:
+     \`\`\`bash
+     pnpm dev
+     \`\`\`
 
-```
-app/
-├── page.tsx                    # ✅ Redirect: user ? /app : /signin
-├── (logged-in)/
-│   └── account/
-│       └── (settings)/         # ✅ User settings
-├── app/                        # ✅ Main app (PROTECTED)
-│   ├── page.tsx
-│   └── ...
-├── admin/                      # ✅ Admin panel (PROTECTED + ROLE)
-│   └── ...
-├── auth/                       # ✅ Auth pages (public)
-│   ├── signin/
-│   ├── signup/
-│   └── ...
-├── docs/                       # ✅ Documentation (public)
-│   └── ...
-├── (layout)/
-│   ├── contact/                # ✅ Contact form (public)
-│   └── legal/                  # ✅ Terms/Privacy (public)
-└── api/
-    └── ...
-```
+  ## Development
 
-#### 7.2 Features Finales
+  - `pnpm dev` - Start dev server (Turbo)
+  - `pnpm test` - Run tests (watch mode)
+  - `pnpm test:ci` - Run tests (CI mode)
+  - `pnpm lint` - Lint code
+  - `pnpm format` - Format code
+  - `pnpm type-check` - TypeScript check
 
-```
-src/features/
-├── auth/              # ✅ Authentication
-├── contact/           # ✅ Contact/Feedback
-├── debug/             # ✅ Debug tools
-├── dialog-manager/    # ✅ Global dialogs
-├── email/             # ✅ Email system
-├── form/              # ✅ Forms
-├── global-dialog/     # ✅ Dialogs (retirer user-plan-dialog.tsx)
-├── layout/            # ✅ Layout components
-├── legal/             # ✅ Legal pages
-├── markdown/          # ✅ Markdown (docs)
-├── navigation/        # ✅ Navigation
-├── page/              # ✅ Page components
-├── sidebar/           # ✅ Sidebar
-└── theme/             # ✅ Theme switcher
-```
+  ## Architecture
 
----
+  Simple Next.js monolith with clean separation:
+  - `app/` - Next.js App Router
+  - `lib/actions/` - Server Actions (business logic)
+  - `lib/ai/` - DevFlow AI
+  - `components/` - React components
+  - `cli/` - DevFlow CLI
 
-### 8. Tests & Validation (10min)
+  ## License
 
-#### 8.1 Smoke Tests
+  MIT
+  ```
 
-```bash
-# Install deps
-pnpm install
+### 11. Git Cleanup (1h)
 
-# Type check
-pnpm ts
+- [ ] Vérifier `.gitignore` :
+  ```
+  # dependencies
+  node_modules
+  .pnpm-store
 
-# Lint
-pnpm lint
+  # next.js
+  .next
+  out
+  build
 
-# Tests
-pnpm test
+  # testing
+  coverage
+  .vitest
+  playwright-report
+  test-results
 
-# Dev server
-pnpm dev
-```
+  # env
+  .env
+  .env*.local
 
-#### 8.2 Vérifications Manuelles
+  # misc
+  .DS_Store
+  *.log
 
-- [ ] `http://localhost:3000/` → Redirige vers `/auth/signin` (si non connecté)
-- [ ] `http://localhost:3000/` → Redirige vers `/app` (si connecté)
-- [ ] `http://localhost:3000/app` → Accessible seulement si connecté
-- [ ] `http://localhost:3000/admin` → Accessible seulement si admin
-- [ ] `http://localhost:3000/docs` → Accessible sans connexion
-- [ ] `http://localhost:3000/contact` → Accessible sans connexion
-- [ ] Aucune erreur console
-- [ ] Aucune 404 sur navigation
+  # prisma
+  prisma/migrations/*_init  # si tu veux pas commit migrations initiales
+  ```
 
----
+- [ ] Commit cleanup :
+  ```bash
+  git add .
+  git commit -m "chore: complete Phase 0 cleanup for DevFlow
 
-### 9. Git Cleanup (10min)
+  - Setup DevFlow folder structure (lib/actions, lib/ai, components/*)
+  - Add git commit conventions to CLAUDE.md
+  - Cleanup .env-template (remove Stripe)
+  - Update README for DevFlow"
+  ```
 
-#### 9.1 Commit Cleanup
-
-```bash
-git add .
-git commit -m "chore: cleanup boilerplate for DevFlow MVP
-
-- Remove landing pages, marketing features (landing, reviews, CTA)
-- Remove blog/posts system
-- Remove public changelog
-- Remove Stripe/billing (MVP - Phase 9 later)
-- Remove pricing/plans features
-- Cleanup Prisma schema (Subscription model, stripe fields)
-- Update site-config.ts (DevFlow branding)
-- Remove unused npm dependencies (stripe, recharts, markdown libs)
-- Keep: Better Auth, Vitest, Docs, Admin, Contact, Feedback
-- Security: App access requires authentication
-
-🤖 Generated with Claude Code via Happy
-Co-Authored-By: Claude <noreply@anthropic.com>
-Co-Authored-By: Happy <yesreply@happy.engineering>"
-```
+- [ ] Create feature branch :
+  ```bash
+  git checkout -b feature/phase-1-design
+  ```
 
 ---
 
 ## Critères de Succès
 
-- [ ] Landing/marketing pages supprimées (~50 files)
-- [ ] Stripe/billing supprimé (~15 files)
-- [ ] Blog/changelog supprimé (~20 files)
-- [ ] Prisma schema nettoyé (Subscription removed)
-- [ ] Dependencies npm nettoyées
-- [ ] site-config.ts mis à jour (DevFlow)
-- [ ] `/` redirige vers `/app` (connecté) ou `/signin` (non connecté)
-- [ ] `/app` accessible seulement si connecté
-- [ ] `/docs`, `/contact` accessibles sans connexion
-- [ ] Docs system fonctionnel
-- [ ] Admin panel fonctionnel
-- [ ] Contact/Feedback fonctionnel
-- [ ] `pnpm dev` fonctionne sans erreur
-- [ ] `pnpm test` passe
-- [ ] `pnpm ts` OK
+- [ ] Features multi-tenant supprimées
+- [ ] Pages marketing supprimées
+- [ ] Dependencies nettoyées
+- [ ] DevFlow folders créés (`lib/actions`, `lib/ai`, etc.)
+- [ ] Git commit conventions ajoutées dans CLAUDE.md
+- [ ] Prisma schema minimal (User only)
+- [ ] Vitest smoke test passe ✅
+- [ ] `pnpm dev` fonctionne
+- [ ] `pnpm test:ci` passe
 - [ ] `pnpm lint` OK
-- [ ] Aucune 404 en navigation
+- [ ] README DevFlow à jour
+- [ ] Git clean (commit cleanup)
+- [ ] .env-template nettoyé (Stripe supprimé)
 
 ---
 
-## Structure Finale DevFlow
+## Checklist Software Craftsmanship
 
-```
-devflow-ia/
-├── app/
-│   ├── page.tsx              # Redirect smart
-│   ├── (logged-in)/account/  # User settings
-│   ├── app/                  # 🔒 Main app (PROTECTED)
-│   ├── admin/                # 🔒 Admin (PROTECTED + ROLE)
-│   ├── auth/                 # 🌐 Auth pages
-│   ├── docs/                 # 📚 Documentation (public)
-│   ├── (layout)/
-│   │   ├── contact/          # 📧 Contact (public)
-│   │   └── legal/            # ⚖️ Legal (public)
-│   └── api/
-├── src/
-│   ├── components/ui/        # shadcn/ui
-│   ├── features/             # Features (cleaned)
-│   ├── lib/                  # Utils
-│   └── hooks/
-├── prisma/
-│   └── schema/
-│       ├── schema.prisma     # Feedback only
-│       └── better-auth.prisma # User, Session, Account (no Subscription)
-└── package.json              # Cleaned dependencies
-```
+✅ **Architecture Simple**
+- Next.js 15 monolith (pas de monorepo over-engineering)
+- Séparation logique (actions, ai, components)
+- Testable
 
----
+✅ **Testing**
+- Vitest configuré
+- Playwright configuré
+- Smoke test passe
+- Tests à lancer manuellement (pnpm test:ci)
 
-## Prochaine Phase
+✅ **Code Quality**
+- ESLint strict
+- Prettier auto-format
+- No console.log (warn only)
+- TypeScript strict mode
 
-**Phase 1 : Design & Wireframes DevFlow**
-- Wireframes principales vues
-- Design system brutal (colors, typography)
-- User flows (onboarding, planning, execution)
+✅ **Git Hygiene**
+- Commits clairs, atomiques
+- Conventional commits (dans CLAUDE.md)
+- Pas de pre-commit hooks (responsabilité développeur)
+
+✅ **Documentation**
+- README DevFlow
+- Code commenté si nécessaire
 
 ---
 
-## Notes
+## Prochaine phase
 
-- ✅ Pas de monorepo (Next.js monolith)
-- ✅ Pas de Jest (Vitest déjà configuré)
-- ✅ Pas de NextAuth (Better Auth déjà configuré)
-- ✅ CLI sera ajouté en Phase 7 (simple package dans `/cli`)
-- ✅ Clean Architecture simplifiée (pas de packages/core séparé)
-- ⚠️ Vérifier usage markdown libs avant suppression (docs system)
-- ⚠️ Stripe sera réintroduit en Phase 9 (billing simple)
+Phase 1 : Validation & Design (Wireframes, User Flows, Design System)

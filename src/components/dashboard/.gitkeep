@@ -1,0 +1,9 @@
+# Dashboard Components
+
+This folder will contain dashboard-related components:
+- Daily view
+- Task overview
+- Quick stats
+- Time blocks
+
+@todo Phase 6: Implement dashboard components

@@ -1,0 +1,9 @@
+# Timer Components
+
+This folder will contain timer-related components:
+- Pomodoro timer
+- Ultradian timer
+- Focus mode
+- Timer settings
+
+@todo Phase 6: Implement timer components
