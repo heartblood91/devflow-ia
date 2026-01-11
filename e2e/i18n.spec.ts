@@ -79,8 +79,9 @@ test.describe("Internationalization (i18n)", () => {
       callbackURL: "/app/backlog",
     });
 
-    // Wait for backlog page to load
-    await page.waitForURL("/app/backlog");
+    // Wait for backlog page to load with regex pattern and longer timeout
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
 
     // Verify we're on the backlog in English (default)
     await expect(

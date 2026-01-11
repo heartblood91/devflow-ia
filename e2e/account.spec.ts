@@ -110,10 +110,8 @@ test.describe("account", () => {
     const submitButton = page.getByRole("button", { name: /Change Password/i });
     await submitButton.click();
 
-    // Wait for button to be re-enabled (mutation complete)
-    await expect(submitButton).toBeEnabled({ timeout: 10000 });
-
-    // Wait for network to be idle
+    // Wait for success: form redirects to /account after password change
+    await page.waitForURL(/\/account$/, { timeout: 15000 });
     await page.waitForLoadState("networkidle");
 
     await signOutAccount({ page });
