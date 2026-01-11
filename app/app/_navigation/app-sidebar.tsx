@@ -25,8 +25,13 @@ import { useEffect, useState } from "react";
 import { AppCommand } from "./app-command";
 import { APP_LINKS } from "./app-navigation.links";
 import { UpgradeCard } from "./upgrade-app-card";
+import type { Locale } from "@/lib/i18n/config";
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  currentLocale: Locale;
+};
+
+export function AppSidebar({ currentLocale }: AppSidebarProps) {
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="flex flex-col gap-2">
@@ -57,7 +62,7 @@ export function AppSidebar() {
       <SidebarFooter className="flex flex-col gap-2">
         <UpgradeCard />
         <ContactFeedbackPopover />
-        <SidebarUserButton />
+        <SidebarUserButton currentLocale={currentLocale} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

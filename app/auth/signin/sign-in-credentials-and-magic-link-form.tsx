@@ -109,7 +109,11 @@ export const SignInCredentialsAndMagicLinkForm = (props: {
                 </Link>
               </div>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input
+                  type="password"
+                  data-testid="signin-password"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -120,6 +124,7 @@ export const SignInCredentialsAndMagicLinkForm = (props: {
       <LoadingButton
         loading={signInMutation.isPending}
         type="submit"
+        data-testid="signin-submit-button"
         className="ring-offset-card w-full ring-offset-2"
       >
         {isUsingCredentials ? "Sign in" : "Sign in with magic link"}

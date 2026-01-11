@@ -311,6 +311,7 @@ ${context.reflections.map((r) => `- ${r.date}: ${r.completedTasks}/${r.totalTask
 - Most Productive Day: ${context.stats.mostProductiveDay || 'N/A'}
   `.trim();
   }
+
   ```
 
   ```

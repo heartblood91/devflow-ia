@@ -51,8 +51,9 @@ export function ResetPasswordPage({ token }: { token: string }) {
     },
     onSuccess: () => {
       toast.success("Password reset successfully");
-      const newUrl = `${window.location.origin}/auth/signin`;
-      window.location.href = newUrl;
+      // Use window.location.href for full page navigation after password reset
+      // This ensures the session is properly cleared and the user is redirected
+      window.location.href = "/auth/signin";
     },
   });
 
@@ -94,7 +95,12 @@ export function ResetPasswordPage({ token }: { token: string }) {
               <FormItem>
                 <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input
+                    type="password"
+                    data-testid="reset-password-input"
+                    placeholder="••••••••"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -103,6 +109,7 @@ export function ResetPasswordPage({ token }: { token: string }) {
           <LoadingButton
             loading={resetPasswordMutation.isPending}
             type="submit"
+            data-testid="reset-password-submit-button"
             className="w-full"
           >
             Reset Password

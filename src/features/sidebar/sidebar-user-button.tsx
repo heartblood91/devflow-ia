@@ -5,13 +5,20 @@ import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { useSession } from "@/lib/auth-client";
 import { ChevronsUpDown } from "lucide-react";
 import { UserDropdown } from "../auth/user-dropdown";
+import type { Locale } from "@/lib/i18n/config";
 
-export const SidebarUserButton = () => {
+type SidebarUserButtonProps = {
+  currentLocale: Locale;
+};
+
+export const SidebarUserButton = ({
+  currentLocale,
+}: SidebarUserButtonProps) => {
   const session = useSession();
   const data = session.data?.user;
 
   return (
-    <UserDropdown>
+    <UserDropdown currentLocale={currentLocale}>
       <SidebarMenuButton variant="outline" className="h-12">
         <Avatar className="size-8 rounded-lg">
           <AvatarImage src={data?.image ?? ""} alt={data?.name[0]} />

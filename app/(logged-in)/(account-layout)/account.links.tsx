@@ -1,5 +1,5 @@
 import type { NavigationGroup } from "@/features/navigation/navigation.type";
-import { AlertCircle, LayoutDashboard, Mail, User2 } from "lucide-react";
+import { AlertCircle, Home, ListTodo, Mail, User, User2 } from "lucide-react";
 
 export const getAccountNavigation = (): NavigationGroup[] => {
   return ACCOUNT_LINKS;
@@ -31,8 +31,18 @@ const ACCOUNT_LINKS: NavigationGroup[] = [
     links: [
       {
         href: "/app",
-        Icon: LayoutDashboard,
+        Icon: Home,
         label: "Dashboard",
+      },
+      {
+        href: "/app/backlog",
+        Icon: ListTodo,
+        label: "Task Backlog",
+      },
+      {
+        href: "/app/users",
+        Icon: User,
+        label: "Analytics",
       },
     ],
   },

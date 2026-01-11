@@ -16,8 +16,13 @@ import type { NavigationGroup } from "@/features/navigation/navigation.type";
 import { SidebarUserButton } from "@/features/sidebar/sidebar-user-button";
 import { ChevronDown } from "lucide-react";
 import { getAccountNavigation } from "./account.links";
+import type { Locale } from "@/lib/i18n/config";
 
-export function AccountSidebar() {
+type AccountSidebarProps = {
+  currentLocale: Locale;
+};
+
+export function AccountSidebar({ currentLocale }: AccountSidebarProps) {
   const links: NavigationGroup[] = getAccountNavigation();
 
   return (
@@ -39,7 +44,7 @@ export function AccountSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter className="flex flex-col gap-2">
-        <SidebarUserButton />
+        <SidebarUserButton currentLocale={currentLocale} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

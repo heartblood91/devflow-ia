@@ -1,8 +1,10 @@
 import { Typography } from "@/components/nowts/typography";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRequiredCurrentUser } from "@/lib/user/get-user";
+import { prisma } from "@/lib/prisma";
 import { Calendar, Timer, ListTodo, MessageSquare } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Dashboard | DevFlow",
@@ -12,15 +14,30 @@ export const metadata: Metadata = {
 
 export default async function AppPage() {
   const user = await getRequiredCurrentUser();
+  const t = await getTranslations("dashboard");
+
+  // Get task statistics
+  const taskStats = await prisma.task.groupBy({
+    by: ["kanbanColumn"],
+    where: { userId: user.id },
+    _count: true,
+  });
+
+  const inboxTasks =
+    taskStats.find((s) => s.kanbanColumn === "inbox")?._count ?? 0;
+  const activeTasks =
+    taskStats.find((s) => s.kanbanColumn === "doing")?._count ?? 0;
+  const doneTasks =
+    taskStats.find((s) => s.kanbanColumn === "done")?._count ?? 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <Typography variant="h1" className="mb-2">
-          Welcome back, {user.name}! 👋
+          {t("welcomeBack", { name: user.name })}
         </Typography>
         <Typography variant="muted" className="text-lg">
-          Your DevFlow dashboard - Let's make today productive
+          {t("subtitle")}
         </Typography>
       </div>
 
@@ -28,77 +45,62 @@ export default async function AppPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Weekly War Room
+              {t("weeklyWarRoom")}
             </CardTitle>
             <Calendar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Coming Soon</div>
-            <p className="text-muted-foreground text-xs">
-              Sunday planning ritual
-            </p>
+            <div className="text-2xl font-bold">{t("comingSoon")}</div>
+            <p className="text-muted-foreground text-xs">{t("sundayRitual")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Focus Timer</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("focusTimer")}
+            </CardTitle>
             <Timer className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Coming Soon</div>
+            <div className="text-2xl font-bold">{t("comingSoon")}</div>
             <p className="text-muted-foreground text-xs">
-              Pomodoro / Ultradian
+              {t("pomodoroUltradian")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Task Backlog</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("taskBacklog")}
+            </CardTitle>
             <ListTodo className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Coming Soon</div>
+            <div className="text-2xl font-bold">
+              {activeTasks}{" "}
+              <span className="text-base font-normal">{t("active")}</span>
+            </div>
             <p className="text-muted-foreground text-xs">
-              Kanban prioritization
+              {inboxTasks} todo, {doneTasks} done
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">DevFlow AI</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("devflowAI")}
+            </CardTitle>
             <MessageSquare className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Coming Soon</div>
-            <p className="text-muted-foreground text-xs">AI insights & chat</p>
+            <div className="text-2xl font-bold">{t("comingSoon")}</div>
+            <p className="text-muted-foreground text-xs">{t("aiInsights")}</p>
           </CardContent>
         </Card>
       </div>
-
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>🚀 Phase 0 Complete</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Typography variant="p" className="mb-4">
-            The foundation is ready! We're building DevFlow features in phases:
-          </Typography>
-          <ul className="text-muted-foreground space-y-2 text-sm">
-            <li>✅ Phase 0: Cleanup & Setup (Complete)</li>
-            <li>⏳ Phase 1: Design & Wireframes</li>
-            <li>⏳ Phase 2: Database Schema</li>
-            <li>⏳ Phase 3: Authentication</li>
-            <li>⏳ Phase 4: Task Backlog</li>
-            <li>⏳ Phase 5: Weekly War Room</li>
-            <li>⏳ Phase 6: Daily Dashboard & Reflection</li>
-            <li>⏳ Phase 7: DevFlow CLI</li>
-            <li>⏳ Phase 8: DevFlow AI</li>
-          </ul>
-        </CardContent>
-      </Card>
     </div>
   );
 }

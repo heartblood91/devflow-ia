@@ -13,7 +13,7 @@ import { LoadingButton } from "@/features/form/submit-button";
 import { authClient } from "@/lib/auth-client";
 import { unwrapSafePromise } from "@/lib/promises";
 import { useMutation } from "@tanstack/react-query";
-import { AlertTriangle, Building2, UserX2 } from "lucide-react";
+import { AlertTriangle, UserX2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function DeleteAccountForm() {
@@ -50,18 +50,6 @@ export function DeleteAccountForm() {
               <p className="text-muted-foreground text-sm">
                 All your personal information and settings will be permanently
                 erased
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-card rounded-lg border p-4">
-          <div className="flex items-start gap-4">
-            <Building2 className="text-muted-foreground mt-0.5 size-5" />
-            <div className="space-y-1">
-              <p className="leading-none font-medium">Organization Data</p>
-              <p className="text-muted-foreground text-sm">
-                If you&apos;re an organization owner, all organization data will
-                be deleted and subscriptions cancelled
               </p>
             </div>
           </div>

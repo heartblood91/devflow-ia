@@ -23,8 +23,13 @@ import { usePathname } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import { useEffect, useState } from "react";
 import { getAdminNavigation } from "./admin-navigation.links";
+import type { Locale } from "@/lib/i18n/config";
 
-export function AdminSidebar() {
+type AdminSidebarProps = {
+  currentLocale: Locale;
+};
+
+export function AdminSidebar({ currentLocale }: AdminSidebarProps) {
   const links: NavigationGroup[] = getAdminNavigation();
 
   return (
@@ -60,7 +65,7 @@ export function AdminSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter className="flex flex-col gap-2">
-        <SidebarUserButton />
+        <SidebarUserButton currentLocale={currentLocale} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

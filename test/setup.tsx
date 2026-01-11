@@ -3,6 +3,8 @@ import { render } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { NextIntlClientProvider } from "next-intl";
+import enMessages from "../locales/en.json";
 
 export const setup = (
   jsx: ReactElement,
@@ -20,9 +22,13 @@ export const setup = (
     },
   });
 
-  // Wrap component with QueryClientProvider
+  // Wrap component with QueryClientProvider and NextIntlClientProvider
   const wrappedJsx = (
-    <QueryClientProvider client={queryClient}>{jsx}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        {jsx}
+      </NextIntlClientProvider>
+    </QueryClientProvider>
   );
 
   return {

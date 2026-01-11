@@ -50,6 +50,7 @@ export const EditProfileCardForm = ({
 
   const updateProfileMutation = useMutation({
     mutationFn: async (values: ProfileFormType) => {
+      // Use authClient.updateUser() which handles both DB and session updates
       return unwrapSafePromise(
         authClient.updateUser({
           name: values.name ?? "",

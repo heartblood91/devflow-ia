@@ -30,13 +30,13 @@ export async function createTestAccount(options: {
   // Fill out the form
   await options.page.getByLabel("Name").fill(userData.name);
   await options.page.getByLabel("Email").fill(userData.email);
-  await options.page.locator('input[name="password"]').fill(userData.password);
+  await options.page.getByTestId("signup-password").fill(userData.password);
   await options.page
-    .locator('input[name="verifyPassword"]')
+    .getByTestId("signup-verify-password")
     .fill(userData.password);
 
   // Submit the form
-  await options.page.getByRole("button", { name: /sign up/i }).click();
+  await options.page.getByTestId("signup-submit-button").click();
 
   // Wait for navigation to complete - we should be redirected to the callback URL
   if (options.callbackURL) {
@@ -88,13 +88,10 @@ export async function signInAccount(options: {
 
   // Fill out the form
   await page.getByLabel("Email").fill(userData.email);
-  await page.locator('input[name="password"]').fill(userData.password);
+  await page.getByTestId("signin-password").fill(userData.password);
 
   // Submit the form
-  await page
-    .getByRole("button", { name: /sign in/i })
-    .first()
-    .click();
+  await page.getByTestId("signin-submit-button").click();
 
   // Wait for navigation to complete if a callback URL is provided
   if (callbackURL) {
@@ -115,11 +112,21 @@ export async function signInAccount(options: {
 export async function signOutAccount(options: { page: Page }) {
   const { page } = options;
 
-  // Navigate to account page
-  await page.goto(`/account`);
+  // Navigate to account page if not already there
+  if (!page.url().includes("/account")) {
+    await page.goto(`/account`);
+    await page.waitForLoadState("networkidle");
+  }
 
   // Click the sign out button
-  await page.getByRole("button", { name: /sign out/i }).click();
+  const signOutButton = page.getByRole("button", { name: /sign out/i });
+  await signOutButton.waitFor({ state: "visible", timeout: 5000 });
+  await signOutButton.click();
 
-  await page.waitForURL(/\/auth\/signin/, { timeout: 10000 });
+  // Wait for navigation to sign in page
+  // Using a generous timeout since client-side navigation might take time
+  await page.waitForURL(/\/auth\/signin/, {
+    timeout: 15000,
+    waitUntil: "domcontentloaded",
+  });
 }

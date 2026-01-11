@@ -1,0 +1,150 @@
+{
+  "common": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "confirm": "Confirm",
+    "close": "Close",
+    "submit": "Submit",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "backlog": {
+    "title": "Backlog",
+    "newTask": "New Task",
+    "resetFilters": "Reset Filters",
+    "noTasks": "No tasks",
+    "columns": {
+      "inbox": "Inbox",
+      "todo": "To Do",
+      "doing": "Doing",
+      "done": "Done"
+    },
+    "filters": {
+      "allPriorities": "All Priorities",
+      "allColumns": "All Columns",
+      "priority": "Priority",
+      "column": "Column"
+    },
+    "archives": {
+      "title": "Archives",
+      "empty": "No archived tasks"
+    },
+    "priority": {
+      "sacred": "Sacred",
+      "important": "Important",
+      "optional": "Optional"
+    },
+    "toast": {
+      "taskDeleted": "Task deleted",
+      "taskRestored": "Task restored!",
+      "taskMoved": "Task moved!",
+      "undo": "Undo",
+      "failedToDelete": "Failed to delete task",
+      "failedToRestore": "Failed to restore task",
+      "failedToMove": "Failed to move task",
+      "failedToRefresh": "Failed to refresh tasks"
+    },
+    "motivational": {
+      "awesome": "🎉 Awesome work! Another one down!",
+      "crushing": "💪 You're crushing it! Task completed!",
+      "greatJob": "🚀 Great job! Keep the momentum going!",
+      "fantastic": "✨ Fantastic! You're making progress!",
+      "onFire": "🔥 On fire! Task knocked out!",
+      "lightning": "⚡ Lightning fast! Well done!",
+      "stellar": "🌟 Stellar work! Task completed!"
+    }
+  },
+  "task": {
+    "title": "Task",
+    "description": "Description",
+    "priority": "Priority",
+    "difficulty": "Difficulty",
+    "estimatedDuration": "Estimated Duration",
+    "deadline": "Deadline",
+    "quarter": "Quarter",
+    "status": "Status",
+    "dependencies": "dependencies",
+    "minutes": "min",
+    "create": "Create Task",
+    "update": "Update Task",
+    "subtasks": "Subtasks",
+    "dialog": {
+      "createTitle": "Create New Task",
+      "editTitle": "Edit Task",
+      "createDescription": "Fill in the details for your new task.",
+      "editDescription": "Update the task details below.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Task title",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Task description (optional)",
+      "priorityLabel": "Priority",
+      "priorityPlaceholder": "Select priority",
+      "difficultyLabel": "Difficulty (1-5)",
+      "estimatedDurationLabel": "Estimated Duration (minutes)",
+      "estimatedDurationDescription": "How long do you estimate this task will take? (1-480 minutes)",
+      "deadlineLabel": "Deadline (optional)",
+      "quarterLabel": "Quarter (optional)",
+      "quarterPlaceholder": "Q1 2024",
+      "taskCreated": "Task created!",
+      "taskUpdated": "Task updated!",
+      "failedToSave": "Failed to save task"
+    }
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "welcomeBack": "Welcome back!",
+    "createAccount": "Create your account"
+  },
+  "dashboard": {
+    "welcomeBack": "Welcome back, {name}! 👋",
+    "subtitle": "Your DevFlow dashboard - Let's make today productive",
+    "weeklyWarRoom": "Weekly War Room",
+    "focusTimer": "Focus Timer",
+    "taskBacklog": "Task Backlog",
+    "devflowAI": "DevFlow AI",
+    "comingSoon": "Coming Soon",
+    "sundayRitual": "Sunday planning ritual",
+    "pomodoroUltradian": "Pomodoro / Ultradian",
+    "tasksInInbox": "{inbox} in inbox, {active} active",
+    "aiInsights": "AI insights & chat",
+    "active": "active"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "backlog": "Backlog",
+    "weekly": "Weekly",
+    "timer": "Timer",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "account": "Account",
+    "preferences": "Preferences",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server error",
+    "tryAgain": "Please try again"
+  }
+}
