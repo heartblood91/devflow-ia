@@ -17,6 +17,7 @@ test("sign up and verify account creation", async ({ page }) => {
   expect(page.url()).toContain("/app");
 
   // Verify the user was created in the database with retry for race conditions
+  // CI needs longer delays due to slower database operations
   const user = await retry(
     async () => {
       const foundUser = await prisma.user.findUnique({
@@ -28,8 +29,8 @@ test("sign up and verify account creation", async ({ page }) => {
       return foundUser;
     },
     {
-      maxAttempts: 5,
-      delayMs: 1000,
+      maxAttempts: 10,
+      delayMs: 2000,
       backoff: true,
     },
   );

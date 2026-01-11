@@ -15,9 +15,10 @@ test.describe("Internationalization (i18n)", () => {
     await page.waitForLoadState("networkidle");
 
     // Verify we're on the dashboard in English (default)
+    // Wait for main heading with longer timeout for CI
     await expect(
       page.getByRole("heading", { name: /welcome back/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/weekly war room/i)).toBeVisible();
     await expect(page.getByText(/focus timer/i)).toBeVisible();
     await expect(
@@ -85,9 +86,10 @@ test.describe("Internationalization (i18n)", () => {
     await page.waitForLoadState("networkidle");
 
     // Verify we're on the backlog in English (default)
+    // Wait for the main heading to be visible with longer timeout for CI
     await expect(
       page.getByRole("heading", { name: /task backlog/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole("heading", { name: /inbox/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /to do/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /doing/i })).toBeVisible();
@@ -159,6 +161,11 @@ test.describe("Internationalization (i18n)", () => {
     // Wait for navigation with regex pattern and longer timeout
     await page.waitForURL(/\/app$/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+
+    // Wait for page content to load
+    await expect(
+      page.getByRole("heading", { name: /welcome back/i }),
+    ).toBeVisible({ timeout: 10000 });
 
     // Switch to French
     await page.getByText(userData.email).click();
