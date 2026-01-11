@@ -10,8 +10,9 @@ test.describe("Internationalization (i18n)", () => {
       callbackURL: "/app",
     });
 
-    // Wait for dashboard page to load
-    await page.waitForURL("/app");
+    // Wait for dashboard page to load with regex pattern and longer timeout
+    await page.waitForURL(/\/app$/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
 
     // Verify we're on the dashboard in English (default)
     await expect(
@@ -155,7 +156,9 @@ test.describe("Internationalization (i18n)", () => {
       callbackURL: "/app",
     });
 
-    await page.waitForURL("/app");
+    // Wait for navigation with regex pattern and longer timeout
+    await page.waitForURL(/\/app$/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
 
     // Switch to French
     await page.getByText(userData.email).click();
