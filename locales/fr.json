@@ -132,6 +132,18 @@
     "timer": "Minuteur",
     "settings": "Paramètres"
   },
+  "nav": {
+    "menu": "Menu",
+    "dashboard": "Tableau de bord",
+    "taskBacklog": "Backlog des Tâches",
+    "analytics": "Analytique",
+    "account": "Compte",
+    "yourProfile": "Votre Profil",
+    "profile": "Profil",
+    "email": "Email",
+    "danger": "Danger",
+    "app": "Application"
+  },
   "settings": {
     "title": "Paramètres",
     "profile": "Profil",

@@ -132,6 +132,18 @@
     "timer": "Timer",
     "settings": "Settings"
   },
+  "nav": {
+    "menu": "Menu",
+    "dashboard": "Dashboard",
+    "taskBacklog": "Task Backlog",
+    "analytics": "Analytics",
+    "account": "Account",
+    "yourProfile": "Your Profile",
+    "profile": "Profile",
+    "email": "Email",
+    "danger": "Danger",
+    "app": "App"
+  },
   "settings": {
     "title": "Settings",
     "profile": "Profile",
