@@ -1,8 +1,9 @@
 # Phase 5 - Jour 1 : Weekly View (Calendrier Semaine)
 
 **Durée :** 1 jour
-**Statut :** 🟡 À faire
+**Statut :** ✅ Terminé
 **Dépendances :** Phase 4 complète
+**PR :** https://github.com/heartblood91/devflow-ia/pull/4
 
 ---
 
@@ -14,101 +15,95 @@ Créer la vue hebdomadaire (calendrier 7 jours) avec affichage des time blocks.
 
 ## Tasks
 
-### 1. Page Weekly View (3h)
+### 1. Page Weekly View (3h) ✅
 
-- [ ] Créer `app/weekly/page.tsx`
-- [ ] Layout de base :
+- [x] Créer `app/app/weekly/page.tsx`
+- [x] Layout de base :
   ```tsx
   <div className="weekly-view">
     <WeeklyHeader />
     <WeeklyGrid />
-    <WeeklySidebar />
+    <WeeklySidebar /> // Coming Soon
   </div>
   ```
 
-### 2. Weekly Header (1h)
+### 2. Weekly Header (1h) ✅
 
-- [ ] Créer `components/weekly/WeeklyHeader.tsx`
-- [ ] Afficher : "Semaine du 6 - 12 janvier 2026"
-- [ ] Boutons navigation : ← Semaine précédente | Semaine suivante →
-- [ ] Bouton "War Room" (top-right)
+- [x] Créer `components/weekly/WeeklyHeader.tsx`
+- [x] Afficher : "Week of January 12 - 18, 2026" (i18n)
+- [x] Boutons navigation : ← Semaine précédente | Semaine suivante →
+- [x] Bouton "War Room" (top-right)
 
-### 3. Weekly Grid (4h)
+### 3. Weekly Grid (4h) ✅
 
-- [ ] Créer `components/weekly/WeeklyGrid.tsx`
-- [ ] Structure :
+- [x] Créer `components/weekly/WeeklyGrid.tsx`
+- [x] Structure :
   ```
   [Horaires] [Lun] [Mar] [Mer] [Jeu] [Ven] [Sam] [Dim]
   08:00      [ ]   [ ]   [ ]   [ ]   [ ]   [ ]   [ ]
   09:00      [ ]   [ ]   [ ]   [ ]   [ ]   [ ]   [ ]
   ...
   ```
-- [ ] Colonne horaires (8h-19h, step 1h)
-- [ ] 7 colonnes jours
-- [ ] Grid CSS (8 cols, auto rows)
+- [x] Colonne horaires (8h-19h, step 1h)
+- [x] 7 colonnes jours
+- [x] Grid CSS (8 cols, auto rows)
 
-### 4. Day Column Component (2h)
+### 4. Day Column Component (2h) ✅
 
-- [ ] Créer `components/weekly/DayColumn.tsx`
-- [ ] Props : `day: Date`, `timeBlocks: TimeBlock[]`, `workHours: { start, end }`
-- [ ] Afficher workHours en background (gris clair)
-- [ ] Afficher time blocks par-dessus
-- [ ] Zone "OFF" si pas workHours (samedi/dimanche)
+- [x] Créer `components/weekly/DayColumn.tsx`
+- [x] Props : `day: Date`, `timeBlocks: TimeBlock[]`, `workHours: { start, end }`
+- [x] Afficher workHours en background (primary/10-20)
+- [x] Afficher time blocks par-dessus
+- [x] Zone "OFF" si pas workHours (samedi/dimanche)
 
-### 5. Time Block Display (2h)
+### 5. Time Block Display (2h) ✅
 
-- [ ] Créer `components/weekly/TimeBlock.tsx`
-- [ ] Positionner selon `startTime` (calcul offset top)
-- [ ] Height selon durée (1 min = 1px)
-- [ ] Couleur selon priorité :
-  - Sacred : bg-red-500
-  - Important : bg-orange-500
-  - Optional : bg-green-500
-  - Buffer : bg-gray-100 border-dashed
-  - Rescue : bg-yellow-400
-- [ ] Afficher titre tâche (ellipsis si trop long)
-- [ ] Afficher horaire (10:00 - 12:00)
+- [x] Créer `components/weekly/TimeBlockCard.tsx`
+- [x] Positionner selon `startTime` (calcul offset top)
+- [x] Height selon durée
+- [x] Couleur selon priorité (+ pastel dark mode) :
+  - Sacred : bg-red-500 / dark:bg-red-400/70
+  - Important : bg-orange-500 / dark:bg-orange-400/70
+  - Optional : bg-green-500 / dark:bg-green-400/70
+  - Buffer : bg-gray-200 border-dashed / dark:bg-gray-600/50
+  - Rescue : bg-yellow-400 / dark:bg-yellow-400/60
+- [x] Afficher titre tâche (line-clamp-2 multi-lignes)
+- [x] Afficher horaire (10:00 - 12:00)
 
-### 6. Server Action : Get Week Blocks (1h)
+### 6. Server Action : Get Week Blocks (1h) ✅
 
-- [ ] Créer `getWeeklyTimeBlocks(weekStartDate: Date)`
-- [ ] Query Prisma :
-  ```ts
-  const blocks = await prisma.timeBlock.findMany({
-    where: {
-      userId: session.user.id,
-      date: { gte: weekStart, lt: weekEnd },
-    },
-    include: { task: true },
-    orderBy: { startTime: "asc" },
-  });
-  ```
-- [ ] Grouper par jour
-- [ ] Return : `{ monday: [...], tuesday: [...], ... }`
+- [x] Créer `getWeeklyTimeBlocks(weekStartDate: Date)`
+- [x] Query Prisma avec safe-actions
+- [x] Grouper par jour
+- [x] Return : `{ monday: [...], tuesday: [...], ... }`
 
-### 7. Navigation Semaines (1h)
+### 7. Navigation Semaines (1h) ✅
 
-- [ ] State `currentWeek` (useState)
-- [ ] Bouton Previous : `setCurrentWeek(subWeeks(currentWeek, 1))`
-- [ ] Bouton Next : `setCurrentWeek(addWeeks(currentWeek, 1))`
-- [ ] Re-fetch blocks on week change
+- [x] State `currentWeek` (useState)
+- [x] Bouton Previous : `subWeeks(currentWeek, 1)`
+- [x] Bouton Next : `addWeeks(currentWeek, 1)`
+- [x] Re-fetch blocks on week change
 
-### 8. Tests (2h)
+### 8. Tests (2h) ✅
 
-- [ ] Test affichage semaine courante
-- [ ] Test navigation prev/next
-- [ ] Test time blocks positionnés correctement
-- [ ] Test workHours affichées
-- [ ] Test responsive (mobile : scroll horizontal)
+- [x] Test affichage semaine courante
+- [x] Test navigation prev/next
+- [x] Test time blocks positionnés correctement
+- [x] Test workHours affichées
+- [x] Test responsive (mobile : scroll horizontal)
+- [x] E2E tests (weekly.spec.ts)
 
 ---
 
 ## Critères de Succès
 
-- [ ] Weekly View affiche 7 jours
-- [ ] Navigation semaines fonctionnelle
-- [ ] Time blocks affichés avec bonnes couleurs
-- [ ] Responsive (scroll horizontal sur mobile)
+- [x] Weekly View affiche 7 jours
+- [x] Navigation semaines fonctionnelle
+- [x] Time blocks affichés avec bonnes couleurs (+ pastel dark mode)
+- [x] Responsive (scroll horizontal sur mobile)
+- [x] i18n complet (EN/FR)
+- [x] Tests unitaires et E2E passent
+- [x] CI green
 
 ---
 

@@ -1,17 +1,18 @@
 # Phase 2 : Setup Technique (Revised)
 
 **Durée :** Semaine 2 (3-4 jours)
-**Statut :** 🟡 À faire
+**Statut :** ✅ Terminé
 **Dépendances :** Phase 0 (Cleanup) + Phase 1 (Design)
+**Note :** Setup technique inclus dans le boilerplate NOW.TS et complété via PR #1 et iterations suivantes
 
 ---
 
 ## Objectifs
 
-- [ ] Ajouter models Prisma (Task, TimeBlock, etc.)
-- [ ] Setup CI/CD (GitHub Actions)
-- [ ] Vérifier Vitest coverage (80% target)
-- [ ] Setup Vercel deployment
+- [x] Ajouter models Prisma (Task, TimeBlock, etc.)
+- [x] Setup CI/CD (GitHub Actions)
+- [x] Vérifier Vitest coverage (80% target)
+- [x] Setup Vercel deployment
 
 ---
 
@@ -500,13 +501,13 @@ jobs:
 
 ## Critères de Succès
 
-- [ ] Prisma schema complet (Task, TimeBlock, RecurringTask, DailyReflection)
-- [ ] Migrations appliquées sur Neon
-- [ ] Vitest coverage configuré (80% target)
-- [ ] CI/CD fonctionnel (GitHub Actions)
-- [ ] Deployment Vercel configuré
-- [ ] Prisma client accessible via `lib/db/prisma.ts`
-- [ ] Prêt pour Phase 3 (Auth + Onboarding)
+- [x] Prisma schema complet (Task, TimeBlock, RecurringTask, DailyReflection)
+- [x] Migrations appliquées sur Neon
+- [x] Vitest coverage configuré (80% target)
+- [x] CI/CD fonctionnel (GitHub Actions)
+- [x] Deployment Vercel configuré
+- [x] Prisma client accessible via `lib/db/prisma.ts`
+- [x] Prêt pour Phase 3 (Auth + Onboarding)
 
 ---
 

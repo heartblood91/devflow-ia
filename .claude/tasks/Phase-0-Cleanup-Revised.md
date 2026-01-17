@@ -1,8 +1,9 @@
 # Phase 0 : Cleanup Boilerplate + Setup DevFlow
 
 **Durée :** 1-2 jours
-**Statut :** 🟡 À faire
+**Statut :** ✅ Terminé
 **Priorité :** CRITIQUE (avant toute feature)
+**PR :** https://github.com/heartblood91/devflow-ia/pull/1
 
 ---
 
@@ -510,19 +511,19 @@ prisma/
 
 ## Critères de Succès
 
-- [ ] Features multi-tenant supprimées
-- [ ] Pages marketing supprimées
-- [ ] Dependencies nettoyées
-- [ ] DevFlow folders créés (`lib/actions`, `lib/ai`, etc.)
-- [ ] Git commit conventions ajoutées dans CLAUDE.md
-- [ ] Prisma schema minimal (User only)
-- [ ] Vitest smoke test passe ✅
-- [ ] `pnpm dev` fonctionne
-- [ ] `pnpm test:ci` passe
-- [ ] `pnpm lint` OK
-- [ ] README DevFlow à jour
-- [ ] Git clean (commit cleanup)
-- [ ] .env-template nettoyé (Stripe supprimé)
+- [x] Features multi-tenant supprimées
+- [x] Pages marketing supprimées
+- [x] Dependencies nettoyées
+- [x] DevFlow folders créés (`lib/actions`, `lib/ai`, etc.)
+- [x] Git commit conventions ajoutées dans CLAUDE.md
+- [x] Prisma schema minimal (User only)
+- [x] Vitest smoke test passe ✅
+- [x] `pnpm dev` fonctionne
+- [x] `pnpm test:ci` passe
+- [x] `pnpm lint` OK
+- [x] README DevFlow à jour
+- [x] Git clean (commit cleanup)
+- [x] .env-template nettoyé (Stripe supprimé)
 
 ---
 
