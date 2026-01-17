@@ -53,12 +53,12 @@ describe("WeeklyGrid", () => {
     it("should have different background styles for productive vs non-productive hours", () => {
       const { container } = setup(<WeeklyGrid currentWeek={testDate} />);
 
-      // Check for productive hour cells (bg-muted/30)
-      const productiveCells = container.querySelectorAll(".bg-muted\\/30");
+      // Check for productive hour cells (bg-primary/10)
+      const productiveCells = container.querySelectorAll(".bg-primary\\/10");
       expect(productiveCells.length).toBeGreaterThan(0);
 
-      // Check for non-productive hour cells (bg-muted/10)
-      const nonProductiveCells = container.querySelectorAll(".bg-muted\\/10");
+      // Check for non-productive hour cells (bg-muted/5)
+      const nonProductiveCells = container.querySelectorAll(".bg-muted\\/5");
       expect(nonProductiveCells.length).toBeGreaterThan(0);
     });
 
@@ -67,13 +67,13 @@ describe("WeeklyGrid", () => {
 
       // Check for productive hour hover state
       const productiveHoverCells = container.querySelectorAll(
-        ".hover\\:bg-muted\\/40",
+        ".hover\\:bg-primary\\/15",
       );
       expect(productiveHoverCells.length).toBeGreaterThan(0);
 
       // Check for non-productive hour hover state
       const nonProductiveHoverCells = container.querySelectorAll(
-        ".hover\\:bg-muted\\/20",
+        ".hover\\:bg-muted\\/10",
       );
       expect(nonProductiveHoverCells.length).toBeGreaterThan(0);
     });

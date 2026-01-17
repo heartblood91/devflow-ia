@@ -59,11 +59,12 @@ describe("TimeBlockCard", () => {
     expect(screen.getByText("10:00 - 12:00")).toBeInTheDocument();
   });
 
-  it("should display 'untitled' when task is null", () => {
-    const timeBlock = createMockTimeBlock({ task: null });
+  it("should display block type name when task is null", () => {
+    const timeBlock = createMockTimeBlock({ task: null, blockType: "buffer" });
     setup(<TimeBlockCard timeBlock={timeBlock} />);
 
-    expect(screen.getByText("Untitled")).toBeInTheDocument();
+    // When task is null, component displays the translated block type name
+    expect(screen.getByText("Buffer")).toBeInTheDocument();
   });
 
   it("should truncate long task titles with title attribute", () => {
@@ -111,7 +112,7 @@ describe("TimeBlockCard", () => {
       setup(<TimeBlockCard timeBlock={timeBlock} />);
 
       const card = screen.getByText("Test Task").closest("div");
-      expect(card).toHaveClass("bg-gray-100");
+      expect(card).toHaveClass("bg-gray-200");
       expect(card).toHaveClass("border-dashed");
     });
 
