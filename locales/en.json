@@ -17,6 +17,8 @@
   },
   "backlog": {
     "title": "Backlog",
+    "pageTitle": "Task Backlog",
+    "pageDescription": "Organize and prioritize your tasks with Kanban",
     "newTask": "New Task",
     "resetFilters": "Reset Filters",
     "noTasks": "No tasks",

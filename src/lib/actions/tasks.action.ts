@@ -24,6 +24,34 @@ import {
   ArchiveTaskSchema,
 } from "./tasks.schema";
 
+/**
+ * Helper to verify task ownership
+ * Throws ActionError if task not found or doesn't belong to user
+ */
+const getOwnedTask = async (taskId: string, userId: string) => {
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+  });
+
+  if (!task) {
+    throw new ActionError("Task not found");
+  }
+
+  if (task.userId !== userId) {
+    throw new ActionError("Unauthorized");
+  }
+
+  return task;
+};
+
+/**
+ * Revalidate task-related pages
+ */
+const revalidateTaskPages = () => {
+  revalidatePath("/app");
+  revalidatePath("/app/backlog");
+};
+
 export const createTaskAction = authAction
   .inputSchema(CreateTaskSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
@@ -61,8 +89,7 @@ export const createTaskAction = authAction
       });
     }
 
-    revalidatePath("/app");
-    revalidatePath("/app/backlog");
+    revalidateTaskPages();
 
     return { success: true, taskId: task.id };
   });
@@ -70,42 +97,33 @@ export const createTaskAction = authAction
 export const updateTaskAction = authAction
   .inputSchema(UpdateTaskSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
-    // Check if task exists and belongs to user
-    const existingTask = await prisma.task.findUnique({
-      where: { id: data.id },
-    });
+    await getOwnedTask(data.id, user.id);
 
-    if (!existingTask) {
-      throw new ActionError("Task not found");
-    }
-
-    if (existingTask.userId !== user.id) {
-      throw new ActionError("Unauthorized");
-    }
-
-    const updateData: Prisma.TaskUpdateInput = {};
-
-    if (data.title !== undefined) updateData.title = data.title;
-    if (data.description !== undefined)
-      updateData.description = data.description;
-    if (data.priority !== undefined) updateData.priority = data.priority;
-    if (data.difficulty !== undefined) updateData.difficulty = data.difficulty;
-    if (data.estimatedDuration !== undefined)
-      updateData.estimatedDuration = data.estimatedDuration;
-    if (data.deadline !== undefined)
-      updateData.deadline = data.deadline ? new Date(data.deadline) : null;
-    if (data.quarter !== undefined) updateData.quarter = data.quarter;
-    if (data.status !== undefined) updateData.status = data.status;
-    if (data.kanbanColumn !== undefined)
-      updateData.kanbanColumn = data.kanbanColumn;
+    // Build updateData only with defined fields
+    const updateData: Prisma.TaskUpdateInput = {
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.priority !== undefined && { priority: data.priority }),
+      ...(data.difficulty !== undefined && { difficulty: data.difficulty }),
+      ...(data.estimatedDuration !== undefined && {
+        estimatedDuration: data.estimatedDuration,
+      }),
+      ...(data.deadline !== undefined && {
+        deadline: data.deadline ? new Date(data.deadline) : null,
+      }),
+      ...(data.quarter !== undefined && { quarter: data.quarter }),
+      ...(data.status !== undefined && { status: data.status }),
+      ...(data.kanbanColumn !== undefined && {
+        kanbanColumn: data.kanbanColumn,
+      }),
+    };
 
     const task = await prisma.task.update({
       where: { id: data.id },
       data: updateData,
     });
 
-    revalidatePath("/app");
-    revalidatePath("/app/backlog");
+    revalidateTaskPages();
 
     return { success: true, task };
   });
@@ -113,18 +131,7 @@ export const updateTaskAction = authAction
 export const deleteTaskAction = authAction
   .inputSchema(DeleteTaskSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
-    // Check if task exists and belongs to user
-    const existingTask = await prisma.task.findUnique({
-      where: { id: data.id },
-    });
-
-    if (!existingTask) {
-      throw new ActionError("Task not found");
-    }
-
-    if (existingTask.userId !== user.id) {
-      throw new ActionError("Unauthorized");
-    }
+    await getOwnedTask(data.id, user.id);
 
     // Soft delete - set deletedAt timestamp
     // User can undo within 10 seconds via Toast
@@ -133,8 +140,7 @@ export const deleteTaskAction = authAction
       data: { deletedAt: new Date() },
     });
 
-    revalidatePath("/app");
-    revalidatePath("/app/backlog");
+    revalidateTaskPages();
 
     return { success: true };
   });
@@ -176,18 +182,7 @@ export const getTasksAction = authAction
 export const updateTaskColumnAction = authAction
   .inputSchema(UpdateTaskColumnSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
-    // Check if task exists and belongs to user
-    const existingTask = await prisma.task.findUnique({
-      where: { id: data.id },
-    });
-
-    if (!existingTask) {
-      throw new ActionError("Task not found");
-    }
-
-    if (existingTask.userId !== user.id) {
-      throw new ActionError("Unauthorized");
-    }
+    await getOwnedTask(data.id, user.id);
 
     await prisma.task.update({
       where: { id: data.id },
@@ -198,8 +193,7 @@ export const updateTaskColumnAction = authAction
       },
     });
 
-    revalidatePath("/app");
-    revalidatePath("/app/backlog");
+    revalidateTaskPages();
 
     return { success: true };
   });
@@ -207,18 +201,7 @@ export const updateTaskColumnAction = authAction
 export const restoreTaskAction = authAction
   .inputSchema(RestoreTaskSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
-    // Check if task exists and belongs to user
-    const existingTask = await prisma.task.findUnique({
-      where: { id: data.id },
-    });
-
-    if (!existingTask) {
-      throw new ActionError("Task not found");
-    }
-
-    if (existingTask.userId !== user.id) {
-      throw new ActionError("Unauthorized");
-    }
+    await getOwnedTask(data.id, user.id);
 
     // Restore task by clearing deletedAt or archivedAt
     await prisma.task.update({
@@ -229,8 +212,7 @@ export const restoreTaskAction = authAction
       },
     });
 
-    revalidatePath("/app");
-    revalidatePath("/app/backlog");
+    revalidateTaskPages();
 
     return { success: true };
   });
@@ -238,18 +220,7 @@ export const restoreTaskAction = authAction
 export const archiveTaskAction = authAction
   .inputSchema(ArchiveTaskSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
-    // Check if task exists and belongs to user
-    const existingTask = await prisma.task.findUnique({
-      where: { id: data.id },
-    });
-
-    if (!existingTask) {
-      throw new ActionError("Task not found");
-    }
-
-    if (existingTask.userId !== user.id) {
-      throw new ActionError("Unauthorized");
-    }
+    const existingTask = await getOwnedTask(data.id, user.id);
 
     // Can only archive completed tasks
     if (existingTask.status !== "done" || !existingTask.completedAt) {
@@ -261,8 +232,7 @@ export const archiveTaskAction = authAction
       data: { archivedAt: new Date() },
     });
 
-    revalidatePath("/app");
-    revalidatePath("/app/backlog");
+    revalidateTaskPages();
 
     return { success: true };
   });

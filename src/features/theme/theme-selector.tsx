@@ -4,9 +4,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 
 export const ThemeSelector = () => {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("settings");
 
   return (
     <RadioGroup value={theme} onValueChange={setTheme}>
@@ -18,7 +20,7 @@ export const ThemeSelector = () => {
             className="flex cursor-pointer items-center gap-2"
           >
             <Sun className="size-4" />
-            Light
+            {t("light")}
           </Label>
         </div>
         <div className="flex items-center space-x-3">
@@ -28,7 +30,7 @@ export const ThemeSelector = () => {
             className="flex cursor-pointer items-center gap-2"
           >
             <Moon className="size-4" />
-            Dark
+            {t("dark")}
           </Label>
         </div>
         <div className="flex items-center space-x-3">
@@ -38,7 +40,7 @@ export const ThemeSelector = () => {
             className="flex cursor-pointer items-center gap-2"
           >
             <Monitor className="size-4" />
-            System
+            {t("system")}
           </Label>
         </div>
       </div>

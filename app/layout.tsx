@@ -12,8 +12,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { type ReactNode, Suspense } from "react";
 import "./globals.css";
 import { Providers } from "./providers";
-import { cookies } from "next/headers";
-import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
+import { getLocaleFromCookies } from "@/lib/i18n/get-locale";
 
 export const metadata: Metadata = {
   title: SiteConfig.title,
@@ -40,13 +39,7 @@ export default async function RootLayout({
   children,
   modal,
 }: LayoutParams & { modal?: ReactNode }) {
-  // Get locale from cookie (server-side)
-  const cookieStore = await cookies();
-  const localeCookie = cookieStore.get("NEXT_LOCALE");
-  const locale =
-    localeCookie?.value && locales.includes(localeCookie.value as Locale)
-      ? (localeCookie.value as Locale)
-      : defaultLocale;
+  const locale = await getLocaleFromCookies();
 
   // Load messages for the current locale
   const messages = (await import(`../locales/${locale}.json`)).default;

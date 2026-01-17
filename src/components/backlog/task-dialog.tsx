@@ -39,6 +39,16 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
+const DEFAULT_TASK_VALUES = {
+  title: "",
+  description: "",
+  priority: "optional" as const,
+  difficulty: 3,
+  estimatedDuration: 60,
+  deadline: "",
+  quarter: "",
+} as const;
+
 type TaskDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -57,15 +67,7 @@ export const TaskDialog = ({
 
   const form = useZodForm({
     schema: CreateTaskSchema,
-    defaultValues: {
-      title: "",
-      description: "",
-      priority: "optional" as const,
-      difficulty: 3,
-      estimatedDuration: 60,
-      deadline: "",
-      quarter: "",
-    },
+    defaultValues: DEFAULT_TASK_VALUES,
   });
 
   // Reset form when task changes (edit mode)
@@ -83,15 +85,7 @@ export const TaskDialog = ({
         quarter: task.quarter ?? "",
       });
     } else {
-      form.reset({
-        title: "",
-        description: "",
-        priority: "optional" as const,
-        difficulty: 3,
-        estimatedDuration: 60,
-        deadline: "",
-        quarter: "",
-      });
+      form.reset(DEFAULT_TASK_VALUES);
     }
   }, [task, form]);
 

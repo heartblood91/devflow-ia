@@ -1,27 +1,9 @@
+import { APP_NAV_LINKS } from "@/features/navigation/app-links";
 import type { NavigationGroup } from "@/features/navigation/navigation.type";
-import { Home, ListTodo, User } from "lucide-react";
-
-const APP_PATH = "/app";
 
 export const APP_LINKS: NavigationGroup[] = [
   {
     title: "Menu",
-    links: [
-      {
-        href: APP_PATH,
-        Icon: Home,
-        label: "Dashboard",
-      },
-      {
-        href: `${APP_PATH}/backlog`,
-        Icon: ListTodo,
-        label: "Task Backlog",
-      },
-      {
-        href: `${APP_PATH}/users`,
-        Icon: User,
-        label: "Analytics",
-      },
-    ],
+    links: [...APP_NAV_LINKS],
   },
 ] satisfies NavigationGroup[];

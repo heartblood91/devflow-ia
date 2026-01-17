@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -19,14 +20,8 @@ import { NextResponse } from "next/server";
  * }
  */
 export const GET = async (req: NextRequest) => {
-  // Verify cron secret for security
-  const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    logger.warn("Unauthorized cron request to cleanup-deleted");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = verifyCronAuth(req, "cleanup-deleted");
+  if (!auth.authorized) return auth.response;
 
   try {
     const thirtyDaysAgo = new Date();

@@ -1,5 +1,6 @@
+import { APP_NAV_LINKS } from "@/features/navigation/app-links";
 import type { NavigationGroup } from "@/features/navigation/navigation.type";
-import { AlertCircle, Home, ListTodo, Mail, User, User2 } from "lucide-react";
+import { AlertCircle, Mail, User2 } from "lucide-react";
 
 export const getAccountNavigation = (): NavigationGroup[] => {
   return ACCOUNT_LINKS;
@@ -28,22 +29,6 @@ const ACCOUNT_LINKS: NavigationGroup[] = [
   },
   {
     title: "App",
-    links: [
-      {
-        href: "/app",
-        Icon: Home,
-        label: "Dashboard",
-      },
-      {
-        href: "/app/backlog",
-        Icon: ListTodo,
-        label: "Task Backlog",
-      },
-      {
-        href: "/app/users",
-        Icon: User,
-        label: "Analytics",
-      },
-    ],
+    links: [...APP_NAV_LINKS],
   },
 ];

@@ -17,6 +17,8 @@
   },
   "backlog": {
     "title": "Backlog",
+    "pageTitle": "Backlog des Tâches",
+    "pageDescription": "Organisez et priorisez vos tâches avec Kanban",
     "newTask": "Nouvelle tâche",
     "resetFilters": "Réinitialiser les filtres",
     "noTasks": "Aucune tâche",

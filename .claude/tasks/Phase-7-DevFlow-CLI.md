@@ -8,7 +8,7 @@
 
 ## Objectifs
 
-- [ ] Créer CLI DevFlow (Node.js)
+- [ ] Créer CLI DevFlow (Rust)
 - [ ] Commandes CRUD tasks (add, list, update, delete)
 - [ ] Authentification CLI → DevFlow API
 - [ ] Workspace Claude Code (task-creator.md)
@@ -18,154 +18,292 @@
 
 ## Tasks
 
-### 7.1 Setup CLI (Commander.js)
+### 7.1 Setup CLI (Rust + Clap)
 
 **Durée estimée :** 4h
 
 #### Structure
 
 ```
-cli/
+devflow-cli/
 ├── src/
 │   ├── commands/
-│   │   ├── auth.ts        # login, logout, whoami
-│   │   ├── tasks.ts       # add, list, update, delete, show
-│   │   ├── planning.ts    # plan, week
-│   │   └── stats.ts       # stats, insights
+│   │   ├── mod.rs          # Module exports
+│   │   ├── auth.rs         # login, logout, whoami
+│   │   ├── tasks.rs        # add, list, update, delete, show
+│   │   ├── planning.rs     # plan, week
+│   │   └── stats.rs        # stats, insights
 │   ├── utils/
-│   │   ├── api.ts         # API client
-│   │   ├── config.ts      # Config management (~/.devflow/config.json)
-│   │   ├── logger.ts      # Console logging
-│   │   └── prompts.ts     # Interactive prompts
-│   ├── types/
-│   │   └── index.ts
-│   └── index.ts           # Entry point
+│   │   ├── mod.rs          # Module exports
+│   │   ├── api.rs          # API client (reqwest)
+│   │   ├── config.rs       # Config management (~/.devflow/config.json)
+│   │   └── logger.rs       # Console logging
+│   ├── types.rs            # Shared types/structs
+│   └── main.rs             # Entry point
 ├── tests/
-├── package.json
-└── tsconfig.json
+│   └── integration_tests.rs
+├── Cargo.toml
+└── README.md
 ```
 
 #### Setup
 
-- [ ] Installer dependencies :
+- [ ] Initialiser le projet Rust :
 
   ```bash
-  cd cli
-  pnpm add commander chalk inquirer axios dotenv
-  pnpm add -D @types/inquirer @types/node tsx
+  cargo new devflow-cli
+  cd devflow-cli
   ```
 
-- [ ] Créer `src/index.ts` :
+- [ ] Configurer `Cargo.toml` :
 
-```ts
-#!/usr/bin/env node
+```toml
+[package]
+name = "devflow"
+version = "1.0.0"
+edition = "2021"
+authors = ["Cédric <cedric@devflow.io>"]
+description = "DevFlow CLI - Productivity system for 10x developers"
+license = "MIT"
+repository = "https://github.com/heartblood91/devflow-cli"
 
-import { program } from "commander";
-import { authCommands } from "./commands/auth";
-import { taskCommands } from "./commands/tasks";
-import { planningCommands } from "./commands/planning";
-import { statsCommands } from "./commands/stats";
+[[bin]]
+name = "devflow"
+path = "src/main.rs"
 
-program
-  .name("devflow")
-  .description("DevFlow CLI - Productivity system for 10x developers")
-  .version("1.0.0");
+[dependencies]
+# CLI framework
+clap = { version = "4.5", features = ["derive", "env"] }
 
-// Auth commands
-program
-  .command("login")
-  .description("Login to DevFlow")
-  .action(authCommands.login);
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "blocking"] }
 
-program
-  .command("logout")
-  .description("Logout from DevFlow")
-  .action(authCommands.logout);
+# JSON serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
-program
-  .command("whoami")
-  .description("Show current user")
-  .action(authCommands.whoami);
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
 
-// Task commands
-program
-  .command("add <title>")
-  .description("Create a new task")
-  .option("-d, --description <description>", "Task description")
-  .option(
-    "-p, --priority <priority>",
-    "Priority (sacred/important/optional)",
-    "optional",
-  )
-  .option("--difficulty <difficulty>", "Difficulty (1-5)", "3")
-  .option("-e, --estimate <minutes>", "Estimated duration (minutes)")
-  .option("--deadline <date>", "Deadline (YYYY-MM-DD)")
-  .option("-q, --quarter <quarter>", "Quarter (Q1-2026, etc.)")
-  .action(taskCommands.add);
+# Terminal colors
+colored = "2.1"
 
-program
-  .command("list")
-  .description("List all tasks")
-  .option("-s, --status <status>", "Filter by status (inbox/todo/doing/done)")
-  .option("-p, --priority <priority>", "Filter by priority")
-  .action(taskCommands.list);
+# Interactive prompts
+dialoguer = { version = "0.11", features = ["password"] }
 
-program
-  .command("show <taskId>")
-  .description("Show task details")
-  .action(taskCommands.show);
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
 
-program
-  .command("update <taskId>")
-  .description("Update a task")
-  .option("-t, --title <title>", "New title")
-  .option("-p, --priority <priority>", "New priority")
-  .option("--status <status>", "New status")
-  .action(taskCommands.update);
+# Environment variables
+dotenvy = "0.15"
 
-program
-  .command("delete <taskId>")
-  .description("Delete a task")
-  .option("-f, --force", "Skip confirmation")
-  .action(taskCommands.delete);
+# Home directory
+dirs = "5.0"
 
-// Planning commands
-program
-  .command("plan")
-  .description("Generate weekly planning")
-  .action(planningCommands.plan);
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
 
-program
-  .command("week")
-  .description("Show current week planning")
-  .action(planningCommands.week);
-
-// Stats commands
-program
-  .command("stats")
-  .description("Show productivity stats")
-  .option("-w, --week", "Show weekly stats")
-  .option("-m, --month", "Show monthly stats")
-  .action(statsCommands.stats);
-
-program.parse(process.argv);
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.1"
+tempfile = "3.12"
 ```
 
-- [ ] Créer `package.json` scripts :
-  ```json
-  {
-    "name": "devflow-cli",
-    "version": "1.0.0",
-    "bin": {
-      "devflow": "./dist/index.js"
+- [ ] Créer `src/main.rs` :
+
+```rust
+use clap::{Parser, Subcommand};
+use colored::*;
+
+mod commands;
+mod types;
+mod utils;
+
+use commands::{auth, planning, stats, tasks};
+
+/// DevFlow CLI - Productivity system for 10x developers
+#[derive(Parser)]
+#[command(name = "devflow")]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Login to DevFlow
+    Login,
+
+    /// Logout from DevFlow
+    Logout,
+
+    /// Show current user
+    Whoami,
+
+    /// Create a new task
+    Add {
+        /// Task title
+        title: String,
+
+        /// Task description
+        #[arg(short, long)]
+        description: Option<String>,
+
+        /// Priority (sacred/important/optional)
+        #[arg(short, long, default_value = "optional")]
+        priority: String,
+
+        /// Difficulty (1-5)
+        #[arg(long, default_value = "3")]
+        difficulty: u8,
+
+        /// Estimated duration (minutes)
+        #[arg(short, long)]
+        estimate: Option<u32>,
+
+        /// Deadline (YYYY-MM-DD)
+        #[arg(long)]
+        deadline: Option<String>,
+
+        /// Quarter (Q1-2026, etc.)
+        #[arg(short, long)]
+        quarter: Option<String>,
     },
-    "scripts": {
-      "dev": "tsx src/index.ts",
-      "build": "tsc",
-      "link": "npm link"
+
+    /// List all tasks
+    List {
+        /// Filter by status (inbox/todo/doing/done)
+        #[arg(short, long)]
+        status: Option<String>,
+
+        /// Filter by priority
+        #[arg(short, long)]
+        priority: Option<String>,
+    },
+
+    /// Show task details
+    Show {
+        /// Task ID
+        task_id: String,
+    },
+
+    /// Update a task
+    Update {
+        /// Task ID
+        task_id: String,
+
+        /// New title
+        #[arg(short, long)]
+        title: Option<String>,
+
+        /// New priority
+        #[arg(short, long)]
+        priority: Option<String>,
+
+        /// New status
+        #[arg(long)]
+        status: Option<String>,
+    },
+
+    /// Delete a task
+    Delete {
+        /// Task ID
+        task_id: String,
+
+        /// Skip confirmation
+        #[arg(short, long)]
+        force: bool,
+    },
+
+    /// Generate weekly planning
+    Plan,
+
+    /// Show current week planning
+    Week,
+
+    /// Show productivity stats
+    Stats {
+        /// Show weekly stats
+        #[arg(short, long)]
+        week: bool,
+
+        /// Show monthly stats
+        #[arg(short, long)]
+        month: bool,
+    },
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        // Auth commands
+        Commands::Login => auth::login().await?,
+        Commands::Logout => auth::logout()?,
+        Commands::Whoami => auth::whoami()?,
+
+        // Task commands
+        Commands::Add {
+            title,
+            description,
+            priority,
+            difficulty,
+            estimate,
+            deadline,
+            quarter,
+        } => {
+            tasks::add(
+                title,
+                description,
+                priority,
+                difficulty,
+                estimate,
+                deadline,
+                quarter,
+            )
+            .await?
+        }
+        Commands::List { status, priority } => tasks::list(status, priority).await?,
+        Commands::Show { task_id } => tasks::show(&task_id).await?,
+        Commands::Update {
+            task_id,
+            title,
+            priority,
+            status,
+        } => tasks::update(&task_id, title, priority, status).await?,
+        Commands::Delete { task_id, force } => tasks::delete(&task_id, force).await?,
+
+        // Planning commands
+        Commands::Plan => planning::plan().await?,
+        Commands::Week => planning::week().await?,
+
+        // Stats commands
+        Commands::Stats { week, month } => stats::stats(week, month).await?,
     }
-  }
-  ```
+
+    Ok(())
+}
+```
+
+- [ ] Créer `src/commands/mod.rs` :
+
+```rust
+pub mod auth;
+pub mod planning;
+pub mod stats;
+pub mod tasks;
+```
+
+- [ ] Créer `src/utils/mod.rs` :
+
+```rust
+pub mod api;
+pub mod config;
+pub mod logger;
+```
 
 **Tests :**
 
@@ -180,174 +318,364 @@ program.parse(process.argv);
 
 #### Login
 
-- [ ] Créer `src/commands/auth.ts` :
+- [ ] Créer `src/commands/auth.rs` :
 
-```ts
-import inquirer from "inquirer";
-import chalk from "chalk";
-import { apiClient } from "../utils/api";
-import { config } from "../utils/config";
-import { logger } from "../utils/logger";
+```rust
+use anyhow::Result;
+use colored::*;
+use dialoguer::{Input, Password};
 
-export const authCommands = {
-  async login() {
-    logger.info("Login to DevFlow");
+use crate::utils::{api::ApiClient, config::Config, logger};
 
-    const answers = await inquirer.prompt([
-      {
-        type: "input",
-        name: "email",
-        message: "Email:",
-        validate: (input) => input.includes("@") || "Invalid email",
-      },
-      {
-        type: "password",
-        name: "password",
-        message: "Password:",
-        mask: "*",
-      },
-    ]);
+pub async fn login() -> Result<()> {
+    logger::info("Login to DevFlow");
 
-    try {
-      const { token, user } = await apiClient.post("/auth/login", answers);
+    let email: String = Input::new()
+        .with_prompt("Email")
+        .validate_with(|input: &String| {
+            if input.contains('@') {
+                Ok(())
+            } else {
+                Err("Invalid email")
+            }
+        })
+        .interact_text()?;
 
-      config.set("token", token);
-      config.set("user", user);
+    let password: String = Password::new()
+        .with_prompt("Password")
+        .interact()?;
 
-      logger.success(`Logged in as ${chalk.bold(user.email)}`);
-    } catch (error) {
-      logger.error("Login failed:", error.message);
-      process.exit(1);
+    let client = ApiClient::new()?;
+
+    match client.login(&email, &password).await {
+        Ok((token, user)) => {
+            let mut config = Config::load()?;
+            config.set_token(&token);
+            config.set_user(&user);
+            config.save()?;
+
+            logger::success(&format!("Logged in as {}", user.email.bold()));
+        }
+        Err(e) => {
+            logger::error(&format!("Login failed: {}", e));
+            std::process::exit(1);
+        }
     }
-  },
 
-  async logout() {
+    Ok(())
+}
+
+pub fn logout() -> Result<()> {
+    let mut config = Config::load()?;
     config.clear();
-    logger.success("Logged out");
-  },
+    config.save()?;
 
-  async whoami() {
-    const user = config.get("user");
+    logger::success("Logged out");
+    Ok(())
+}
 
-    if (!user) {
-      logger.error("Not logged in. Run `devflow login` first.");
-      process.exit(1);
+pub fn whoami() -> Result<()> {
+    let config = Config::load()?;
+
+    match config.get_user() {
+        Some(user) => {
+            logger::info(&format!("Logged in as {}", user.email.bold()));
+            logger::info(&format!("User ID: {}", user.id));
+        }
+        None => {
+            logger::error("Not logged in. Run `devflow login` first.");
+            std::process::exit(1);
+        }
     }
 
-    logger.info(`Logged in as ${chalk.bold(user.email)}`);
-    logger.info(`User ID: ${user.id}`);
-  },
-};
+    Ok(())
+}
 ```
 
 #### Config Management
 
-- [ ] Créer `src/utils/config.ts` :
+- [ ] Créer `src/utils/config.rs` :
 
-```ts
-import fs from "fs";
-import path from "path";
-import os from "os";
+```rust
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::PathBuf;
 
-const CONFIG_DIR = path.join(os.homedir(), ".devflow");
-const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
-
-class Config {
-  private data: Record<string, any> = {};
-
-  constructor() {
-    this.load();
-  }
-
-  load() {
-    if (!fs.existsSync(CONFIG_DIR)) {
-      fs.mkdirSync(CONFIG_DIR, { recursive: true });
-    }
-
-    if (fs.existsSync(CONFIG_FILE)) {
-      const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
-      this.data = JSON.parse(raw);
-    }
-  }
-
-  save() {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(this.data, null, 2));
-  }
-
-  get(key: string) {
-    return this.data[key];
-  }
-
-  set(key: string, value: any) {
-    this.data[key] = value;
-    this.save();
-  }
-
-  clear() {
-    this.data = {};
-    this.save();
-  }
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct User {
+    pub id: String,
+    pub email: String,
+    pub name: Option<String>,
 }
 
-export const config = new Config();
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct ConfigData {
+    pub token: Option<String>,
+    pub user: Option<User>,
+    pub api_url: Option<String>,
+}
+
+pub struct Config {
+    path: PathBuf,
+    data: ConfigData,
+}
+
+impl Config {
+    fn config_dir() -> PathBuf {
+        dirs::home_dir()
+            .expect("Could not find home directory")
+            .join(".devflow")
+    }
+
+    fn config_file() -> PathBuf {
+        Self::config_dir().join("config.json")
+    }
+
+    pub fn load() -> Result<Self> {
+        let config_dir = Self::config_dir();
+        let config_file = Self::config_file();
+
+        if !config_dir.exists() {
+            fs::create_dir_all(&config_dir)?;
+        }
+
+        let data = if config_file.exists() {
+            let raw = fs::read_to_string(&config_file)?;
+            serde_json::from_str(&raw)?
+        } else {
+            ConfigData::default()
+        };
+
+        Ok(Self {
+            path: config_file,
+            data,
+        })
+    }
+
+    pub fn save(&self) -> Result<()> {
+        let json = serde_json::to_string_pretty(&self.data)?;
+        fs::write(&self.path, json)?;
+        Ok(())
+    }
+
+    pub fn get_token(&self) -> Option<&str> {
+        self.data.token.as_deref()
+    }
+
+    pub fn set_token(&mut self, token: &str) {
+        self.data.token = Some(token.to_string());
+    }
+
+    pub fn get_user(&self) -> Option<&User> {
+        self.data.user.as_ref()
+    }
+
+    pub fn set_user(&mut self, user: &User) {
+        self.data.user = Some(user.clone());
+    }
+
+    pub fn get_api_url(&self) -> &str {
+        self.data
+            .api_url
+            .as_deref()
+            .unwrap_or("https://devflow.vercel.app/api")
+    }
+
+    pub fn clear(&mut self) {
+        self.data = ConfigData::default();
+    }
+}
 ```
 
 #### API Client
 
-- [ ] Créer `src/utils/api.ts` :
+- [ ] Créer `src/utils/api.rs` :
 
-```ts
-import axios, { AxiosInstance } from "axios";
-import { config } from "./config";
+```rust
+use anyhow::{anyhow, Result};
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-class ApiClient {
-  private client: AxiosInstance;
+use crate::types::Task;
+use crate::utils::config::{Config, User};
 
-  constructor() {
-    this.client = axios.create({
-      baseURL: process.env.DEVFLOW_API_URL || "https://devflow.vercel.app/api",
-      timeout: 10000,
-    });
-
-    // Interceptor: Add auth token
-    this.client.interceptors.request.use((config) => {
-      const token = config.get("token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    });
-
-    // Interceptor: Handle errors
-    this.client.interceptors.response.use(
-      (response) => response.data,
-      (error) => {
-        if (error.response?.status === 401) {
-          throw new Error("Unauthorized. Run `devflow login` first.");
-        }
-        throw new Error(error.response?.data?.message || error.message);
-      },
-    );
-  }
-
-  async get(url: string, params?: any) {
-    return this.client.get(url, { params });
-  }
-
-  async post(url: string, data?: any) {
-    return this.client.post(url, data);
-  }
-
-  async put(url: string, data?: any) {
-    return this.client.put(url, data);
-  }
-
-  async delete(url: string) {
-    return this.client.delete(url);
-  }
+#[derive(Debug, Serialize)]
+struct LoginRequest {
+    email: String,
+    password: String,
 }
 
-export const apiClient = new ApiClient();
+#[derive(Debug, Deserialize)]
+struct LoginResponse {
+    token: String,
+    user: User,
+}
+
+pub struct ApiClient {
+    client: reqwest::Client,
+    base_url: String,
+    token: Option<String>,
+}
+
+impl ApiClient {
+    pub fn new() -> Result<Self> {
+        let config = Config::load()?;
+        let base_url = config.get_api_url().to_string();
+        let token = config.get_token().map(|s| s.to_string());
+
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(10))
+            .build()?;
+
+        Ok(Self {
+            client,
+            base_url,
+            token,
+        })
+    }
+
+    fn headers(&self) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+
+        if let Some(token) = &self.token {
+            if let Ok(value) = HeaderValue::from_str(&format!("Bearer {}", token)) {
+                headers.insert(AUTHORIZATION, value);
+            }
+        }
+
+        headers
+    }
+
+    pub async fn login(&self, email: &str, password: &str) -> Result<(String, User)> {
+        let url = format!("{}/cli/auth/login", self.base_url);
+        let body = LoginRequest {
+            email: email.to_string(),
+            password: password.to_string(),
+        };
+
+        let response = self
+            .client
+            .post(&url)
+            .headers(self.headers())
+            .json(&body)
+            .send()
+            .await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await.unwrap_or_default();
+            return Err(anyhow!("Login failed ({}): {}", status, text));
+        }
+
+        let login_response: LoginResponse = response.json().await?;
+        Ok((login_response.token, login_response.user))
+    }
+
+    pub async fn get<T: DeserializeOwned>(&self, endpoint: &str) -> Result<T> {
+        let url = format!("{}{}", self.base_url, endpoint);
+
+        let response = self
+            .client
+            .get(&url)
+            .headers(self.headers())
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn post<T: DeserializeOwned, B: Serialize>(&self, endpoint: &str, body: &B) -> Result<T> {
+        let url = format!("{}{}", self.base_url, endpoint);
+
+        let response = self
+            .client
+            .post(&url)
+            .headers(self.headers())
+            .json(body)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn put<T: DeserializeOwned, B: Serialize>(&self, endpoint: &str, body: &B) -> Result<T> {
+        let url = format!("{}{}", self.base_url, endpoint);
+
+        let response = self
+            .client
+            .put(&url)
+            .headers(self.headers())
+            .json(body)
+            .send()
+            .await?;
+
+        self.handle_response(response).await
+    }
+
+    pub async fn delete(&self, endpoint: &str) -> Result<()> {
+        let url = format!("{}{}", self.base_url, endpoint);
+
+        let response = self
+            .client
+            .delete(&url)
+            .headers(self.headers())
+            .send()
+            .await?;
+
+        if response.status() == reqwest::StatusCode::UNAUTHORIZED {
+            return Err(anyhow!("Unauthorized. Run `devflow login` first."));
+        }
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await.unwrap_or_default();
+            return Err(anyhow!("Request failed ({}): {}", status, text));
+        }
+
+        Ok(())
+    }
+
+    async fn handle_response<T: DeserializeOwned>(&self, response: reqwest::Response) -> Result<T> {
+        if response.status() == reqwest::StatusCode::UNAUTHORIZED {
+            return Err(anyhow!("Unauthorized. Run `devflow login` first."));
+        }
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await.unwrap_or_default();
+            return Err(anyhow!("Request failed ({}): {}", status, text));
+        }
+
+        let data = response.json().await?;
+        Ok(data)
+    }
+}
+```
+
+#### Logger
+
+- [ ] Créer `src/utils/logger.rs` :
+
+```rust
+use colored::*;
+
+pub fn info(message: &str) {
+    println!("{} {}", "ℹ".blue(), message);
+}
+
+pub fn success(message: &str) {
+    println!("{} {}", "✓".green(), message);
+}
+
+pub fn error(message: &str) {
+    eprintln!("{} {}", "✗".red(), message);
+}
+
+pub fn warn(message: &str) {
+    println!("{} {}", "⚠".yellow(), message);
+}
 ```
 
 **Tests :**
@@ -362,172 +690,325 @@ export const apiClient = new ApiClient();
 
 **Durée estimée :** 6h
 
-#### Add Task
+#### Types
 
-- [ ] Créer `src/commands/tasks.ts` :
+- [ ] Créer `src/types.rs` :
 
-```ts
-import chalk from "chalk";
-import inquirer from "inquirer";
-import { apiClient } from "../utils/api";
-import { logger } from "../utils/logger";
+```rust
+use chrono::{DateTime, NaiveDate, Utc};
+use serde::{Deserialize, Serialize};
 
-export const taskCommands = {
-  async add(title: string, options: any) {
-    logger.info(`Creating task: ${chalk.bold(title)}`);
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Task {
+    pub id: String,
+    pub title: String,
+    pub description: Option<String>,
+    pub priority: String,
+    pub difficulty: u8,
+    pub status: String,
+    #[serde(rename = "estimatedDuration")]
+    pub estimated_duration: Option<u32>,
+    pub deadline: Option<DateTime<Utc>>,
+    pub quarter: Option<String>,
+    #[serde(rename = "kanbanColumn")]
+    pub kanban_column: String,
+    #[serde(rename = "createdAt")]
+    pub created_at: DateTime<Utc>,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CreateTaskRequest {
+    pub title: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    pub priority: String,
+    pub difficulty: u8,
+    #[serde(rename = "estimatedDuration", skip_serializing_if = "Option::is_none")]
+    pub estimated_duration: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deadline: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quarter: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UpdateTaskRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub priority: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+}
+```
+
+#### Task Commands
+
+- [ ] Créer `src/commands/tasks.rs` :
+
+```rust
+use anyhow::Result;
+use colored::*;
+use dialoguer::Input;
+
+use crate::types::{CreateTaskRequest, Task, UpdateTaskRequest};
+use crate::utils::{api::ApiClient, logger};
+
+pub async fn add(
+    title: String,
+    description: Option<String>,
+    priority: String,
+    difficulty: u8,
+    estimate: Option<u32>,
+    deadline: Option<String>,
+    quarter: Option<String>,
+) -> Result<()> {
+    logger::info(&format!("Creating task: {}", title.bold()));
 
     // If estimate not provided, ask
-    let estimate = options.estimate;
-    if (!estimate) {
-      const answer = await inquirer.prompt([
-        {
-          type: "input",
-          name: "estimate",
-          message: "Estimated duration (minutes):",
-          default: "60",
-          validate: (input) => !isNaN(parseInt(input)) || "Must be a number",
-        },
-      ]);
-      estimate = parseInt(answer.estimate);
-    }
-
-    try {
-      const task = await apiClient.post("/tasks", {
-        title,
-        description: options.description,
-        priority: options.priority,
-        difficulty: parseInt(options.difficulty),
-        estimatedDuration: parseInt(estimate),
-        deadline: options.deadline ? new Date(options.deadline) : undefined,
-        quarter: options.quarter,
-      });
-
-      logger.success(`Task created: ${chalk.bold(task.title)}`);
-      logger.info(`Task ID: ${task.id}`);
-    } catch (error) {
-      logger.error("Failed to create task:", error.message);
-      process.exit(1);
-    }
-  },
-
-  async list(options: any) {
-    try {
-      const tasks = await apiClient.get("/tasks", {
-        status: options.status,
-        priority: options.priority,
-      });
-
-      if (tasks.length === 0) {
-        logger.info("No tasks found.");
-        return;
-      }
-
-      logger.info(`Found ${chalk.bold(tasks.length)} tasks:\n`);
-
-      tasks.forEach((task: any) => {
-        const priorityIcon = {
-          sacred: "🔴",
-          important: "🟠",
-          optional: "🟢",
-        }[task.priority];
-
-        const difficultyStars = "⭐".repeat(task.difficulty);
-
-        console.log(
-          `${priorityIcon} ${chalk.bold(task.title)} ${difficultyStars}`,
-        );
-        console.log(
-          `   ID: ${task.id} | Status: ${task.status} | ${task.estimatedDuration} min`,
-        );
-        if (task.deadline) {
-          console.log(
-            `   Deadline: ${new Date(task.deadline).toLocaleDateString()}`,
-          );
+    let estimated_duration = match estimate {
+        Some(e) => Some(e),
+        None => {
+            let answer: String = Input::new()
+                .with_prompt("Estimated duration (minutes)")
+                .default("60".to_string())
+                .validate_with(|input: &String| {
+                    input.parse::<u32>().map(|_| ()).map_err(|_| "Must be a number")
+                })
+                .interact_text()?;
+            Some(answer.parse()?)
         }
-        console.log("");
-      });
-    } catch (error) {
-      logger.error("Failed to list tasks:", error.message);
-      process.exit(1);
-    }
-  },
+    };
 
-  async show(taskId: string) {
-    try {
-      const task = await apiClient.get(`/tasks/${taskId}`);
+    let client = ApiClient::new()?;
 
-      console.log("");
-      console.log(chalk.bold(task.title));
-      console.log("─".repeat(task.title.length));
-      console.log("");
-      console.log(`ID:           ${task.id}`);
-      console.log(`Priority:     ${task.priority}`);
-      console.log(`Difficulty:   ${"⭐".repeat(task.difficulty)}`);
-      console.log(`Status:       ${task.status}`);
-      console.log(`Estimate:     ${task.estimatedDuration} min`);
-      if (task.deadline) {
-        console.log(
-          `Deadline:     ${new Date(task.deadline).toLocaleDateString()}`,
-        );
-      }
-      if (task.quarter) {
-        console.log(`Quarter:      ${task.quarter}`);
-      }
-      if (task.description) {
-        console.log("");
-        console.log("Description:");
-        console.log(task.description);
-      }
-      console.log("");
-    } catch (error) {
-      logger.error("Failed to show task:", error.message);
-      process.exit(1);
-    }
-  },
+    let request = CreateTaskRequest {
+        title: title.clone(),
+        description,
+        priority,
+        difficulty,
+        estimated_duration,
+        deadline,
+        quarter,
+    };
 
-  async update(taskId: string, options: any) {
-    try {
-      const updates: any = {};
-
-      if (options.title) updates.title = options.title;
-      if (options.priority) updates.priority = options.priority;
-      if (options.status) updates.status = options.status;
-
-      const task = await apiClient.put(`/tasks/${taskId}`, updates);
-
-      logger.success(`Task updated: ${chalk.bold(task.title)}`);
-    } catch (error) {
-      logger.error("Failed to update task:", error.message);
-      process.exit(1);
-    }
-  },
-
-  async delete(taskId: string, options: any) {
-    if (!options.force) {
-      const answer = await inquirer.prompt([
-        {
-          type: "confirm",
-          name: "confirm",
-          message: "Are you sure you want to delete this task?",
-          default: false,
-        },
-      ]);
-
-      if (!answer.confirm) {
-        logger.info("Cancelled.");
-        return;
-      }
+    match client.post::<Task, _>("/cli/tasks", &request).await {
+        Ok(task) => {
+            logger::success(&format!("Task created: {}", task.title.bold()));
+            logger::info(&format!("Task ID: {}", task.id));
+        }
+        Err(e) => {
+            logger::error(&format!("Failed to create task: {}", e));
+            std::process::exit(1);
+        }
     }
 
-    try {
-      await apiClient.delete(`/tasks/${taskId}`);
-      logger.success("Task deleted.");
-    } catch (error) {
-      logger.error("Failed to delete task:", error.message);
-      process.exit(1);
+    Ok(())
+}
+
+pub async fn list(status: Option<String>, priority: Option<String>) -> Result<()> {
+    let client = ApiClient::new()?;
+
+    let mut endpoint = "/cli/tasks".to_string();
+    let mut params = Vec::new();
+
+    if let Some(s) = status {
+        params.push(format!("status={}", s));
     }
-  },
-};
+    if let Some(p) = priority {
+        params.push(format!("priority={}", p));
+    }
+
+    if !params.is_empty() {
+        endpoint = format!("{}?{}", endpoint, params.join("&"));
+    }
+
+    match client.get::<Vec<Task>>(&endpoint).await {
+        Ok(tasks) => {
+            if tasks.is_empty() {
+                logger::info("No tasks found.");
+                return Ok(());
+            }
+
+            logger::info(&format!("Found {} tasks:\n", tasks.len().to_string().bold()));
+
+            for task in tasks {
+                let priority_icon = match task.priority.as_str() {
+                    "sacred" => "🔴",
+                    "important" => "🟠",
+                    _ => "🟢",
+                };
+
+                let difficulty_stars = "⭐".repeat(task.difficulty as usize);
+
+                println!(
+                    "{} {} {}",
+                    priority_icon,
+                    task.title.bold(),
+                    difficulty_stars
+                );
+                println!(
+                    "   ID: {} | Status: {} | {} min",
+                    task.id,
+                    task.status,
+                    task.estimated_duration.unwrap_or(0)
+                );
+                if let Some(deadline) = task.deadline {
+                    println!("   Deadline: {}", deadline.format("%Y-%m-%d"));
+                }
+                println!();
+            }
+        }
+        Err(e) => {
+            logger::error(&format!("Failed to list tasks: {}", e));
+            std::process::exit(1);
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn show(task_id: &str) -> Result<()> {
+    let client = ApiClient::new()?;
+
+    match client.get::<Task>(&format!("/cli/tasks/{}", task_id)).await {
+        Ok(task) => {
+            println!();
+            println!("{}", task.title.bold());
+            println!("{}", "─".repeat(task.title.len()));
+            println!();
+            println!("ID:           {}", task.id);
+            println!("Priority:     {}", task.priority);
+            println!("Difficulty:   {}", "⭐".repeat(task.difficulty as usize));
+            println!("Status:       {}", task.status);
+            println!(
+                "Estimate:     {} min",
+                task.estimated_duration.unwrap_or(0)
+            );
+            if let Some(deadline) = task.deadline {
+                println!("Deadline:     {}", deadline.format("%Y-%m-%d"));
+            }
+            if let Some(quarter) = &task.quarter {
+                println!("Quarter:      {}", quarter);
+            }
+            if let Some(description) = &task.description {
+                println!();
+                println!("Description:");
+                println!("{}", description);
+            }
+            println!();
+        }
+        Err(e) => {
+            logger::error(&format!("Failed to show task: {}", e));
+            std::process::exit(1);
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn update(
+    task_id: &str,
+    title: Option<String>,
+    priority: Option<String>,
+    status: Option<String>,
+) -> Result<()> {
+    let client = ApiClient::new()?;
+
+    let request = UpdateTaskRequest {
+        title,
+        priority,
+        status,
+    };
+
+    match client
+        .put::<Task, _>(&format!("/cli/tasks/{}", task_id), &request)
+        .await
+    {
+        Ok(task) => {
+            logger::success(&format!("Task updated: {}", task.title.bold()));
+        }
+        Err(e) => {
+            logger::error(&format!("Failed to update task: {}", e));
+            std::process::exit(1);
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn delete(task_id: &str, force: bool) -> Result<()> {
+    if !force {
+        let confirm = dialoguer::Confirm::new()
+            .with_prompt("Are you sure you want to delete this task?")
+            .default(false)
+            .interact()?;
+
+        if !confirm {
+            logger::info("Cancelled.");
+            return Ok(());
+        }
+    }
+
+    let client = ApiClient::new()?;
+
+    match client.delete(&format!("/cli/tasks/{}", task_id)).await {
+        Ok(_) => {
+            logger::success("Task deleted.");
+        }
+        Err(e) => {
+            logger::error(&format!("Failed to delete task: {}", e));
+            std::process::exit(1);
+        }
+    }
+
+    Ok(())
+}
+```
+
+#### Planning and Stats (stub)
+
+- [ ] Créer `src/commands/planning.rs` :
+
+```rust
+use anyhow::Result;
+use crate::utils::logger;
+
+pub async fn plan() -> Result<()> {
+    logger::info("Generating weekly planning...");
+    // TODO: Implement planning generation
+    logger::warn("Planning generation not yet implemented.");
+    Ok(())
+}
+
+pub async fn week() -> Result<()> {
+    logger::info("Fetching current week planning...");
+    // TODO: Implement week display
+    logger::warn("Week display not yet implemented.");
+    Ok(())
+}
+```
+
+- [ ] Créer `src/commands/stats.rs` :
+
+```rust
+use anyhow::Result;
+use crate::utils::logger;
+
+pub async fn stats(week: bool, month: bool) -> Result<()> {
+    if week {
+        logger::info("Fetching weekly stats...");
+    } else if month {
+        logger::info("Fetching monthly stats...");
+    } else {
+        logger::info("Fetching overall stats...");
+    }
+    // TODO: Implement stats
+    logger::warn("Stats not yet implemented.");
+    Ok(())
+}
 ```
 
 **Tests :**
@@ -544,19 +1025,88 @@ export const taskCommands = {
 
 **Durée estimée :** 4h
 
-#### Create Endpoints
+> Note: Les endpoints backend restent en Next.js/TypeScript. Seule la CLI est en Rust.
 
-- [ ] Créer `app/api/tasks/route.ts` :
+#### Create CLI-specific Endpoints
+
+- [ ] Créer `app/api/cli/auth/login/route.ts` :
 
 ```ts
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
+import { sign } from "jsonwebtoken";
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { email, password } = body;
+
+  // Verify credentials using Better Auth
+  const result = await auth.api.signInEmail({
+    body: { email, password },
+  });
+
+  if (!result.user) {
+    return Response.json({ error: "Invalid credentials" }, { status: 401 });
+  }
+
+  // Generate CLI token (JWT)
+  const token = sign(
+    { userId: result.user.id, email: result.user.email },
+    process.env.AUTH_SECRET!,
+    { expiresIn: "30d" },
+  );
+
+  return Response.json({
+    token,
+    user: {
+      id: result.user.id,
+      email: result.user.email,
+      name: result.user.name,
+    },
+  });
+}
+```
+
+- [ ] Créer middleware pour CLI auth `src/lib/cli-auth.ts` :
+
+```ts
+import { NextRequest } from "next/server";
+import { verify } from "jsonwebtoken";
+
+export type CLIUser = {
+  userId: string;
+  email: string;
+};
+
+export function verifyCLIToken(req: NextRequest): CLIUser | null {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.slice(7);
+
+  try {
+    const decoded = verify(token, process.env.AUTH_SECRET!) as CLIUser;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+```
+
+- [ ] Créer `app/api/cli/tasks/route.ts` :
+
+```ts
+import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyCLIToken } from "@/lib/cli-auth";
 
 export async function GET(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+  const user = verifyCLIToken(req);
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { searchParams } = new URL(req.url);
@@ -565,7 +1115,7 @@ export async function GET(req: NextRequest) {
 
   const tasks = await prisma.task.findMany({
     where: {
-      userId: session.user.id,
+      userId: user.userId,
       ...(status && { status }),
       ...(priority && { priority }),
     },
@@ -578,22 +1128,22 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+  const user = verifyCLIToken(req);
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await req.json();
 
   const task = await prisma.task.create({
     data: {
-      userId: session.user.id,
+      userId: user.userId,
       title: body.title,
       description: body.description,
       priority: body.priority,
       difficulty: body.difficulty,
       estimatedDuration: body.estimatedDuration,
-      deadline: body.deadline,
+      deadline: body.deadline ? new Date(body.deadline) : undefined,
       quarter: body.quarter,
       status: "inbox",
       kanbanColumn: "inbox",
@@ -604,31 +1154,31 @@ export async function POST(req: NextRequest) {
 }
 ```
 
-- [ ] Créer `app/api/tasks/[taskId]/route.ts` :
+- [ ] Créer `app/api/cli/tasks/[taskId]/route.ts` :
 
 ```ts
 import { NextRequest } from "next/server";
-import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
+import { verifyCLIToken } from "@/lib/cli-auth";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { taskId: string } },
 ) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+  const user = verifyCLIToken(req);
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const task = await prisma.task.findUnique({
     where: {
       id: params.taskId,
-      userId: session.user.id,
+      userId: user.userId,
     },
   });
 
   if (!task) {
-    return new Response("Task not found", { status: 404 });
+    return Response.json({ error: "Task not found" }, { status: 404 });
   }
 
   return Response.json(task);
@@ -638,9 +1188,9 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { taskId: string } },
 ) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+  const user = verifyCLIToken(req);
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await req.json();
@@ -648,7 +1198,7 @@ export async function PUT(
   const task = await prisma.task.update({
     where: {
       id: params.taskId,
-      userId: session.user.id,
+      userId: user.userId,
     },
     data: body,
   });
@@ -660,33 +1210,162 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { taskId: string } },
 ) {
-  const session = await auth.api.getSession({ headers: req.headers });
-  if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+  const user = verifyCLIToken(req);
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   await prisma.task.delete({
     where: {
       id: params.taskId,
-      userId: session.user.id,
+      userId: user.userId,
     },
   });
 
-  return new Response("Task deleted", { status: 200 });
+  return Response.json({ success: true });
 }
 ```
 
 **Tests :**
 
-- [ ] Test GET /api/tasks → returns tasks
-- [ ] Test POST /api/tasks → creates task
-- [ ] Test GET /api/tasks/:id → returns task
-- [ ] Test PUT /api/tasks/:id → updates task
-- [ ] Test DELETE /api/tasks/:id → deletes task
+- [ ] Test GET /api/cli/tasks → returns tasks
+- [ ] Test POST /api/cli/tasks → creates task
+- [ ] Test GET /api/cli/tasks/:id → returns task
+- [ ] Test PUT /api/cli/tasks/:id → updates task
+- [ ] Test DELETE /api/cli/tasks/:id → deletes task
 
 ---
 
-### 7.5 Workspace Claude Code (task-creator)
+### 7.5 Build and Distribution
+
+**Durée estimée :** 2h
+
+#### Build for Multiple Platforms
+
+- [ ] Configurer CI/CD pour cross-compilation :
+
+```yaml
+# .github/workflows/cli-release.yml
+name: CLI Release
+
+on:
+  push:
+    tags:
+      - "cli-v*"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: devflow-linux-x86_64
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            artifact: devflow-linux-aarch64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: devflow-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: devflow-macos-aarch64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: devflow-windows-x86_64.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build
+        run: |
+          cd devflow-cli
+          cargo build --release --target ${{ matrix.target }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: devflow-cli/target/${{ matrix.target }}/release/devflow*
+```
+
+#### Installation Instructions
+
+- [ ] Créer `devflow-cli/README.md` :
+
+```markdown
+# DevFlow CLI
+
+Productivity system for 10x developers.
+
+## Installation
+
+### macOS (Homebrew)
+
+```bash
+brew tap heartblood91/devflow
+brew install devflow
+```
+
+### Linux
+
+```bash
+# Download the latest release
+curl -L https://github.com/heartblood91/devflow-cli/releases/latest/download/devflow-linux-x86_64 -o devflow
+chmod +x devflow
+sudo mv devflow /usr/local/bin/
+```
+
+### Windows
+
+Download the latest release from GitHub and add to PATH.
+
+### From source (Rust)
+
+```bash
+cargo install --git https://github.com/heartblood91/devflow-cli
+```
+
+## Usage
+
+```bash
+# Login
+devflow login
+
+# Add a task
+devflow add "Implement SEPA" -p sacred --difficulty 4 -e 180
+
+# List tasks
+devflow list
+
+# Show task details
+devflow show <task-id>
+
+# Update task
+devflow update <task-id> --status done
+
+# Delete task
+devflow delete <task-id>
+
+# Logout
+devflow logout
+```
+
+## Configuration
+
+Config is stored in `~/.devflow/config.json`.
+```
+
+---
+
+### 7.6 Workspace Claude Code (task-creator)
 
 **Durée estimée :** 4h
 
@@ -842,14 +1521,34 @@ Si user valide → exécute les commandes.
 
 ## Critères de Succès
 
-- [ ] CLI DevFlow installable (`npm link`)
+- [ ] CLI DevFlow compilée et distribuable (binaire Rust)
 - [ ] Commandes auth fonctionnelles (login, logout, whoami)
 - [ ] Commandes tasks fonctionnelles (add, list, show, update, delete)
-- [ ] API endpoints créés et testés
+- [ ] API endpoints CLI créés et testés
 - [ ] Workspace Claude Code configuré
 - [ ] Flow complet Voice → Transcript → CLI testé
-- [ ] Tests unitaires passent (80% coverage)
+- [ ] Binaires disponibles pour Linux, macOS, Windows
 - [ ] Prêt pour Phase 8 (DevFlow AI)
+
+---
+
+## Avantages du passage à Rust
+
+1. **Performance** : Binaire natif, démarrage instantané (< 10ms vs ~500ms Node.js)
+2. **Distribution** : Single binary, pas de runtime nécessaire
+3. **Fiabilité** : Typage fort, pas d'erreurs runtime
+4. **Cross-platform** : Compilation native pour Linux, macOS, Windows
+5. **Taille** : Binaire compact (~5-10MB vs ~100MB+ Node.js avec node_modules)
+
+---
+
+## Migration de l'ancien scaffolding TypeScript
+
+Le dossier `cli/` existant contient du scaffolding TypeScript qui doit être supprimé :
+
+- [ ] Supprimer `cli/` directory (TypeScript scaffolding)
+- [ ] Créer nouveau projet `devflow-cli/` (Rust)
+- [ ] Mettre à jour les références dans la documentation
 
 ---
 
@@ -860,23 +1559,24 @@ Si user valide → exécute les commandes.
 - **Impact :** Tâches mal créées
 - **Mitigation :** Toujours valider avec user avant exécution
 
-**Risque 2 : CLI authentication complexe**
+**Risque 2 : Cross-compilation complexe**
 
-- **Impact :** User frustré
-- **Mitigation :** JWT simple, stored in ~/.devflow/config.json
+- **Impact :** Builds échoués sur certaines plateformes
+- **Mitigation :** Utiliser GitHub Actions avec matrices de build testées
 
 **Risque 3 : API rate limiting**
 
 - **Impact :** CLI bloqué
-- **Mitigation :** Ajouter retry logic avec backoff
+- **Mitigation :** Ajouter retry logic avec backoff exponentiel
 
 ---
 
 ## Notes
 
-- CLI doit être rapide (< 500ms par commande)
-- Output CLI coloré (chalk) pour UX
+- CLI doit être rapide (< 50ms par commande grâce à Rust)
+- Output CLI coloré (colored crate) pour UX
 - Workspace task-creator réutilisable pour autres use cases
+- Installation simple : télécharger binaire ou `cargo install`
 
 ---
 
