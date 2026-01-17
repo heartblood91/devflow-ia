@@ -4,14 +4,19 @@ import { createTestAccount } from "./utils/auth-test";
 
 test.describe("Weekly Planning", () => {
   test("should display weekly page correctly", async ({ page }) => {
-    // Create test account and login
+    // Create test account and login (go to dashboard first, then navigate to weekly)
     const userData = await createTestAccount({
       page,
-      callbackURL: "/weekly",
+      callbackURL: "/dashboard",
     });
 
-    // Wait for page to load with extended timeout
-    await page.waitForURL("/weekly", { timeout: 30000 });
+    // Wait for dashboard to load first
+    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
+    // Now navigate to weekly page
+    await page.goto("/weekly");
+    await page.waitForURL(/\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Verify we're on the weekly page
@@ -62,13 +67,18 @@ test.describe("Weekly Planning", () => {
   });
 
   test("should navigate between weeks", async ({ page }) => {
-    // Create test account and login
+    // Create test account and login (go to dashboard first, then navigate to weekly)
     const userData = await createTestAccount({
       page,
-      callbackURL: "/weekly",
+      callbackURL: "/dashboard",
     });
 
-    await page.waitForURL("/weekly", { timeout: 30000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
+    // Navigate to weekly page
+    await page.goto("/weekly");
+    await page.waitForURL(/\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Get the week date range element - it's the p element next to h2 in the header
@@ -120,13 +130,18 @@ test.describe("Weekly Planning", () => {
   });
 
   test("should display weekend OFF zones", async ({ page }) => {
-    // Create test account and login
+    // Create test account and login (go to dashboard first, then navigate to weekly)
     const userData = await createTestAccount({
       page,
-      callbackURL: "/weekly",
+      callbackURL: "/dashboard",
     });
 
-    await page.waitForURL("/weekly", { timeout: 30000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
+    // Navigate to weekly page
+    await page.goto("/weekly");
+    await page.waitForURL(/\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Wait for the grid to be visible
@@ -155,10 +170,15 @@ test.describe("Weekly Planning", () => {
     // Create test account and login first (at default viewport)
     const userData = await createTestAccount({
       page,
-      callbackURL: "/weekly",
+      callbackURL: "/dashboard",
     });
 
-    await page.waitForURL("/weekly", { timeout: 30000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
+    // Navigate to weekly page
+    await page.goto("/weekly");
+    await page.waitForURL(/\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Now resize to mobile viewport
@@ -203,13 +223,18 @@ test.describe("Weekly Planning", () => {
   test("should display work hours grid with proper time slots", async ({
     page,
   }) => {
-    // Create test account and login
+    // Create test account and login (go to dashboard first, then navigate to weekly)
     const userData = await createTestAccount({
       page,
-      callbackURL: "/weekly",
+      callbackURL: "/dashboard",
     });
 
-    await page.waitForURL("/weekly", { timeout: 30000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
+    // Navigate to weekly page
+    await page.goto("/weekly");
+    await page.waitForURL(/\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Wait for the grid to be visible
@@ -260,13 +285,18 @@ test.describe("Weekly Planning", () => {
   });
 
   test("should display correct day headers with dates", async ({ page }) => {
-    // Create test account and login
+    // Create test account and login (go to dashboard first, then navigate to weekly)
     const userData = await createTestAccount({
       page,
-      callbackURL: "/weekly",
+      callbackURL: "/dashboard",
     });
 
-    await page.waitForURL("/weekly", { timeout: 30000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
+    // Navigate to weekly page
+    await page.goto("/weekly");
+    await page.waitForURL(/\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Wait for the grid to be visible
