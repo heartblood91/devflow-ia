@@ -140,6 +140,13 @@
     "untitled": "Untitled",
     "gridPlaceholder": "Weekly Grid Coming Soon",
     "sidebarPlaceholder": "Sidebar Coming Soon",
+    "blockType": {
+      "sacred": "Sacred",
+      "important": "Important",
+      "optional": "Optional",
+      "buffer": "Buffer",
+      "rescue": "Rescue"
+    },
     "days": {
       "monday": "MON",
       "tuesday": "TUE",
@@ -155,6 +162,7 @@
     "menu": "Menu",
     "dashboard": "Dashboard",
     "taskBacklog": "Task Backlog",
+    "weeklyView": "Weekly View",
     "analytics": "Analytics",
     "account": "Account",
     "yourProfile": "Your Profile",

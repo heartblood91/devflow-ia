@@ -5,6 +5,7 @@ import type { WeeklyTimeBlocks } from "@/lib/actions/getWeeklyTimeBlocks.action"
 import { addDays, format, startOfWeek } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 import { DayColumn } from "./DayColumn";
+import { cn } from "@/lib/utils";
 
 type WeeklyGridProps = {
   currentWeek: Date;
@@ -108,16 +109,20 @@ export const WeeklyGrid = ({ currentWeek, timeBlocks }: WeeklyGridProps) => {
               {/* Background cells for grid lines with work hours styling */}
               {timeSlots.map((hour) => {
                 const isProductive = isProductiveHour(hour);
+                // Strong visual distinction: productive hours have more prominent background
                 const cellClasses = isWeekend
-                  ? "bg-muted/10"
+                  ? "bg-muted/10 dark:bg-muted/5"
                   : isProductive
-                    ? "bg-muted/30 hover:bg-muted/40"
-                    : "bg-muted/10 hover:bg-muted/20";
+                    ? "bg-primary/10 hover:bg-primary/15 dark:bg-primary/20 dark:hover:bg-primary/25"
+                    : "bg-muted/5 hover:bg-muted/10 dark:bg-muted/5 dark:hover:bg-muted/10";
 
                 return (
                   <div
                     key={`${dayKey}-${hour}`}
-                    className={`border-border h-16 border-b transition-colors ${cellClasses}`}
+                    className={cn(
+                      "border-border h-16 border-b transition-colors",
+                      cellClasses,
+                    )}
                   />
                 );
               })}

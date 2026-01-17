@@ -10,25 +10,35 @@ type TimeBlockCardProps = {
   timeBlock: TimeBlockWithTask;
 };
 
+/**
+ * Block type styles with pastel colors for dark mode.
+ * Light mode uses brighter colors for better visibility.
+ * Dark mode uses softer pastel variants for less eye strain.
+ */
 const BLOCK_TYPE_STYLES: Record<BlockType, string> = {
-  sacred: "bg-red-500 text-white",
-  important: "bg-orange-500 text-white",
-  optional: "bg-green-500 text-white",
-  buffer: "bg-gray-100 border border-dashed border-gray-400 text-gray-700",
-  rescue: "bg-yellow-400 text-gray-900",
+  sacred: "bg-red-500 text-white dark:bg-red-400/70 dark:text-red-50",
+  important:
+    "bg-orange-500 text-white dark:bg-orange-400/70 dark:text-orange-50",
+  optional: "bg-green-500 text-white dark:bg-green-400/70 dark:text-green-50",
+  buffer:
+    "bg-gray-200 border border-dashed border-gray-400 text-gray-700 dark:bg-gray-600/50 dark:border-gray-500 dark:text-gray-200",
+  rescue:
+    "bg-yellow-400 text-gray-900 dark:bg-yellow-400/60 dark:text-yellow-50",
 };
 
 /**
  * Compact card component for displaying a time block in the weekly grid.
- * Shows task title (with ellipsis) and time range.
- * Colors are based on block type priority.
+ * Shows task title (multi-line with line-clamp) and time range.
+ * Colors are based on block type priority with pastel variants for dark mode.
  */
 export const TimeBlockCard = ({ timeBlock }: TimeBlockCardProps) => {
   const t = useTranslations("weekly");
   const startTime = format(new Date(timeBlock.startTime), "HH:mm");
   const endTime = format(new Date(timeBlock.endTime), "HH:mm");
 
-  const taskTitle = timeBlock.task?.title ?? t("untitled");
+  // Show task title if available, otherwise show block type name
+  const displayTitle =
+    timeBlock.task?.title ?? t(`blockType.${timeBlock.blockType}`);
   const blockTypeStyle = BLOCK_TYPE_STYLES[timeBlock.blockType];
 
   return (
@@ -38,8 +48,11 @@ export const TimeBlockCard = ({ timeBlock }: TimeBlockCardProps) => {
         blockTypeStyle,
       )}
     >
-      <span className="truncate text-xs font-medium" title={taskTitle}>
-        {taskTitle}
+      <span
+        className="line-clamp-2 text-xs leading-tight font-medium"
+        title={displayTitle}
+      >
+        {displayTitle}
       </span>
       <span className="text-xs opacity-80">
         {startTime} - {endTime}

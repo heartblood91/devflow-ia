@@ -140,6 +140,13 @@
     "untitled": "Sans titre",
     "gridPlaceholder": "Grille Hebdomadaire Bientôt Disponible",
     "sidebarPlaceholder": "Barre Latérale Bientôt Disponible",
+    "blockType": {
+      "sacred": "Sacrée",
+      "important": "Importante",
+      "optional": "Optionnelle",
+      "buffer": "Buffer",
+      "rescue": "Rescue"
+    },
     "days": {
       "monday": "LUN",
       "tuesday": "MAR",
@@ -155,6 +162,7 @@
     "menu": "Menu",
     "dashboard": "Tableau de bord",
     "taskBacklog": "Backlog des Tâches",
+    "weeklyView": "Vue Hebdomadaire",
     "analytics": "Analytique",
     "account": "Compte",
     "yourProfile": "Votre Profil",
