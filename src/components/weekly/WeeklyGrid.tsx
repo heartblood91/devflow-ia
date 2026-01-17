@@ -3,9 +3,12 @@
 import { addDays, format, startOfWeek } from "date-fns";
 import { enUS, fr } from "date-fns/locale";
 import { useLocale, useTranslations } from "next-intl";
+import type { WeeklyTimeBlocks } from "@/lib/actions/getWeeklyTimeBlocks.action";
+import { DayColumn } from "./DayColumn";
 
 type WeeklyGridProps = {
   currentWeek: Date;
+  timeBlocks?: WeeklyTimeBlocks | null;
 };
 
 const LOCALE_MAP = {
@@ -28,7 +31,7 @@ const DAY_KEYS = [
   "sunday",
 ] as const;
 
-export const WeeklyGrid = ({ currentWeek }: WeeklyGridProps) => {
+export const WeeklyGrid = ({ currentWeek, timeBlocks }: WeeklyGridProps) => {
   const t = useTranslations("weekly");
   const locale = useLocale();
   const dateFnsLocale =
@@ -72,23 +75,42 @@ export const WeeklyGrid = ({ currentWeek }: WeeklyGridProps) => {
           </div>
         ))}
 
-        {/* Time slots rows */}
-        {timeSlots.map((hour) => (
-          <div key={`row-${hour}`} className="contents">
-            {/* Time column */}
-            <div className="border-border bg-muted/30 flex h-16 items-start justify-end border-r-2 border-b pt-1 pr-3">
+        {/* Time column with time slots */}
+        <div className="border-border border-r-2">
+          {timeSlots.map((hour) => (
+            <div
+              key={`time-${hour}`}
+              className="border-border bg-muted/30 flex h-16 items-start justify-end border-b pt-1 pr-3"
+            >
               <span className="text-muted-foreground text-xs font-medium">
                 {formatTime(hour)}
               </span>
             </div>
+          ))}
+        </div>
 
-            {/* Day cells */}
-            {DAY_KEYS.map((dayKey) => (
+        {/* Day columns with time blocks */}
+        {DAY_KEYS.map((dayKey, index) => (
+          <div
+            key={dayKey}
+            className="border-border relative border-r last:border-r-0"
+          >
+            {/* Background cells for grid lines */}
+            {timeSlots.map((hour) => (
               <div
                 key={`${dayKey}-${hour}`}
-                className="border-border hover:bg-muted/20 h-16 border-r border-b transition-colors last:border-r-0"
+                className="border-border hover:bg-muted/20 h-16 border-b transition-colors"
               />
             ))}
+
+            {/* Overlay DayColumn with time blocks */}
+            <div className="absolute inset-0">
+              <DayColumn
+                day={weekDays[index]}
+                timeBlocks={timeBlocks?.[dayKey] ?? []}
+                workHours={WORK_HOURS}
+              />
+            </div>
           </div>
         ))}
       </div>
