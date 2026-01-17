@@ -142,7 +142,11 @@
     "profile": "Profil",
     "email": "Email",
     "danger": "Danger",
-    "app": "Application"
+    "app": "Application",
+    "Admin": "Admin",
+    "Dashboard": "Dashboard",
+    "Users": "Users",
+    "Feedback": "Feedback"
   },
   "settings": {
     "title": "Paramètres",

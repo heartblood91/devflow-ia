@@ -44,7 +44,9 @@ test.describe("Internationalization (i18n)", () => {
     ).toBeVisible();
     await expect(page.getByText(/war room hebdomadaire/i)).toBeVisible();
     await expect(page.getByText(/minuteur de concentration/i)).toBeVisible();
-    await expect(page.getByText(/backlog des tâches/i)).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText(/backlog des tâches/i),
+    ).toBeVisible();
     await expect(page.getByText(/devflow ia/i)).toBeVisible();
     await expect(page.getByText(/bientôt disponible/i).first()).toBeVisible();
 
