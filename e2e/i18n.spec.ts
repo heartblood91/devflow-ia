@@ -180,8 +180,8 @@ test.describe("Internationalization (i18n)", () => {
       page.getByRole("heading", { name: /bon retour/i }),
     ).toBeVisible();
 
-    // Navigate to backlog
-    await page.getByRole("link", { name: /task backlog/i }).click();
+    // Navigate to backlog (use French translation since we switched language)
+    await page.getByRole("link", { name: /backlog des tâches/i }).click();
     await page.waitForURL("/app/backlog");
 
     // Wait for page to load
@@ -195,8 +195,8 @@ test.describe("Internationalization (i18n)", () => {
       page.getByRole("button", { name: /nouvelle tâche/i }),
     ).toBeVisible();
 
-    // Navigate back to dashboard
-    await page.getByRole("link", { name: /dashboard/i }).click();
+    // Navigate back to dashboard (use French translation since we're in French mode)
+    await page.getByRole("link", { name: /tableau de bord/i }).click();
     await page.waitForURL("/app");
 
     // Wait for page to load
