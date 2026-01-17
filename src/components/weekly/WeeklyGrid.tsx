@@ -64,16 +64,16 @@ export const WeeklyGrid = ({ currentWeek, timeBlocks }: WeeklyGridProps) => {
   };
 
   return (
-    <div className="border-border bg-card overflow-hidden rounded-lg border-2">
+    <div className="border-border bg-card overflow-x-auto rounded-lg border-2">
       {/* Grid container */}
       <div
         className="grid"
         style={{
-          gridTemplateColumns: "80px repeat(7, 1fr)",
+          gridTemplateColumns: "80px repeat(7, minmax(120px, 1fr))",
         }}
       >
         {/* Header row */}
-        <div className="border-border bg-muted/50 border-r-2 border-b-2 p-3" />
+        <div className="border-border bg-muted/50 sticky left-0 z-10 border-r-2 border-b-2 p-3" />
         {weekDays.map((day, index) => (
           <div
             key={DAY_KEYS[index]}
@@ -89,7 +89,7 @@ export const WeeklyGrid = ({ currentWeek, timeBlocks }: WeeklyGridProps) => {
         ))}
 
         {/* Time column with time slots */}
-        <div className="border-border border-r-2">
+        <div className="border-border sticky left-0 z-10 border-r-2">
           {timeSlots.map((hour) => (
             <div
               key={`time-${hour}`}
