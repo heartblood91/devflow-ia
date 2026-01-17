@@ -1,20 +1,15 @@
 "use client";
 
-import { addDays, format, startOfWeek } from "date-fns";
-import { enUS, fr } from "date-fns/locale";
-import { useLocale, useTranslations } from "next-intl";
+import { getDateFnsLocale } from "@/lib/format/date";
 import type { WeeklyTimeBlocks } from "@/lib/actions/getWeeklyTimeBlocks.action";
+import { addDays, format, startOfWeek } from "date-fns";
+import { useLocale, useTranslations } from "next-intl";
 import { DayColumn } from "./DayColumn";
 
 type WeeklyGridProps = {
   currentWeek: Date;
   timeBlocks?: WeeklyTimeBlocks | null;
 };
-
-const LOCALE_MAP = {
-  en: enUS,
-  fr: fr,
-} as const;
 
 const WORK_HOURS = {
   start: 8,
@@ -47,8 +42,7 @@ const DAY_KEYS = [
 export const WeeklyGrid = ({ currentWeek, timeBlocks }: WeeklyGridProps) => {
   const t = useTranslations("weekly");
   const locale = useLocale();
-  const dateFnsLocale =
-    locale in LOCALE_MAP ? LOCALE_MAP[locale as keyof typeof LOCALE_MAP] : enUS;
+  const dateFnsLocale = getDateFnsLocale(locale);
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
 

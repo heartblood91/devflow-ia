@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { getDateFnsLocale } from "@/lib/format/date";
 import { addWeeks, endOfWeek, format, startOfWeek, subWeeks } from "date-fns";
-import { enUS, fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Target } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -11,11 +11,6 @@ type WeeklyHeaderProps = {
   onWeekChange?: (newWeek: Date) => void;
 };
 
-const LOCALE_MAP = {
-  en: enUS,
-  fr: fr,
-} as const;
-
 export const WeeklyHeader = ({
   currentWeek,
   onWeekChange,
@@ -23,8 +18,7 @@ export const WeeklyHeader = ({
   const t = useTranslations("weekly");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const dateFnsLocale =
-    locale in LOCALE_MAP ? LOCALE_MAP[locale as keyof typeof LOCALE_MAP] : enUS;
+  const dateFnsLocale = getDateFnsLocale(locale);
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
