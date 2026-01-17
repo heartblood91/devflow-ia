@@ -87,6 +87,7 @@ prisma/
   - Stripe setup (on le fera nous-mêmes)
 
 - [ ] Lister dans un fichier `CLEANUP.md` :
+
   ```markdown
   # To Delete
 

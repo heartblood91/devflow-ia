@@ -104,7 +104,7 @@ export const SignUpCredentialsForm = () => {
           <FormItem>
             <FormLabel>Password</FormLabel>
             <FormControl>
-              <Input type="password" {...field} />
+              <Input type="password" data-testid="signup-password" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -117,14 +117,22 @@ export const SignUpCredentialsForm = () => {
           <FormItem>
             <FormLabel>Verify Password</FormLabel>
             <FormControl>
-              <Input type="password" {...field} />
+              <Input
+                type="password"
+                data-testid="signup-verify-password"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <Button type="submit" className="w-full">
+      <Button
+        type="submit"
+        data-testid="signup-submit-button"
+        className="w-full"
+      >
         Sign up
       </Button>
     </Form>

@@ -28,7 +28,9 @@ export default function GoodbyePage() {
             </AvatarFallback>
           </Avatar>
         </div>
-        <CardHeader className="text-center">Account Deleted</CardHeader>
+        <CardHeader className="text-center" data-testid="goodbye-page-heading">
+          Account Deleted
+        </CardHeader>
 
         <CardDescription className="text-center">
           Your account has been successfully deleted. We're sorry to see you go.

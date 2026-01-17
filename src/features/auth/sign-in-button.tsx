@@ -34,15 +34,17 @@ export const SignInButton = (props: VariantProps<typeof buttonVariants>) => {
 
 export const LoggedInButton = ({
   user,
+  currentLocale,
 }: {
   user: {
     name?: string | null;
     email?: string | null;
     image?: string | null;
   };
+  currentLocale: "en" | "fr";
 }) => {
   return (
-    <UserDropdown>
+    <UserDropdown currentLocale={currentLocale}>
       <button className="group size-9 rounded-full">
         <Avatar className="mr-2 size-full group-active:scale-95">
           <AvatarFallback className="bg-card">

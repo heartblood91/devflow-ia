@@ -16,6 +16,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Authentication checks
   if (isAppRoute(pathname)) {
     const session = await validateSession(request);
     if (!session) {

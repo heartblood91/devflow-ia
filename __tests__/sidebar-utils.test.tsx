@@ -116,18 +116,19 @@ describe("SidebarNavigationMenu", () => {
     const { usePathname } = await import("next/navigation");
     vi.mocked(usePathname).mockReturnValue("/dashboard");
 
+    // Labels are i18n keys that get translated by useTranslations("nav")
     const navigationGroup: NavigationGroup = {
-      title: "Main",
+      title: "menu",
       links: [
         {
           href: "/dashboard",
           Icon: Home,
-          label: "Dashboard",
+          label: "dashboard", // Translates to "Dashboard"
         },
         {
           href: "/profile",
           Icon: User,
-          label: "Profile",
+          label: "profile", // Translates to "Profile"
         },
       ],
     };
@@ -136,7 +137,7 @@ describe("SidebarNavigationMenu", () => {
       withSidebarProvider(<SidebarNavigationMenu link={navigationGroup} />),
     );
 
-    // Check that main links are rendered
+    // Check that translated links are rendered
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Profile")).toBeInTheDocument();
   });
@@ -145,18 +146,19 @@ describe("SidebarNavigationMenu", () => {
     const { usePathname } = await import("next/navigation");
     vi.mocked(usePathname).mockReturnValue("/settings/account");
 
+    // Labels are i18n keys that get translated by useTranslations("nav")
     const navigationGroup: NavigationGroup = {
-      title: "Settings",
+      title: "yourProfile",
       links: [
         {
           href: "/settings",
           Icon: Settings,
-          label: "Settings",
+          label: "profile", // Translates to "Profile"
           links: [
             {
               href: "/settings/account",
               Icon: User,
-              label: "Account Settings",
+              label: "account", // Translates to "Account"
             },
           ],
         },
@@ -167,10 +169,10 @@ describe("SidebarNavigationMenu", () => {
       withSidebarProvider(<SidebarNavigationMenu link={navigationGroup} />),
     );
 
-    // Check that parent link is rendered
-    expect(screen.getByText("Settings")).toBeInTheDocument();
+    // Check that translated parent link is rendered
+    expect(screen.getByText("Profile")).toBeInTheDocument();
 
-    // Check that child link is rendered
-    expect(screen.getByText("Account Settings")).toBeInTheDocument();
+    // Check that translated child link is rendered
+    expect(screen.getByText("Account")).toBeInTheDocument();
   });
 });

@@ -17,12 +17,16 @@ import { Layout } from "@/features/page/layout";
 import { SiteConfig } from "@/site-config";
 import { Home, User } from "lucide-react";
 import type { PropsWithChildren } from "react";
+import { getLocale } from "next-intl/server";
 import { SidebarUserButton } from "../sidebar/sidebar-user-button";
+import type { Locale } from "@/lib/i18n/config";
 
-export function BaseNavigation({ children }: PropsWithChildren) {
+export async function BaseNavigation({ children }: PropsWithChildren) {
+  const currentLocale = (await getLocale()) as Locale;
+
   return (
     <SidebarProvider id="app-sidebar">
-      <BaseSidebar />
+      <BaseSidebar currentLocale={currentLocale} />
       <SidebarInset className="border-accent border">
         <header className="flex h-16 shrink-0 items-center gap-2">
           <Layout size="lg">
@@ -35,7 +39,7 @@ export function BaseNavigation({ children }: PropsWithChildren) {
   );
 }
 
-const BaseSidebar = () => {
+const BaseSidebar = ({ currentLocale }: { currentLocale: Locale }) => {
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
@@ -61,7 +65,7 @@ const BaseSidebar = () => {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="flex flex-col gap-2">
-        <SidebarUserButton />
+        <SidebarUserButton currentLocale={currentLocale} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

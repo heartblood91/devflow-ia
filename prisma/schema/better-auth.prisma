@@ -16,6 +16,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   feedbacks     Feedback[]
+  tasks         Task[]
 
   role       String?
   banned     Boolean?

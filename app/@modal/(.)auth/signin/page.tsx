@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DialogContent } from "@/components/ui/dialog";
+import { DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { InterceptDialog } from "@/components/utils/intercept-dialog";
 import { SocialProviders } from "@/lib/auth";
 import { SiteConfig } from "@/site-config";
@@ -9,6 +9,7 @@ export default function SignInDialogPage() {
   return (
     <InterceptDialog>
       <DialogContent className="bg-card">
+        <DialogTitle className="sr-only">Sign In</DialogTitle>
         <div className="flex flex-col items-center justify-center gap-1">
           <div className="mx-auto mt-4 flex flex-row items-center gap-2">
             <Avatar className="size-8 rounded-md">

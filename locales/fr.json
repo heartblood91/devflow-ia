@@ -1,0 +1,168 @@
+{
+  "common": {
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "submit": "Soumettre",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page",
+    "of": "de",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "backlog": {
+    "title": "Backlog",
+    "pageTitle": "Backlog des Tâches",
+    "pageDescription": "Organisez et priorisez vos tâches avec Kanban",
+    "newTask": "Nouvelle tâche",
+    "resetFilters": "Réinitialiser les filtres",
+    "noTasks": "Aucune tâche",
+    "columns": {
+      "inbox": "Boîte de réception",
+      "todo": "À faire",
+      "doing": "En cours",
+      "done": "Terminé"
+    },
+    "filters": {
+      "allPriorities": "Toutes les priorités",
+      "allColumns": "Toutes les colonnes",
+      "priority": "Priorité",
+      "column": "Colonne"
+    },
+    "archives": {
+      "title": "Archives",
+      "empty": "Aucune tâche archivée"
+    },
+    "priority": {
+      "sacred": "Sacrée",
+      "important": "Importante",
+      "optional": "Optionnelle"
+    },
+    "toast": {
+      "taskDeleted": "Tâche supprimée",
+      "taskRestored": "Tâche restaurée !",
+      "taskMoved": "Tâche déplacée !",
+      "undo": "Annuler",
+      "failedToDelete": "Échec de la suppression de la tâche",
+      "failedToRestore": "Échec de la restauration de la tâche",
+      "failedToMove": "Échec du déplacement de la tâche",
+      "failedToRefresh": "Échec du rafraîchissement des tâches"
+    },
+    "motivational": {
+      "awesome": "🎉 Excellent travail ! Une de plus !",
+      "crushing": "💪 Tu assures ! Tâche accomplie !",
+      "greatJob": "🚀 Super boulot ! Continue comme ça !",
+      "fantastic": "✨ Fantastique ! Tu progresses !",
+      "onFire": "🔥 En feu ! Tâche éliminée !",
+      "lightning": "⚡ Rapide comme l'éclair ! Bien joué !",
+      "stellar": "🌟 Travail stellaire ! Tâche accomplie !"
+    }
+  },
+  "task": {
+    "title": "Tâche",
+    "description": "Description",
+    "priority": "Priorité",
+    "difficulty": "Difficulté",
+    "estimatedDuration": "Durée estimée",
+    "deadline": "Date limite",
+    "quarter": "Trimestre",
+    "status": "Statut",
+    "dependencies": "dépendances",
+    "minutes": "min",
+    "create": "Créer une tâche",
+    "update": "Mettre à jour la tâche",
+    "subtasks": "Sous-tâches",
+    "dialog": {
+      "createTitle": "Créer une nouvelle tâche",
+      "editTitle": "Modifier la tâche",
+      "createDescription": "Remplissez les détails de votre nouvelle tâche.",
+      "editDescription": "Mettez à jour les détails de la tâche ci-dessous.",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "Titre de la tâche",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Description de la tâche (optionnel)",
+      "priorityLabel": "Priorité",
+      "priorityPlaceholder": "Sélectionner la priorité",
+      "difficultyLabel": "Difficulté (1-5)",
+      "estimatedDurationLabel": "Durée estimée (minutes)",
+      "estimatedDurationDescription": "Combien de temps estimez-vous que cette tâche prendra ? (1-480 minutes)",
+      "deadlineLabel": "Date limite (optionnel)",
+      "quarterLabel": "Trimestre (optionnel)",
+      "quarterPlaceholder": "T1 2024",
+      "taskCreated": "Tâche créée !",
+      "taskUpdated": "Tâche mise à jour !",
+      "failedToSave": "Échec de l'enregistrement de la tâche"
+    }
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "welcomeBack": "Bon retour !",
+    "createAccount": "Créez votre compte"
+  },
+  "dashboard": {
+    "welcomeBack": "Bon retour, {name} ! 👋",
+    "subtitle": "Votre tableau de bord DevFlow - Faisons de cette journée une réussite",
+    "weeklyWarRoom": "War Room Hebdomadaire",
+    "focusTimer": "Minuteur de Concentration",
+    "taskBacklog": "Backlog des Tâches",
+    "devflowAI": "DevFlow IA",
+    "comingSoon": "Bientôt disponible",
+    "sundayRitual": "Rituel du dimanche",
+    "pomodoroUltradian": "Pomodoro / Ultradien",
+    "tasksInInbox": "{inbox} en boîte de réception, {active} actives",
+    "aiInsights": "Insights & chat IA",
+    "active": "actives"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "backlog": "Backlog",
+    "weekly": "Hebdomadaire",
+    "timer": "Minuteur",
+    "settings": "Paramètres"
+  },
+  "nav": {
+    "menu": "Menu",
+    "dashboard": "Tableau de bord",
+    "taskBacklog": "Backlog des Tâches",
+    "analytics": "Analytique",
+    "account": "Compte",
+    "yourProfile": "Votre Profil",
+    "profile": "Profil",
+    "email": "Email",
+    "danger": "Danger",
+    "app": "Application",
+    "Admin": "Admin",
+    "Dashboard": "Dashboard",
+    "Users": "Users",
+    "Feedback": "Feedback"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "profile": "Profil",
+    "account": "Compte",
+    "preferences": "Préférences",
+    "language": "Langue",
+    "theme": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "errors": {
+    "notFound": "Page non trouvée",
+    "unauthorized": "Non autorisé",
+    "serverError": "Erreur serveur",
+    "tryAgain": "Veuillez réessayer"
+  }
+}

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/lib/auth-client";
 import {
+  Languages,
   LayoutDashboard,
   Monitor,
   Moon,
@@ -30,10 +31,38 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import { UserDropdownLogout } from "./user-dropdown-logout";
 import { UserDropdownStopImpersonating } from "./user-dropdown-stop-impersonating";
+import { locales, localeNames, type Locale } from "@/lib/i18n/config";
+import { setLocaleAction } from "@/lib/actions/locale.action";
+import { resolveActionResult } from "@/lib/actions/actions-utils";
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-export const UserDropdown = ({ children }: PropsWithChildren) => {
+type UserDropdownProps = PropsWithChildren<{
+  currentLocale: Locale;
+}>;
+
+export const UserDropdown = ({
+  children,
+  currentLocale,
+}: UserDropdownProps) => {
   const session = useSession();
   const theme = useTheme();
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleLocaleChange = (locale: Locale) => {
+    startTransition(async () => {
+      try {
+        await resolveActionResult(setLocaleAction({ locale }));
+        router.refresh();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to change language",
+        );
+      }
+    });
+  };
 
   if (!session.data?.user) {
     return null;
@@ -97,6 +126,29 @@ export const UserDropdown = ({ children }: PropsWithChildren) => {
                 <Monitor className="mr-2 size-4" />
                 <span>System</span>
               </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger disabled={isPending}>
+            <Languages className="text-muted-foreground mr-4 size-4" />
+            <span>Language</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              {locales.map((locale) => (
+                <DropdownMenuItem
+                  key={locale}
+                  onClick={() => handleLocaleChange(locale)}
+                  disabled={isPending}
+                >
+                  {currentLocale === locale && <span className="mr-2">✓</span>}
+                  <span className={currentLocale !== locale ? "ml-6" : ""}>
+                    {localeNames[locale]}
+                  </span>
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>

@@ -12,6 +12,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { type ReactNode, Suspense } from "react";
 import "./globals.css";
 import { Providers } from "./providers";
+import { getLocaleFromCookies } from "@/lib/i18n/get-locale";
 
 export const metadata: Metadata = {
   title: SiteConfig.title,
@@ -34,12 +35,17 @@ const GeistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   modal,
 }: LayoutParams & { modal?: ReactNode }) {
+  const locale = await getLocaleFromCookies();
+
+  // Load messages for the current locale
+  const messages = (await import(`../locales/${locale}.json`)).default;
+
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang={locale} className="h-full" suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={cn(
@@ -50,7 +56,7 @@ export default function RootLayout({
         )}
       >
         <NuqsAdapter>
-          <Providers>
+          <Providers locale={locale} messages={messages}>
             <NextTopLoader
               delay={100}
               showSpinner={false}

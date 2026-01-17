@@ -53,7 +53,7 @@ test.describe("account", () => {
 
     await page.getByRole("button", { name: "Yes, Delete My Account" }).click();
     await page.waitForURL(/\/auth\/goodbye/, { timeout: 10000 });
-    await expect(page.getByText("Account Deleted").first()).toBeVisible();
+    await expect(page.getByTestId("goodbye-page-heading")).toBeVisible();
 
     const user = await prisma.user.findUnique({
       where: {
@@ -73,11 +73,23 @@ test.describe("account", () => {
 
     const newName = faker.person.fullName();
     const input = page.getByRole("textbox", { name: "Name" });
+    await input.clear();
     await input.fill(newName);
-    await page.getByRole("button", { name: /save/i }).click();
 
-    await expect(page.getByText("Profile updated")).toBeVisible();
+    // Click save button
+    const saveButton = page.getByRole("button", { name: /save/i });
+    await saveButton.click();
+
+    // Wait for save button to be re-enabled (mutation complete)
+    await expect(saveButton).toBeEnabled({ timeout: 10000 });
+
+    // Wait for network to be idle after the save
+    await page.waitForLoadState("networkidle");
+
+    // Reload and verify persistence
     await page.reload();
+    await page.waitForLoadState("networkidle");
+
     const updatedInput = page.getByRole("textbox", { name: "Name" });
     await expect(updatedInput).toHaveValue(newName);
   });
@@ -91,12 +103,16 @@ test.describe("account", () => {
       length: 12,
       memorable: true,
     });
-    await page.locator('input[name="currentPassword"]').fill(userData.password);
-    await page.locator('input[name="newPassword"]').fill(newPassword);
-    await page.locator('input[name="confirmPassword"]').fill(newPassword);
-    await page.getByRole("button", { name: /Change Password/i }).click();
+    await page.getByTestId("change-password-current").fill(userData.password);
+    await page.getByTestId("change-password-new").fill(newPassword);
+    await page.getByTestId("change-password-confirm").fill(newPassword);
 
-    await expect(page.getByText("Password changed successfully")).toBeVisible();
+    const submitButton = page.getByRole("button", { name: /Change Password/i });
+    await submitButton.click();
+
+    // Wait for success: form redirects to /account after password change
+    await page.waitForURL(/\/account$/, { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
 
     await signOutAccount({ page });
 

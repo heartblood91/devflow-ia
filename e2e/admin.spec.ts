@@ -11,13 +11,18 @@ test.describe("admin", () => {
 
     await page.goto("/admin");
 
-    await expect(page.getByRole("link", { name: "Users" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Users", exact: true }).first(),
+    ).toBeVisible();
 
     await expect(
       page.getByRole("link", { name: "Feedback" }).first(),
     ).toBeVisible();
 
-    await page.getByRole("link", { name: "Users" }).click();
+    await page
+      .getByRole("link", { name: "Users", exact: true })
+      .first()
+      .click();
 
     await expect(page).toHaveURL("/admin/users");
 
