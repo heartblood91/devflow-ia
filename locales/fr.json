@@ -148,7 +148,8 @@
       "friday": "VEN",
       "saturday": "SAM",
       "sunday": "DIM"
-    }
+    },
+    "offDay": "REPOS"
   },
   "nav": {
     "menu": "Menu",

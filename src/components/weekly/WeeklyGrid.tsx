@@ -21,6 +21,19 @@ const WORK_HOURS = {
   end: 19,
 };
 
+const PRODUCTIVE_HOURS = {
+  start: 9,
+  end: 18,
+};
+
+const isProductiveHour = (hour: number): boolean => {
+  return hour >= PRODUCTIVE_HOURS.start && hour < PRODUCTIVE_HOURS.end;
+};
+
+const isWeekendDay = (dayIndex: number): boolean => {
+  return dayIndex >= 5;
+};
+
 const DAY_KEYS = [
   "monday",
   "tuesday",
@@ -90,29 +103,51 @@ export const WeeklyGrid = ({ currentWeek, timeBlocks }: WeeklyGridProps) => {
         </div>
 
         {/* Day columns with time blocks */}
-        {DAY_KEYS.map((dayKey, index) => (
-          <div
-            key={dayKey}
-            className="border-border relative border-r last:border-r-0"
-          >
-            {/* Background cells for grid lines */}
-            {timeSlots.map((hour) => (
-              <div
-                key={`${dayKey}-${hour}`}
-                className="border-border hover:bg-muted/20 h-16 border-b transition-colors"
-              />
-            ))}
+        {DAY_KEYS.map((dayKey, dayIndex) => {
+          const isWeekend = isWeekendDay(dayIndex);
 
-            {/* Overlay DayColumn with time blocks */}
-            <div className="absolute inset-0">
-              <DayColumn
-                day={weekDays[index]}
-                timeBlocks={timeBlocks?.[dayKey] ?? []}
-                workHours={WORK_HOURS}
-              />
+          return (
+            <div
+              key={dayKey}
+              className="border-border relative border-r last:border-r-0"
+            >
+              {/* Background cells for grid lines with work hours styling */}
+              {timeSlots.map((hour) => {
+                const isProductive = isProductiveHour(hour);
+                const cellClasses = isWeekend
+                  ? "bg-muted/10"
+                  : isProductive
+                    ? "bg-muted/30 hover:bg-muted/40"
+                    : "bg-muted/10 hover:bg-muted/20";
+
+                return (
+                  <div
+                    key={`${dayKey}-${hour}`}
+                    className={`border-border h-16 border-b transition-colors ${cellClasses}`}
+                  />
+                );
+              })}
+
+              {/* Weekend OFF zone overlay */}
+              {isWeekend && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <span className="text-muted-foreground/30 text-4xl font-bold tracking-widest">
+                    {t("offDay")}
+                  </span>
+                </div>
+              )}
+
+              {/* Overlay DayColumn with time blocks */}
+              <div className="absolute inset-0">
+                <DayColumn
+                  day={weekDays[dayIndex]}
+                  timeBlocks={timeBlocks?.[dayKey] ?? []}
+                  workHours={WORK_HOURS}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

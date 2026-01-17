@@ -148,7 +148,8 @@
       "friday": "FRI",
       "saturday": "SAT",
       "sunday": "SUN"
-    }
+    },
+    "offDay": "OFF"
   },
   "nav": {
     "menu": "Menu",
