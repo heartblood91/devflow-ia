@@ -132,6 +132,13 @@
     "timer": "Minuteur",
     "settings": "Paramètres"
   },
+  "weekly": {
+    "pageTitle": "Planification Hebdomadaire",
+    "pageDescription": "Planifiez votre semaine avec le time-blocking",
+    "warRoom": "War Room",
+    "gridPlaceholder": "Grille Hebdomadaire Bientôt Disponible",
+    "sidebarPlaceholder": "Barre Latérale Bientôt Disponible"
+  },
   "nav": {
     "menu": "Menu",
     "dashboard": "Tableau de bord",

@@ -13,30 +13,31 @@ model User {
   resendContactId String?
 
   // Outgoing
-  sessions      Session[]
-  accounts      Account[]
-  feedbacks     Feedback[]
-  tasks         Task[]
+  sessions  Session[]
+  accounts  Account[]
+  feedbacks Feedback[]
+  tasks     Task[]
 
   role       String?
   banned     Boolean?
   banReason  String?
   banExpires DateTime?
+  TimeBlock  TimeBlock[]
 
   @@unique([email])
   @@map("user")
 }
 
 model Session {
-  id                   String   @id
-  expiresAt            DateTime
-  token                String
-  createdAt            DateTime
-  updatedAt            DateTime
-  ipAddress            String?
-  userAgent            String?
-  userId               String
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   impersonatedBy String?
 
@@ -73,4 +74,3 @@ model Verification {
 
   @@map("verification")
 }
-
