@@ -138,7 +138,16 @@
     "warRoom": "War Room",
     "weekOf": "Semaine du",
     "gridPlaceholder": "Grille Hebdomadaire Bientôt Disponible",
-    "sidebarPlaceholder": "Barre Latérale Bientôt Disponible"
+    "sidebarPlaceholder": "Barre Latérale Bientôt Disponible",
+    "days": {
+      "monday": "LUN",
+      "tuesday": "MAR",
+      "wednesday": "MER",
+      "thursday": "JEU",
+      "friday": "VEN",
+      "saturday": "SAM",
+      "sunday": "DIM"
+    }
   },
   "nav": {
     "menu": "Menu",

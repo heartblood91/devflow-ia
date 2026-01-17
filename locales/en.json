@@ -138,7 +138,16 @@
     "warRoom": "War Room",
     "weekOf": "Week of",
     "gridPlaceholder": "Weekly Grid Coming Soon",
-    "sidebarPlaceholder": "Sidebar Coming Soon"
+    "sidebarPlaceholder": "Sidebar Coming Soon",
+    "days": {
+      "monday": "MON",
+      "tuesday": "TUE",
+      "wednesday": "WED",
+      "thursday": "THU",
+      "friday": "FRI",
+      "saturday": "SAT",
+      "sunday": "SUN"
+    }
   },
   "nav": {
     "menu": "Menu",

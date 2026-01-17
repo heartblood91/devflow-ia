@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { WeeklyGrid } from "./WeeklyGrid";
 import { WeeklyHeader } from "./WeeklyHeader";
 
 export const WeeklyContent = () => {
@@ -20,12 +21,8 @@ export const WeeklyContent = () => {
       {/* Main Content Area */}
       <div className="mt-8 flex flex-1 gap-6">
         {/* Grid Area - Weekly Calendar */}
-        <main className="flex-1">
-          <div className="border-border bg-card min-h-[600px] rounded-lg border-2 p-4">
-            <div className="text-muted-foreground flex h-full items-center justify-center">
-              {t("gridPlaceholder")}
-            </div>
-          </div>
+        <main className="flex-1 overflow-x-auto">
+          <WeeklyGrid currentWeek={currentWeek} />
         </main>
 
         {/* Sidebar Area (Optional) */}
