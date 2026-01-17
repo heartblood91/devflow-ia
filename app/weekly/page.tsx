@@ -1,4 +1,5 @@
 import { Typography } from "@/components/nowts/typography";
+import { WeeklyHeader } from "@/components/weekly/WeeklyHeader";
 import { getRequiredCurrentUser } from "@/lib/user/get-user";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -16,12 +17,17 @@ export default async function WeeklyPage() {
     <div className="container mx-auto flex min-h-screen flex-col px-4 py-8">
       {/* Header Section */}
       <header className="mb-8">
-        <Typography variant="h1" className="mb-2">
-          {t("pageTitle")}
-        </Typography>
-        <Typography variant="muted" className="text-lg">
-          {t("pageDescription")}
-        </Typography>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <Typography variant="h1" className="mb-2">
+              {t("pageTitle")}
+            </Typography>
+            <Typography variant="muted" className="text-lg">
+              {t("pageDescription")}
+            </Typography>
+          </div>
+          <WeeklyHeader currentWeek={new Date()} />
+        </div>
       </header>
 
       {/* Main Content Area */}
