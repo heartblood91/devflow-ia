@@ -74,6 +74,7 @@
     "status": "Status",
     "dependencies": "dependencies",
     "minutes": "min",
+    "dragHandle": "Draggable task",
     "create": "Create Task",
     "update": "Update Task",
     "subtasks": "Subtasks",
@@ -171,7 +172,24 @@
       "title": "War Room - Week of {date}",
       "planning": "Weekly Planning",
       "comingSoon": "Coming in Phase 5 Day 3",
-      "generatePlanning": "Generate Planning"
+      "generatePlanning": "Generate Planning",
+      "backlogTasks": "Backlog Tasks",
+      "noTasksToPlan": "No tasks to plan",
+      "chargeValidation": {
+        "workload": "Weekly Workload",
+        "overloaded": "Workload too high. Remove {hours}h of tasks.",
+        "ariaLabel": "Weekly workload: {current} hours out of {max} hours"
+      },
+      "toast": {
+        "generationSuccess": "Planning generated successfully!",
+        "generationError": "Failed to generate planning",
+        "saveSuccess": "Planning saved successfully!",
+        "saveError": "Failed to save planning"
+      },
+      "dropZone": {
+        "empty": "{day} at {time}, drop task here",
+        "occupied": "{day} at {time}, task: {task}"
+      }
     },
     "aiInsights": {
       "title": "DevFlow AI Insights",
