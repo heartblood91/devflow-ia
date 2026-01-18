@@ -164,7 +164,8 @@
       "rescueSlots": "Rescue Slots",
       "skippedTasks": "Skipped Tasks",
       "focusQuality": "Focus Quality",
-      "energyLevel": "Energy Level"
+      "energyLevel": "Energy Level",
+      "comingSoon": "Soon"
     },
     "warRoomModal": {
       "title": "War Room - Week of {date}",

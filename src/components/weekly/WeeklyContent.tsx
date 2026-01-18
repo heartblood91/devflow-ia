@@ -57,9 +57,9 @@ export const WeeklyContent = () => {
       <WeeklyHeader currentWeek={currentWeek} onWeekChange={handleWeekChange} />
 
       {/* Main Content Area */}
-      <div className="mt-8 flex flex-1 gap-6">
+      <div className="mt-8 flex min-w-0 flex-1 gap-6">
         {/* Grid Area - Weekly Calendar */}
-        <main className="flex-1 overflow-x-auto">
+        <main className="min-w-0 flex-1">
           <WeeklyGrid currentWeek={currentWeek} timeBlocks={timeBlocks} />
         </main>
 

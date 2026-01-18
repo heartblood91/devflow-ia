@@ -14,7 +14,7 @@ export default async function WeeklyPage() {
   const t = await getTranslations("weekly");
 
   return (
-    <div className="container mx-auto flex min-h-screen flex-col px-4 py-8">
+    <div className="container mx-auto flex max-w-full flex-col overflow-x-hidden px-4 py-8">
       {/* Page Title Section */}
       <header className="mb-6">
         <Typography variant="h1" className="mb-2">

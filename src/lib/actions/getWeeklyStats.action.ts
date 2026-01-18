@@ -8,13 +8,8 @@
 
 import { authAction } from "@/lib/actions/safe-actions";
 import { GetWeeklyStatsSchema } from "./getWeeklyStats.schema";
-import {
-  calculateWeeklyStats,
-  type WeeklyStats,
-} from "@/lib/stats/calculateWeeklyStats";
+import { calculateWeeklyStats } from "@/lib/stats/calculateWeeklyStats";
 import { startOfWeek } from "date-fns";
-
-export type { WeeklyStats };
 
 export const getWeeklyStatsAction = authAction
   .inputSchema(GetWeeklyStatsSchema)

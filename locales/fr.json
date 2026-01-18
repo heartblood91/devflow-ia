@@ -164,7 +164,8 @@
       "rescueSlots": "Créneaux Secours",
       "skippedTasks": "Tâches Skippées",
       "focusQuality": "Qualité Focus",
-      "energyLevel": "Niveau Énergie"
+      "energyLevel": "Niveau Énergie",
+      "comingSoon": "Bientôt"
     },
     "warRoomModal": {
       "title": "War Room - Semaine du {date}",

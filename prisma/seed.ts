@@ -258,7 +258,7 @@ async function main() {
         updatedAt: new Date(),
       },
 
-      // Done tasks
+      // Done tasks (completed THIS WEEK for War Room stats)
       {
         id: nanoid(11),
         userId: testUser.id,
@@ -273,8 +273,8 @@ async function main() {
         dependencies: [],
         deletedAt: null,
         archivedAt: null,
-        completedAt: new Date(),
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+        completedAt: new Date(), // Completed today (this week)
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         updatedAt: new Date(),
       },
       {
@@ -290,8 +290,59 @@ async function main() {
         dependencies: [],
         deletedAt: null,
         archivedAt: null,
-        completedAt: new Date(),
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+        completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // Completed yesterday (this week)
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        title: "Fix login redirect issue",
+        description: "Users were being redirected to wrong page after login",
+        priority: "sacred",
+        difficulty: 3,
+        estimatedDuration: 60,
+        status: "done",
+        kanbanColumn: "done",
+        dependencies: [],
+        deletedAt: null,
+        archivedAt: null,
+        completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // Completed 2 days ago (this week)
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        title: "Implement email notifications",
+        description: "Send email notifications for important events",
+        priority: "important",
+        difficulty: 4,
+        estimatedDuration: 90,
+        status: "done",
+        kanbanColumn: "done",
+        dependencies: [],
+        deletedAt: null,
+        archivedAt: null,
+        completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // Completed 3 days ago (this week)
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        title: "Add user profile page",
+        description: null,
+        priority: "optional",
+        difficulty: 2,
+        estimatedDuration: 45,
+        status: "done",
+        kanbanColumn: "done",
+        dependencies: [],
+        deletedAt: null,
+        archivedAt: null,
+        completedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // Completed 4 days ago (this week)
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         updatedAt: new Date(),
       },
 
@@ -370,13 +421,19 @@ async function main() {
     ],
   });
   console.log(
-    "✅ Sample tasks created (14 tasks total - including 3 archived)",
+    "✅ Sample tasks created (17 tasks total - 5 done this week, 3 archived)",
   );
 
-  // Get some task IDs for linking to time blocks
-  const tasks = await prisma.task.findMany({
-    where: { userId: testUser.id },
+  // Get DONE task IDs for linking to time blocks (so War Room stats work correctly)
+  const doneTasks = await prisma.task.findMany({
+    where: { userId: testUser.id, status: "done", archivedAt: null },
     take: 5,
+  });
+
+  // Also get some non-done tasks for mixed time blocks
+  const pendingTasks = await prisma.task.findMany({
+    where: { userId: testUser.id, status: { in: ["todo", "doing"] } },
+    take: 3,
   });
 
   // Create Sample TimeBlocks for Weekly View
@@ -427,11 +484,11 @@ async function main() {
 
   await prisma.timeBlock.createMany({
     data: [
-      // Monday - Deep work morning
+      // Monday - Deep work morning (done tasks)
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[0]?.id ?? null,
+        taskId: doneTasks[0]?.id ?? null, // CI/CD setup - done
         date: monday,
         startTime: createTime(monday, 9, 0),
         endTime: createTime(monday, 11, 0),
@@ -453,7 +510,7 @@ async function main() {
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[1]?.id ?? null,
+        taskId: doneTasks[1]?.id ?? null, // Dark mode - done
         date: monday,
         startTime: createTime(monday, 14, 0),
         endTime: createTime(monday, 16, 0),
@@ -462,7 +519,7 @@ async function main() {
         updatedAt: new Date(),
       },
 
-      // Tuesday - Meetings & code review
+      // Tuesday - Meetings & code review (mix of done and pending)
       {
         id: nanoid(11),
         userId: testUser.id,
@@ -477,7 +534,7 @@ async function main() {
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[2]?.id ?? null,
+        taskId: doneTasks[2]?.id ?? null, // Login redirect fix - done
         date: tuesday,
         startTime: createTime(tuesday, 11, 0),
         endTime: createTime(tuesday, 12, 30),
@@ -488,7 +545,7 @@ async function main() {
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[3]?.id ?? null,
+        taskId: doneTasks[3]?.id ?? null, // Email notifications - done
         date: tuesday,
         startTime: createTime(tuesday, 14, 0),
         endTime: createTime(tuesday, 17, 0),
@@ -497,7 +554,7 @@ async function main() {
         updatedAt: new Date(),
       },
 
-      // Wednesday - Mixed day
+      // Wednesday - Mixed day (done + pending)
       {
         id: nanoid(11),
         userId: testUser.id,
@@ -512,7 +569,7 @@ async function main() {
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[4]?.id ?? null,
+        taskId: doneTasks[4]?.id ?? null, // User profile - done
         date: wednesday,
         startTime: createTime(wednesday, 10, 30),
         endTime: createTime(wednesday, 12, 0),
@@ -523,7 +580,7 @@ async function main() {
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: null,
+        taskId: pendingTasks[0]?.id ?? null, // Pending task (todo/doing)
         date: wednesday,
         startTime: createTime(wednesday, 14, 0),
         endTime: createTime(wednesday, 15, 30),
@@ -532,11 +589,11 @@ async function main() {
         updatedAt: new Date(),
       },
 
-      // Thursday - Focus day
+      // Thursday - Focus day (mix)
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[0]?.id ?? null,
+        taskId: pendingTasks[1]?.id ?? null, // Pending task (todo/doing)
         date: thursday,
         startTime: createTime(thursday, 8, 0),
         endTime: createTime(thursday, 12, 0),
@@ -558,7 +615,7 @@ async function main() {
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[1]?.id ?? null,
+        taskId: pendingTasks[2]?.id ?? null, // Pending task (todo/doing)
         date: thursday,
         startTime: createTime(thursday, 14, 0),
         endTime: createTime(thursday, 16, 30),
@@ -582,7 +639,7 @@ async function main() {
       {
         id: nanoid(11),
         userId: testUser.id,
-        taskId: tasks[2]?.id ?? null,
+        taskId: doneTasks[0]?.id ?? null, // Re-use done task (CI/CD)
         date: friday,
         startTime: createTime(friday, 11, 0),
         endTime: createTime(friday, 12, 0),
