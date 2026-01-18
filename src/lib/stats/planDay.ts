@@ -77,6 +77,10 @@ const isInPeakHours = (time: Date, peakHours: PeakHour[]): boolean => {
   return peakHours.some((peak) => timeStr >= peak.start && timeStr < peak.end);
 };
 
+// Constants for peak hour search
+const MAX_PEAK_SEARCH_MINUTES = 480; // Don't search beyond 8 hours ahead
+const PEAK_SEARCH_INTERVAL_MINUTES = 30; // Check every 30 minutes
+
 /**
  * Plan a single day's time blocks
  *
@@ -159,9 +163,12 @@ export const planDay = (options: PlanDayOptions): TimeBlock[] => {
       // Find next peak hour within work day
       let foundPeak = false;
       let checkTime = currentTime;
-      const maxCheckMinutes = 480; // Don't check beyond 8 hours ahead
 
-      for (let i = 0; i < maxCheckMinutes; i += 30) {
+      for (
+        let i = 0;
+        i < MAX_PEAK_SEARCH_MINUTES;
+        i += PEAK_SEARCH_INTERVAL_MINUTES
+      ) {
         if (checkTime >= workEnd) {
           break; // Don't search beyond work end time
         }
@@ -173,7 +180,7 @@ export const planDay = (options: PlanDayOptions): TimeBlock[] => {
           foundPeak = true;
           break;
         }
-        checkTime = addMinutes(checkTime, 30);
+        checkTime = addMinutes(checkTime, PEAK_SEARCH_INTERVAL_MINUTES);
       }
 
       // If no peak found, place anyway at current time
