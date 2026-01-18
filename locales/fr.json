@@ -171,7 +171,9 @@
       "title": "War Room - Semaine du {date}",
       "planning": "Planification Hebdomadaire",
       "comingSoon": "Disponible Phase 5 Jour 3",
-      "generatePlanning": "Générer Planning"
+      "generatePlanning": "Générer Planning",
+      "backlogTasks": "Tâches du Backlog",
+      "noTasksToPlan": "Aucune tâche à planifier"
     },
     "aiInsights": {
       "title": "DevFlow AI Insights",
