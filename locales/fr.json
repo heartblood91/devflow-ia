@@ -156,7 +156,22 @@
       "saturday": "SAM",
       "sunday": "DIM"
     },
-    "offDay": "REPOS"
+    "offDay": "REPOS",
+    "stats": {
+      "title": "Rétrospective Hebdomadaire",
+      "tasksCompleted": "Tâches Terminées",
+      "totalHours": "Heures Totales",
+      "rescueSlots": "Créneaux Secours",
+      "skippedTasks": "Tâches Skippées",
+      "focusQuality": "Qualité Focus",
+      "energyLevel": "Niveau Énergie"
+    },
+    "warRoomModal": {
+      "title": "War Room - Semaine du {date}",
+      "planning": "Planification Hebdomadaire",
+      "comingSoon": "Disponible Phase 5 Jour 3",
+      "generatePlanning": "Générer Planning"
+    }
   },
   "nav": {
     "menu": "Menu",
