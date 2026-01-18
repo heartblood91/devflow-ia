@@ -54,8 +54,12 @@ export const DraggableTaskCard = ({
       {...attributes}
       {...listeners}
       data-testid={`task-card-${task.id}`}
+      role="listitem"
+      aria-roledescription={t("dragHandle")}
+      aria-label={task.title}
+      tabIndex={0}
       className={cn(
-        "flex flex-col gap-2 rounded-none border-2 bg-white p-3 transition-all hover:border-4 dark:bg-gray-950",
+        "flex flex-col gap-2 rounded-none border-2 bg-white p-3 transition-all hover:border-4 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-950",
         priorityColor,
         isDragging
           ? "cursor-grabbing opacity-50"

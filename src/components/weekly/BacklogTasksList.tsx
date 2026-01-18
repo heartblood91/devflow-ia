@@ -39,7 +39,7 @@ export const BacklogTasksList = ({
   const t = useTranslations("weekly.warRoomModal");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [_isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     let mounted = true;

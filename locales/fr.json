@@ -74,6 +74,7 @@
     "status": "Statut",
     "dependencies": "dépendances",
     "minutes": "min",
+    "dragHandle": "Tâche déplaçable",
     "create": "Créer une tâche",
     "update": "Mettre à jour la tâche",
     "subtasks": "Sous-tâches",
@@ -184,6 +185,10 @@
         "generationError": "Échec de la génération du planning",
         "saveSuccess": "Planning sauvegardé avec succès !",
         "saveError": "Échec de la sauvegarde du planning"
+      },
+      "dropZone": {
+        "empty": "{day} à {time}, déposez une tâche ici",
+        "occupied": "{day} à {time}, tâche : {task}"
       }
     },
     "aiInsights": {

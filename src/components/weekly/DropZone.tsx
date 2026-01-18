@@ -2,6 +2,7 @@
 
 import { useDroppable } from "@dnd-kit/core";
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 type DropZoneProps = {
@@ -17,6 +18,8 @@ type DropZoneProps = {
  * Uses @dnd-kit/core useDroppable hook for drag & drop functionality.
  */
 export const DropZone = ({ day, time, children, taskTitle }: DropZoneProps) => {
+  const t = useTranslations("weekly.warRoomModal");
+  const tDays = useTranslations("weekly.days");
   const droppableId = `${day}-${time}`;
   const { setNodeRef, isOver, active } = useDroppable({
     id: droppableId,
@@ -24,11 +27,17 @@ export const DropZone = ({ day, time, children, taskTitle }: DropZoneProps) => {
 
   const hasTask = !!taskTitle;
   const isDragging = !!active;
+  const dayLabel = tDays(day);
 
   return (
     <div
       ref={setNodeRef}
       data-testid={`drop-zone-${day}-${time}`}
+      aria-label={
+        hasTask
+          ? t("dropZone.occupied", { day: dayLabel, time, task: taskTitle })
+          : t("dropZone.empty", { day: dayLabel, time })
+      }
       className={cn(
         "flex h-10 items-center justify-center transition-colors",
         hasTask

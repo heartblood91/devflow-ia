@@ -74,6 +74,7 @@
     "status": "Status",
     "dependencies": "dependencies",
     "minutes": "min",
+    "dragHandle": "Draggable task",
     "create": "Create Task",
     "update": "Update Task",
     "subtasks": "Subtasks",
@@ -184,6 +185,10 @@
         "generationError": "Failed to generate planning",
         "saveSuccess": "Planning saved successfully!",
         "saveError": "Failed to save planning"
+      },
+      "dropZone": {
+        "empty": "{day} at {time}, drop task here",
+        "occupied": "{day} at {time}, task: {task}"
       }
     },
     "aiInsights": {
