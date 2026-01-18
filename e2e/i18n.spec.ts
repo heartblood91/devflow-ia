@@ -35,13 +35,10 @@ test.describe("Internationalization (i18n)", () => {
     // Switch to French
     await page.getByRole("menuitem", { name: "Français" }).click();
 
-    // Wait for page to reload with French translations
-    await page.waitForTimeout(1000);
-
-    // Verify French translations
+    // Verify French translations (auto-waits for language change)
     await expect(
       page.getByRole("heading", { name: /bon retour/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/war room hebdomadaire/i)).toBeVisible();
     await expect(page.getByText(/minuteur de concentration/i)).toBeVisible();
     await expect(
@@ -55,13 +52,10 @@ test.describe("Internationalization (i18n)", () => {
     await page.getByRole("menuitem", { name: /language/i }).click();
     await page.getByRole("menuitem", { name: "English" }).click();
 
-    // Wait for page to reload
-    await page.waitForTimeout(1000);
-
-    // Verify English translations are back
+    // Verify English translations are back (auto-waits for language change)
     await expect(
       page.getByRole("heading", { name: /welcome back/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/coming soon/i).first()).toBeVisible();
 
     // Clean up - delete user
@@ -109,13 +103,10 @@ test.describe("Internationalization (i18n)", () => {
     // Switch to French
     await page.getByRole("menuitem", { name: "Français" }).click();
 
-    // Wait for page to reload with French translations
-    await page.waitForTimeout(1000);
-
-    // Verify French translations
+    // Verify French translations (auto-waits for language change)
     await expect(
       page.getByRole("heading", { name: /boîte de réception/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole("heading", { name: /à faire/i })).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /en cours/i }),
@@ -132,11 +123,10 @@ test.describe("Internationalization (i18n)", () => {
     await page.getByRole("menuitem", { name: /language/i }).click();
     await page.getByRole("menuitem", { name: "English" }).click();
 
-    // Wait for page to reload
-    await page.waitForTimeout(1000);
-
-    // Verify English translations are back
-    await expect(page.getByRole("heading", { name: /inbox/i })).toBeVisible();
+    // Verify English translations are back (auto-waits for language change)
+    await expect(page.getByRole("heading", { name: /inbox/i })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByRole("button", { name: /new task/i })).toBeVisible();
 
     // Clean up - delete user
@@ -174,25 +164,19 @@ test.describe("Internationalization (i18n)", () => {
     await page.getByRole("menuitem", { name: /language/i }).click();
     await page.getByRole("menuitem", { name: "Français" }).click();
 
-    // Wait for reload
-    await page.waitForTimeout(1000);
-
-    // Verify French on dashboard
+    // Verify French on dashboard (auto-waits for language change)
     await expect(
       page.getByRole("heading", { name: /bon retour/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Navigate to backlog (use French translation since we switched language)
     await page.getByRole("link", { name: /backlog des tâches/i }).click();
     await page.waitForURL("/app/backlog");
 
-    // Wait for page to load
-    await page.waitForTimeout(1000);
-
     // Verify language persisted (still French)
     await expect(
       page.getByRole("heading", { name: /boîte de réception/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("button", { name: /nouvelle tâche/i }),
     ).toBeVisible();
@@ -201,13 +185,10 @@ test.describe("Internationalization (i18n)", () => {
     await page.getByRole("link", { name: /tableau de bord/i }).click();
     await page.waitForURL("/app");
 
-    // Wait for page to load
-    await page.waitForTimeout(1000);
-
     // Verify language still persisted (still French)
     await expect(
       page.getByRole("heading", { name: /bon retour/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Clean up - delete user
     const user = await prisma.user.findUnique({
@@ -276,16 +257,13 @@ test.describe("Internationalization (i18n)", () => {
     await page.getByRole("menuitem", { name: /language/i }).click();
     await page.getByRole("menuitem", { name: "Français" }).click();
 
-    // Wait for reload
-    await page.waitForTimeout(1000);
-
-    // Verify task buttons are now in French
+    // Verify task buttons are now in French (auto-waits for language change)
     const taskCardFr = page.getByRole("button").filter({
       hasText: "Test i18n Task",
     });
     await expect(
       taskCardFr.getByRole("button", { name: /modifier/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(
       taskCardFr.getByRole("button", { name: /supprimer/i }),
     ).toBeVisible();

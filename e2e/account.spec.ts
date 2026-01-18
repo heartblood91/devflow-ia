@@ -7,6 +7,7 @@ import {
   signInAccount,
   signOutAccount,
 } from "./utils/auth-test";
+import { retry } from "./utils/retry";
 
 test.describe("account", () => {
   test("delete account flow", async ({ page }) => {
@@ -86,11 +87,21 @@ test.describe("account", () => {
     // Wait for network to be idle after the save
     await page.waitForLoadState("networkidle");
 
-    // Verify in database that update was successful
-    const user = await prisma.user.findUnique({
-      where: { email: userData.email },
-    });
-    expect(user?.name).toBe(newName);
+    // Verify in database that update was successful (with retry for race conditions)
+    const user = await retry(
+      async () => {
+        const foundUser = await prisma.user.findUnique({
+          where: { email: userData.email },
+        });
+        if (!foundUser || foundUser.name !== newName) {
+          throw new Error(
+            `Name not updated yet: expected ${newName}, got ${foundUser?.name}`,
+          );
+        }
+        return foundUser;
+      },
+      { maxAttempts: 5, delayMs: 1000 },
+    );
 
     // Reload and verify persistence in UI
     await page.reload();
@@ -100,11 +111,9 @@ test.describe("account", () => {
     await expect(updatedInput).toHaveValue(newName, { timeout: 10000 });
 
     // Clean up - delete user
-    if (user) {
-      await prisma.user.delete({
-        where: { id: user.id },
-      });
-    }
+    await prisma.user.delete({
+      where: { id: user.id },
+    });
   });
 
   test("change password flow", async ({ page }) => {

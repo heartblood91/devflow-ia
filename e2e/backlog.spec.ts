@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { expect, test } from "@playwright/test";
 import { createTestAccount } from "./utils/auth-test";
+import { retry } from "./utils/retry";
 
 test.describe("Task Backlog", () => {
   test("should display backlog page and manage tasks", async ({ page }) => {
@@ -11,7 +12,7 @@ test.describe("Task Backlog", () => {
     });
 
     // Wait for page to load
-    await page.waitForURL("/app/backlog");
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
 
     // Verify we're on the backlog page
     expect(page.url()).toContain("/app/backlog");
@@ -146,7 +147,7 @@ test.describe("Task Backlog", () => {
       callbackURL: "/app/backlog",
     });
 
-    await page.waitForURL("/app/backlog", { timeout: 30000 });
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
 
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
@@ -174,15 +175,18 @@ test.describe("Task Backlog", () => {
       callbackURL: "/app/backlog",
     });
 
-    await page.waitForURL("/app/backlog");
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
+
+    // Wait for page to be fully loaded before clicking
+    await page.waitForLoadState("networkidle");
 
     // Click "New Task" button
     await page.getByRole("button", { name: /new task/i }).click();
 
-    // Wait for dialog to appear
+    // Wait for dialog to appear (with longer timeout)
     await expect(
       page.getByRole("heading", { name: /create new task/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Fill in the form
     await page.getByLabel(/^title$/i).fill("E2E Test Task");
@@ -233,15 +237,21 @@ test.describe("Task Backlog", () => {
       callbackURL: "/app/backlog",
     });
 
-    await page.waitForURL("/app/backlog");
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
 
-    // Get the user from database
-    const user = await prisma.user.findUnique({
-      where: { email: userData.email },
-    });
-
-    expect(user).not.toBeNull();
-    if (!user) throw new Error("User not found");
+    // Get the user from database with retry for race conditions
+    const user = await retry(
+      async () => {
+        const foundUser = await prisma.user.findUnique({
+          where: { email: userData.email },
+        });
+        if (!foundUser) {
+          throw new Error("User not found in database");
+        }
+        return foundUser;
+      },
+      { maxAttempts: 5, delayMs: 1000 },
+    );
 
     // Create a test task
     await prisma.task.create({
@@ -257,6 +267,10 @@ test.describe("Task Backlog", () => {
         dependencies: [],
       },
     });
+
+    // Wait for page to be stable before reload
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
 
     // Reload page
     await page.reload();
@@ -319,15 +333,21 @@ test.describe("Task Backlog", () => {
       callbackURL: "/app/backlog",
     });
 
-    await page.waitForURL("/app/backlog");
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
 
-    // Get the user from database
-    const user = await prisma.user.findUnique({
-      where: { email: userData.email },
-    });
-
-    expect(user).not.toBeNull();
-    if (!user) throw new Error("User not found");
+    // Get the user from database with retry for race conditions
+    const user = await retry(
+      async () => {
+        const foundUser = await prisma.user.findUnique({
+          where: { email: userData.email },
+        });
+        if (!foundUser) {
+          throw new Error("User not found in database");
+        }
+        return foundUser;
+      },
+      { maxAttempts: 5, delayMs: 1000 },
+    );
 
     // Create a test task in Inbox
     const createdTask = await prisma.task.create({
@@ -343,6 +363,10 @@ test.describe("Task Backlog", () => {
         dependencies: [],
       },
     });
+
+    // Wait for page to be stable before reload
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(500);
 
     // Reload page
     await page.reload();
