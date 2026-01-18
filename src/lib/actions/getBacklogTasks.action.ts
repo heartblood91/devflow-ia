@@ -13,7 +13,7 @@
 
 import { authAction } from "@/lib/actions/safe-actions";
 import { prisma } from "@/lib/prisma";
-import type { Task } from "@/generated/prisma";
+import { GetBacklogTasksSchema } from "./getBacklogTasks.schema";
 
 /**
  * Get backlog tasks eligible for War Room planning
@@ -22,8 +22,9 @@ import type { Task } from "@/generated/prisma";
  * Optional tasks are excluded as they are not plannable.
  * Tasks are ordered to show highest priority, hardest, and earliest deadline first.
  */
-export const getBacklogTasksAction = authAction.action(
-  async ({ ctx: { user } }): Promise<{ tasks: Task[] }> => {
+export const getBacklogTasksAction = authAction
+  .inputSchema(GetBacklogTasksSchema)
+  .action(async ({ ctx: { user } }) => {
     const tasks = await prisma.task.findMany({
       where: {
         userId: user.id,
@@ -33,6 +34,7 @@ export const getBacklogTasksAction = authAction.action(
           in: ["sacred", "important"],
         },
         deletedAt: null,
+        archivedAt: null,
       },
       orderBy: [
         { priority: "desc" }, // sacred > important
@@ -42,5 +44,4 @@ export const getBacklogTasksAction = authAction.action(
     });
 
     return { tasks };
-  },
-);
+  });
