@@ -38,6 +38,11 @@ export const saveWeeklyPlanningAction = authAction
       return { success: true };
     }
 
+    // Get date range for the week to delete existing blocks
+    const dates = validBlocks.map((block) => block.date);
+    const minDate = new Date(Math.min(...dates.map((d) => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())));
+
     // Prepare data for createMany - include userId for each block
     const createData = validBlocks.map((block) => ({
       userId: user.id,
@@ -48,10 +53,24 @@ export const saveWeeklyPlanningAction = authAction
       taskId: block.taskId ?? null,
     }));
 
-    // Save all time blocks in a single transaction
-    await prisma.timeBlock.createMany({
-      data: createData,
-    });
+    // Use transaction to delete old blocks and create new ones atomically
+    // This prevents duplicates and ensures data consistency
+    await prisma.$transaction([
+      // Delete existing time blocks for this week
+      prisma.timeBlock.deleteMany({
+        where: {
+          userId: user.id,
+          date: {
+            gte: minDate,
+            lte: maxDate,
+          },
+        },
+      }),
+      // Create new time blocks
+      prisma.timeBlock.createMany({
+        data: createData,
+      }),
+    ]);
 
     return { success: true };
   });

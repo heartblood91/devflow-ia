@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { Loader2, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { DndContext, type DragEndEvent, useDroppable } from "@dnd-kit/core";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,9 +27,12 @@ import {
 import { ChargeValidation } from "./ChargeValidation";
 import { getBacklogTasksAction } from "@/lib/actions/getBacklogTasks.action";
 import { generateWeeklyPlanningAction } from "@/lib/actions/generateWeeklyPlanning.action";
+import { saveWeeklyPlanningAction } from "@/lib/actions/saveWeeklyPlanning.action";
 import { resolveActionResult } from "@/lib/actions/actions-utils";
 import type { Task } from "@/generated/prisma";
 import type { TimeBlock } from "@/lib/stats/planDay";
+
+const MAX_WEEKLY_HOURS = 20;
 
 type WarRoomModalProps = {
   open: boolean;
@@ -65,11 +69,13 @@ export const WarRoomModal = ({
 }: WarRoomModalProps) => {
   const t = useTranslations();
   const locale = useLocale();
+  const router = useRouter();
   const dateFnsLocale = getDateFnsLocale(locale);
 
   const [droppedTasks, setDroppedTasks] = useState<DroppedTask[]>([]);
   const [backlogTasks, setBacklogTasks] = useState<Task[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [generatedPlanning, setGeneratedPlanning] = useState<{
     timeBlocks: TimeBlock[];
     totalHours: number;
@@ -153,6 +159,35 @@ export const WarRoomModal = ({
       setIsGenerating(false);
     }
   }, [weekStartDate, droppedTasks, t]);
+
+  // Handle confirm planning button click
+  const handleConfirm = useCallback(async () => {
+    if (!generatedPlanning) return;
+
+    setIsSaving(true);
+    try {
+      await resolveActionResult(
+        saveWeeklyPlanningAction({ timeBlocks: generatedPlanning.timeBlocks }),
+      );
+
+      toast.success(t("weekly.warRoomModal.toast.saveSuccess"));
+      onOpenChange(false);
+      router.refresh();
+    } catch {
+      toast.error(t("weekly.warRoomModal.toast.saveError"));
+    } finally {
+      setIsSaving(false);
+    }
+  }, [generatedPlanning, t, onOpenChange, router]);
+
+  // Check if workload is overloaded
+  const isOverloaded =
+    generatedPlanning !== null &&
+    generatedPlanning.totalHours > MAX_WEEKLY_HOURS;
+
+  // Disable confirm when no planning, overloaded, or saving
+  const isConfirmDisabled =
+    !generatedPlanning || isOverloaded || isSaving || isGenerating;
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -297,10 +332,12 @@ export const WarRoomModal = ({
             </Button>
             <Button
               variant="default"
-              onClick={() => onOpenChange(false)}
+              onClick={handleConfirm}
+              disabled={isConfirmDisabled}
               className="rounded-none border-2"
               data-testid="confirm-planning-btn"
             >
+              {isSaving && <Loader2 className="mr-2 size-4 animate-spin" />}
               {t("common.confirm")}
             </Button>
           </div>

@@ -181,7 +181,9 @@
       },
       "toast": {
         "generationSuccess": "Planning généré avec succès !",
-        "generationError": "Échec de la génération du planning"
+        "generationError": "Échec de la génération du planning",
+        "saveSuccess": "Planning sauvegardé avec succès !",
+        "saveError": "Échec de la sauvegarde du planning"
       }
     },
     "aiInsights": {
