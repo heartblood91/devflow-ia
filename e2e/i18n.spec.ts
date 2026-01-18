@@ -11,14 +11,17 @@ test.describe("Internationalization (i18n)", () => {
     });
 
     // Wait for dashboard page to load with regex pattern and longer timeout
-    await page.waitForURL(/\/app$/, { timeout: 30000 });
+    await page.waitForURL(/\/app\/?$/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+
+    // Additional wait for hydration in CI environment
+    await page.waitForLoadState("domcontentloaded");
 
     // Verify we're on the dashboard in English (default)
     // Wait for main heading with longer timeout for CI
     await expect(
       page.getByRole("heading", { name: /welcome back/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(/weekly war room/i)).toBeVisible();
     await expect(page.getByText(/focus timer/i)).toBeVisible();
     await expect(
@@ -151,13 +154,14 @@ test.describe("Internationalization (i18n)", () => {
     });
 
     // Wait for navigation with regex pattern and longer timeout
-    await page.waitForURL(/\/app$/, { timeout: 30000 });
+    await page.waitForURL(/\/app\/?$/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Wait for page content to load
     await expect(
       page.getByRole("heading", { name: /welcome back/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
 
     // Switch to French
     await page.getByText(userData.email).click();

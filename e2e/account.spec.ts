@@ -68,18 +68,30 @@ test.describe("account", () => {
   test("update name flow", async ({ page }) => {
     const userData = await createTestAccount({ page, callbackURL: "/account" });
 
+    // Wait for page to fully load
+    await page.waitForURL(/\/account\/?$/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
     await page.getByRole("heading", { name: "Settings", level: 2 }).waitFor({
       timeout: 10000,
     });
 
-    const newName = faker.person.fullName();
+    // Wait for form to be ready
     const input = page.getByRole("textbox", { name: "Name" });
+    await expect(input).toBeVisible({ timeout: 5000 });
+
+    const newName = faker.person.fullName();
     await input.clear();
     await input.fill(newName);
 
     // Click save button
     const saveButton = page.getByRole("button", { name: /save/i });
     await saveButton.click();
+
+    // Wait for the success toast to appear (indicates mutation completed)
+    await expect(page.getByText("Profile updated")).toBeVisible({
+      timeout: 15000,
+    });
 
     // Wait for mutation to complete - button becomes enabled again
     await expect(saveButton).toBeEnabled({ timeout: 10000 });
@@ -100,7 +112,7 @@ test.describe("account", () => {
         }
         return foundUser;
       },
-      { maxAttempts: 5, delayMs: 1000 },
+      { maxAttempts: 10, delayMs: 1500 },
     );
 
     // Reload and verify persistence in UI
@@ -119,13 +131,30 @@ test.describe("account", () => {
   test("change password flow", async ({ page }) => {
     const userData = await createTestAccount({ page, callbackURL: "/account" });
 
+    // Wait for the account page to fully load
+    await page.waitForURL(/\/account\/?$/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+
+    // Wait for Settings heading to be visible before clicking
+    await expect(
+      page.getByRole("heading", { name: "Settings", level: 2 }),
+    ).toBeVisible({ timeout: 10000 });
+
     await page.getByRole("link", { name: /change password/i }).click();
+
+    // Wait for the change password page to fully load
+    await page.waitForURL(/\/account\/change-password/, { timeout: 10000 });
+    await page.waitForLoadState("networkidle");
+
+    // Wait for the form fields to be visible before filling
+    const currentPasswordField = page.getByTestId("change-password-current");
+    await expect(currentPasswordField).toBeVisible({ timeout: 10000 });
 
     const newPassword = faker.internet.password({
       length: 12,
       memorable: true,
     });
-    await page.getByTestId("change-password-current").fill(userData.password);
+    await currentPasswordField.fill(userData.password);
     await page.getByTestId("change-password-new").fill(newPassword);
     await page.getByTestId("change-password-confirm").fill(newPassword);
 

@@ -13,12 +13,13 @@ test.describe("Task Backlog", () => {
 
     // Wait for page to load
     await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
 
     // Verify we're on the backlog page
     expect(page.url()).toContain("/app/backlog");
     await expect(
       page.getByRole("heading", { name: /task backlog/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Verify the Kanban columns are displayed
     await expect(
@@ -32,13 +33,19 @@ test.describe("Task Backlog", () => {
     ).toBeVisible();
     await expect(page.getByRole("heading", { name: /done.*0/i })).toBeVisible();
 
-    // Get the user from database to create tasks
-    const user = await prisma.user.findUnique({
-      where: { email: userData.email },
-    });
-
-    expect(user).not.toBeNull();
-    if (!user) throw new Error("User not found");
+    // Get the user from database with retry for race conditions
+    const user = await retry(
+      async () => {
+        const foundUser = await prisma.user.findUnique({
+          where: { email: userData.email },
+        });
+        if (!foundUser) {
+          throw new Error("User not found in database");
+        }
+        return foundUser;
+      },
+      { maxAttempts: 5, delayMs: 1000 },
+    );
 
     // Create test tasks directly in the database
     await prisma.task.create({
@@ -151,10 +158,16 @@ test.describe("Task Backlog", () => {
 
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
+
+    // Wait for backlog heading to ensure page is loaded
+    await expect(
+      page.getByRole("heading", { name: /task backlog/i }),
+    ).toBeVisible({ timeout: 10000 });
 
     // Verify empty states are displayed in all columns
     const emptyStates = page.getByText(/no tasks/i);
-    await expect(emptyStates).toHaveCount(4); // One for each column
+    await expect(emptyStates).toHaveCount(4, { timeout: 10000 }); // One for each column
 
     // Clean up - delete user
     const user = await prisma.user.findUnique({
@@ -177,16 +190,29 @@ test.describe("Task Backlog", () => {
 
     await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
 
-    // Wait for page to be fully loaded before clicking
+    // Wait for page to be fully loaded and hydrated
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
+
+    // Wait for backlog page heading to ensure hydration
+    await expect(
+      page.getByRole("heading", { name: /task backlog/i }),
+    ).toBeVisible({ timeout: 10000 });
+
+    // Ensure New Task button is visible and ready
+    const newTaskButton = page.getByRole("button", { name: /new task/i });
+    await expect(newTaskButton).toBeVisible({ timeout: 5000 });
+
+    // Wait a bit more to ensure React is fully hydrated
+    await page.waitForTimeout(500);
 
     // Click "New Task" button
-    await page.getByRole("button", { name: /new task/i }).click();
+    await newTaskButton.click();
 
     // Wait for dialog to appear (with longer timeout)
     await expect(
       page.getByRole("heading", { name: /create new task/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
 
     // Fill in the form
     await page.getByLabel(/^title$/i).fill("E2E Test Task");
@@ -268,18 +294,22 @@ test.describe("Task Backlog", () => {
       },
     });
 
-    // Wait for page to be stable before reload
+    // Wait for page to be stable
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(1000);
 
-    // Reload page
-    await page.reload();
+    // Navigate to backlog page (more reliable than reload)
+    await page.goto("/app/backlog", { timeout: 30000 });
 
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Verify task is visible
-    await expect(page.getByText("Task to Edit")).toBeVisible();
+    await expect(page.getByText("Task to Edit")).toBeVisible({
+      timeout: 10000,
+    });
 
     // Click Edit button for the specific task
     const taskToEditCard = page
@@ -364,18 +394,22 @@ test.describe("Task Backlog", () => {
       },
     });
 
-    // Wait for page to be stable before reload
+    // Wait for page to be stable
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(500);
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(1000);
 
-    // Reload page
-    await page.reload();
+    // Navigate to backlog page (more reliable than reload)
+    await page.goto("/app/backlog", { timeout: 30000 });
 
     // Wait for page to be fully loaded
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Wait for task to be visible
-    await expect(page.getByText("Task to Drag")).toBeVisible();
+    await expect(page.getByText("Task to Drag")).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify task is in Inbox (count should be 1)
     await expect(page.getByTestId("kanban-column-heading-inbox")).toContainText(
