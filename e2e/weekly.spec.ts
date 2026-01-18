@@ -4,19 +4,14 @@ import { createTestAccount } from "./utils/auth-test";
 
 test.describe("Weekly Planning", () => {
   test("should display weekly page correctly", async ({ page }) => {
-    // Create test account and login (go to dashboard first, then navigate to weekly)
+    // Create test account and login directly to weekly page
     const userData = await createTestAccount({
       page,
-      callbackURL: "/dashboard",
+      callbackURL: "/app/weekly",
     });
 
-    // Wait for dashboard to load first
-    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
-    await page.waitForLoadState("networkidle");
-
-    // Now navigate to weekly page
-    await page.goto("/weekly");
-    await page.waitForURL(/\/weekly/, { timeout: 30000 });
+    // Wait for weekly page to load
+    await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Verify we're on the weekly page
@@ -33,7 +28,9 @@ test.describe("Weekly Planning", () => {
     await expect(h1).toBeVisible();
 
     // Verify week header is displayed (EN: "Week of", FR: "Semaine du")
-    await expect(page.locator("h2")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 2, name: /week of|semaine du/i }),
+    ).toBeVisible();
 
     // Verify navigation buttons are visible (using aria-label which stays consistent)
     await expect(page.locator("button[aria-label]").first()).toBeVisible();
@@ -67,33 +64,30 @@ test.describe("Weekly Planning", () => {
   });
 
   test("should navigate between weeks", async ({ page }) => {
-    // Create test account and login (go to dashboard first, then navigate to weekly)
+    // Create test account and login directly to weekly page
     const userData = await createTestAccount({
       page,
-      callbackURL: "/dashboard",
+      callbackURL: "/app/weekly",
     });
 
-    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
+    await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
-    // Navigate to weekly page
-    await page.goto("/weekly");
-    await page.waitForURL(/\/weekly/, { timeout: 30000 });
-    await page.waitForLoadState("networkidle");
+    // Get the week header and verify it's visible
+    const weekHeader = page.getByRole("heading", {
+      level: 2,
+      name: /week of|semaine du/i,
+    });
+    await expect(weekHeader).toBeVisible({ timeout: 10000 });
 
     // Get the week date range element - it's the p element next to h2 in the header
-    // Using a more robust selector that works across locales
-    const weekRangeElement = page
-      .locator("h2")
-      .locator("..")
-      .locator("p")
-      .first();
+    const weekRangeElement = weekHeader.locator("..").locator("p").first();
     await expect(weekRangeElement).toBeVisible({ timeout: 10000 });
     const initialWeekRange = await weekRangeElement.textContent();
     expect(initialWeekRange).toBeTruthy();
 
-    // Click next week button
-    await page.getByRole("button", { name: /next/i }).click();
+    // Click next week button (exact match to avoid Next.js Dev Tools button)
+    await page.getByRole("button", { name: "Next", exact: true }).click();
 
     // Wait for the week range to change
     await page.waitForTimeout(500);
@@ -103,7 +97,7 @@ test.describe("Weekly Planning", () => {
     expect(nextWeekRange).not.toBe(initialWeekRange);
 
     // Click previous week button to go back to original week
-    await page.getByRole("button", { name: /previous/i }).click();
+    await page.getByRole("button", { name: "Previous", exact: true }).click();
     await page.waitForTimeout(500);
 
     // Verify we're back to the original week
@@ -111,7 +105,7 @@ test.describe("Weekly Planning", () => {
     expect(backToOriginalRange).toBe(initialWeekRange);
 
     // Click previous again to go to the previous week
-    await page.getByRole("button", { name: /previous/i }).click();
+    await page.getByRole("button", { name: "Previous", exact: true }).click();
     await page.waitForTimeout(500);
 
     const previousWeekRange = await weekRangeElement.textContent();
@@ -130,22 +124,17 @@ test.describe("Weekly Planning", () => {
   });
 
   test("should display weekend OFF zones", async ({ page }) => {
-    // Create test account and login (go to dashboard first, then navigate to weekly)
+    // Create test account and login directly to weekly page
     const userData = await createTestAccount({
       page,
-      callbackURL: "/dashboard",
+      callbackURL: "/app/weekly",
     });
 
-    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
-    await page.waitForLoadState("networkidle");
-
-    // Navigate to weekly page
-    await page.goto("/weekly");
-    await page.waitForURL(/\/weekly/, { timeout: 30000 });
+    await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Wait for the grid to be visible
-    await expect(page.locator(".overflow-x-auto")).toBeVisible({
+    await expect(page.locator(".overflow-x-auto.rounded-lg")).toBeVisible({
       timeout: 10000,
     });
 
@@ -167,18 +156,13 @@ test.describe("Weekly Planning", () => {
   });
 
   test("should be responsive on mobile viewport", async ({ page }) => {
-    // Create test account and login first (at default viewport)
+    // Create test account and login directly to weekly page
     const userData = await createTestAccount({
       page,
-      callbackURL: "/dashboard",
+      callbackURL: "/app/weekly",
     });
 
-    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
-    await page.waitForLoadState("networkidle");
-
-    // Navigate to weekly page
-    await page.goto("/weekly");
-    await page.waitForURL(/\/weekly/, { timeout: 30000 });
+    await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Now resize to mobile viewport
@@ -193,12 +177,18 @@ test.describe("Weekly Planning", () => {
     });
 
     // Verify header elements are visible (h2 for week info)
-    await expect(page.locator("h2")).toBeVisible();
-    await expect(page.getByRole("button", { name: /previous/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /next/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 2, name: /week of|semaine du/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Previous", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Next", exact: true }),
+    ).toBeVisible();
 
     // Verify grid container exists
-    const gridContainer = page.locator(".overflow-x-auto").first();
+    const gridContainer = page.locator(".overflow-x-auto.rounded-lg").first();
     await expect(gridContainer).toBeVisible();
 
     // Verify time column is visible
@@ -223,22 +213,17 @@ test.describe("Weekly Planning", () => {
   test("should display work hours grid with proper time slots", async ({
     page,
   }) => {
-    // Create test account and login (go to dashboard first, then navigate to weekly)
+    // Create test account and login directly to weekly page
     const userData = await createTestAccount({
       page,
-      callbackURL: "/dashboard",
+      callbackURL: "/app/weekly",
     });
 
-    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
-    await page.waitForLoadState("networkidle");
-
-    // Navigate to weekly page
-    await page.goto("/weekly");
-    await page.waitForURL(/\/weekly/, { timeout: 30000 });
+    await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Wait for the grid to be visible
-    await expect(page.locator(".overflow-x-auto")).toBeVisible({
+    await expect(page.locator(".overflow-x-auto.rounded-lg")).toBeVisible({
       timeout: 10000,
     });
 
@@ -285,22 +270,17 @@ test.describe("Weekly Planning", () => {
   });
 
   test("should display correct day headers with dates", async ({ page }) => {
-    // Create test account and login (go to dashboard first, then navigate to weekly)
+    // Create test account and login directly to weekly page
     const userData = await createTestAccount({
       page,
-      callbackURL: "/dashboard",
+      callbackURL: "/app/weekly",
     });
 
-    await page.waitForURL(/\/dashboard/, { timeout: 30000 });
-    await page.waitForLoadState("networkidle");
-
-    // Navigate to weekly page
-    await page.goto("/weekly");
-    await page.waitForURL(/\/weekly/, { timeout: 30000 });
+    await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
     // Wait for the grid to be visible
-    await expect(page.locator(".overflow-x-auto")).toBeVisible({
+    await expect(page.locator(".overflow-x-auto.rounded-lg")).toBeVisible({
       timeout: 10000,
     });
 
