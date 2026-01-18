@@ -66,6 +66,7 @@ async function main() {
 
   // Clean existing data (development only)
   console.log("🧹 Cleaning existing data...");
+  await prisma.timeBlock.deleteMany();
   await prisma.task.deleteMany();
   await prisma.feedback.deleteMany();
   await prisma.session.deleteMany();
@@ -372,6 +373,238 @@ async function main() {
     "✅ Sample tasks created (14 tasks total - including 3 archived)",
   );
 
+  // Get some task IDs for linking to time blocks
+  const tasks = await prisma.task.findMany({
+    where: { userId: testUser.id },
+    take: 5,
+  });
+
+  // Create Sample TimeBlocks for Weekly View
+  console.log("📅 Creating sample time blocks...");
+
+  // Helper to get date for a specific day of current week (uses UTC noon to avoid timezone issues)
+  const getWeekDay = (dayOffset: number) => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust to Monday
+
+    // Use UTC to avoid timezone issues with @db.Date
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + diff + dayOffset);
+
+    // Create date at UTC noon to ensure correct day regardless of timezone
+    return new Date(
+      Date.UTC(
+        targetDate.getFullYear(),
+        targetDate.getMonth(),
+        targetDate.getDate(),
+        12,
+        0,
+        0,
+      ),
+    );
+  };
+
+  // Helper to create time with specific hour
+  // Uses local time so times display correctly in the user's timezone
+  const createTime = (date: Date, hour: number, minutes = 0) => {
+    const time = new Date(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      hour,
+      minutes,
+      0,
+    );
+    return time;
+  };
+
+  const monday = getWeekDay(0);
+  const tuesday = getWeekDay(1);
+  const wednesday = getWeekDay(2);
+  const thursday = getWeekDay(3);
+  const friday = getWeekDay(4);
+
+  await prisma.timeBlock.createMany({
+    data: [
+      // Monday - Deep work morning
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[0]?.id ?? null,
+        date: monday,
+        startTime: createTime(monday, 9, 0),
+        endTime: createTime(monday, 11, 0),
+        blockType: "sacred",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: null,
+        date: monday,
+        startTime: createTime(monday, 11, 0),
+        endTime: createTime(monday, 11, 30),
+        blockType: "buffer",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[1]?.id ?? null,
+        date: monday,
+        startTime: createTime(monday, 14, 0),
+        endTime: createTime(monday, 16, 0),
+        blockType: "important",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+
+      // Tuesday - Meetings & code review
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: null,
+        date: tuesday,
+        startTime: createTime(tuesday, 9, 30),
+        endTime: createTime(tuesday, 10, 30),
+        blockType: "important",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[2]?.id ?? null,
+        date: tuesday,
+        startTime: createTime(tuesday, 11, 0),
+        endTime: createTime(tuesday, 12, 30),
+        blockType: "optional",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[3]?.id ?? null,
+        date: tuesday,
+        startTime: createTime(tuesday, 14, 0),
+        endTime: createTime(tuesday, 17, 0),
+        blockType: "sacred",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+
+      // Wednesday - Mixed day
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: null,
+        date: wednesday,
+        startTime: createTime(wednesday, 9, 0),
+        endTime: createTime(wednesday, 10, 0),
+        blockType: "rescue",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[4]?.id ?? null,
+        date: wednesday,
+        startTime: createTime(wednesday, 10, 30),
+        endTime: createTime(wednesday, 12, 0),
+        blockType: "important",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: null,
+        date: wednesday,
+        startTime: createTime(wednesday, 14, 0),
+        endTime: createTime(wednesday, 15, 30),
+        blockType: "optional",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+
+      // Thursday - Focus day
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[0]?.id ?? null,
+        date: thursday,
+        startTime: createTime(thursday, 8, 0),
+        endTime: createTime(thursday, 12, 0),
+        blockType: "sacred",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: null,
+        date: thursday,
+        startTime: createTime(thursday, 13, 0),
+        endTime: createTime(thursday, 13, 30),
+        blockType: "buffer",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[1]?.id ?? null,
+        date: thursday,
+        startTime: createTime(thursday, 14, 0),
+        endTime: createTime(thursday, 16, 30),
+        blockType: "important",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+
+      // Friday - Wrap-up
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: null,
+        date: friday,
+        startTime: createTime(friday, 9, 0),
+        endTime: createTime(friday, 10, 30),
+        blockType: "rescue",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: tasks[2]?.id ?? null,
+        date: friday,
+        startTime: createTime(friday, 11, 0),
+        endTime: createTime(friday, 12, 0),
+        blockType: "optional",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: nanoid(11),
+        userId: testUser.id,
+        taskId: null,
+        date: friday,
+        startTime: createTime(friday, 14, 0),
+        endTime: createTime(friday, 15, 0),
+        blockType: "buffer",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+  });
+  console.log("✅ Sample time blocks created (15 blocks across Mon-Fri)");
+
   console.log("\n🎉 Seeding completed successfully!\n");
   console.log("📝 Test Accounts:");
   console.log("   👤 Test:  test@devflow.app  / test@devflow.apP");
@@ -381,8 +614,14 @@ async function main() {
   console.log("   📝 To Do: 2 tasks (1 sacred, 1 important)");
   console.log("   ⚡ Doing: 2 tasks (1 important, 1 optional)");
   console.log("   ✅ Done:  2 active tasks + 3 archived tasks");
+  console.log("\n📅 Time Blocks:");
+  console.log("   📌 Monday: 3 blocks (sacred, buffer, important)");
+  console.log("   📌 Tuesday: 3 blocks (important, optional, sacred)");
+  console.log("   📌 Wednesday: 3 blocks (rescue, important, optional)");
+  console.log("   📌 Thursday: 3 blocks (sacred, buffer, important)");
+  console.log("   📌 Friday: 3 blocks (rescue, optional, buffer)");
   console.log(
-    "\n💡 You can now sign in and test the backlog (including i18n FR/EN)!\n",
+    "\n💡 You can now sign in and test the backlog + weekly view (including i18n FR/EN)!\n",
   );
 }
 

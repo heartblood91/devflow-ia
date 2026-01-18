@@ -132,10 +132,37 @@
     "timer": "Minuteur",
     "settings": "Paramètres"
   },
+  "weekly": {
+    "pageTitle": "Planification Hebdomadaire",
+    "pageDescription": "Planifiez votre semaine avec le time-blocking",
+    "warRoom": "War Room",
+    "weekOf": "Semaine du",
+    "untitled": "Sans titre",
+    "gridPlaceholder": "Grille Hebdomadaire Bientôt Disponible",
+    "sidebarPlaceholder": "Barre Latérale Bientôt Disponible",
+    "blockType": {
+      "sacred": "Sacrée",
+      "important": "Importante",
+      "optional": "Optionnelle",
+      "buffer": "Buffer",
+      "rescue": "Rescue"
+    },
+    "days": {
+      "monday": "LUN",
+      "tuesday": "MAR",
+      "wednesday": "MER",
+      "thursday": "JEU",
+      "friday": "VEN",
+      "saturday": "SAM",
+      "sunday": "DIM"
+    },
+    "offDay": "REPOS"
+  },
   "nav": {
     "menu": "Menu",
     "dashboard": "Tableau de bord",
     "taskBacklog": "Backlog des Tâches",
+    "weeklyView": "Vue Hebdomadaire",
     "analytics": "Analytique",
     "account": "Compte",
     "yourProfile": "Votre Profil",

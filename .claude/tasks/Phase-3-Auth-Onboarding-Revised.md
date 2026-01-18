@@ -1,8 +1,9 @@
 # Phase 3 : Onboarding + Settings (Revised)
 
 **Durée :** Semaine 3 (5 jours)
-**Statut :** 🟡 À faire
+**Statut :** ⏭️ Skipped (auth via NOW.TS boilerplate, onboarding conversationnel non implémenté)
 **Dépendances :** Phase 2 (Prisma models)
+**Note :** Better Auth fonctionnel via boilerplate. Onboarding conversationnel reporté - implémentation iterative
 
 ---
 

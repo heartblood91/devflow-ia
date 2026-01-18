@@ -25,34 +25,36 @@ model Feedback {
 }
 
 model Task {
-  id                String       @id @default(nanoid(11))
-  userId            String
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(nanoid(11))
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   title             String
   description       String?
   priority          Priority     @default(optional)
   difficulty        Int          @default(3) // 1-5
-  estimatedDuration Int          // minutes
+  estimatedDuration Int // minutes
   status            TaskStatus   @default(inbox)
   kanbanColumn      KanbanColumn @default(inbox)
 
-  deadline          DateTime?
-  quarter           String?      // "Q1-2026", "Q2-2026", etc.
+  deadline DateTime?
+  quarter  String? // "Q1-2026", "Q2-2026", etc.
 
-  parentTaskId      String?
-  parentTask        Task?        @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
-  subtasks          Task[]       @relation("TaskSubtasks")
+  parentTaskId String?
+  parentTask   Task?   @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subtasks     Task[]  @relation("TaskSubtasks")
 
-  dependencies      String[]     // Array of task IDs
+  dependencies String[] // Array of task IDs
 
-  weekSkippedCount  Int          @default(0)
+  weekSkippedCount Int @default(0)
 
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  completedAt       DateTime?
-  deletedAt         DateTime?    // Soft delete - tasks marked for deletion
-  archivedAt        DateTime?    // Auto-archived after 7 days in done
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+  deletedAt   DateTime? // Soft delete - tasks marked for deletion
+  archivedAt  DateTime? // Auto-archived after 7 days in done
+
+  timeBlocks TimeBlock[]
 
   @@index([userId, status])
   @@index([userId, priority])
@@ -79,4 +81,32 @@ enum KanbanColumn {
   todo
   doing
   done
+}
+
+enum BlockType {
+  sacred
+  important
+  optional
+  buffer
+  rescue
+}
+
+model TimeBlock {
+  id     String @id @default(nanoid(11))
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  date      DateTime  @db.Date
+  startTime DateTime
+  endTime   DateTime
+  blockType BlockType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
+  @@map("time_block")
 }

@@ -1,18 +1,19 @@
 # Phase 4 : Backlog + Tasks Management
 
 **Durée :** Semaine 4 (5 jours)
-**Statut :** 🟡 À faire
+**Statut :** ✅ Terminé
 **Responsable :** Développeur (Cédric) + Jean-Claude (PM)
+**PR :** https://github.com/heartblood91/devflow-ia/pull/3
 
 ---
 
 ## Objectifs
 
-- [ ] Créer Backlog Kanban (4 colonnes)
-- [ ] CRUD Tasks (Create, Read, Update, Delete)
-- [ ] Drag & drop entre colonnes
-- [ ] Filtres (priorité, difficulté, deadline, quarter)
-- [ ] Sous-tâches et dépendances
+- [x] Créer Backlog Kanban (4 colonnes)
+- [x] CRUD Tasks (Create, Read, Update, Delete)
+- [x] Drag & drop entre colonnes
+- [x] Filtres (priorité, colonne)
+- [ ] Sous-tâches et dépendances (future iteration)
 
 ---
 

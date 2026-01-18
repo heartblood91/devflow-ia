@@ -1,4 +1,4 @@
-import { Home, ListTodo, User } from "lucide-react";
+import { Calendar, Home, ListTodo, User } from "lucide-react";
 
 export const APP_PATH = "/app";
 
@@ -17,6 +17,11 @@ export const APP_NAV_LINKS = [
     href: `${APP_PATH}/backlog`,
     Icon: ListTodo,
     label: "taskBacklog",
+  },
+  {
+    href: `${APP_PATH}/weekly`,
+    Icon: Calendar,
+    label: "weeklyView",
   },
   {
     href: `${APP_PATH}/users`,
