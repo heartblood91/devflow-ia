@@ -178,6 +178,10 @@
         "workload": "Charge Hebdomadaire",
         "overloaded": "Charge trop élevée. Retirez {hours}h de tâches.",
         "ariaLabel": "Charge hebdomadaire : {current} heures sur {max} heures"
+      },
+      "toast": {
+        "generationSuccess": "Planning généré avec succès !",
+        "generationError": "Échec de la génération du planning"
       }
     },
     "aiInsights": {

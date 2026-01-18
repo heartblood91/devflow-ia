@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { DndContext, type DragEndEvent, useDroppable } from "@dnd-kit/core";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,9 +23,12 @@ import {
   WeeklyPlanningPreview,
   type DroppedTask,
 } from "./WeeklyPlanningPreview";
+import { ChargeValidation } from "./ChargeValidation";
 import { getBacklogTasksAction } from "@/lib/actions/getBacklogTasks.action";
+import { generateWeeklyPlanningAction } from "@/lib/actions/generateWeeklyPlanning.action";
 import { resolveActionResult } from "@/lib/actions/actions-utils";
 import type { Task } from "@/generated/prisma";
+import type { TimeBlock } from "@/lib/stats/planDay";
 
 type WarRoomModalProps = {
   open: boolean;
@@ -65,6 +69,13 @@ export const WarRoomModal = ({
 
   const [droppedTasks, setDroppedTasks] = useState<DroppedTask[]>([]);
   const [backlogTasks, setBacklogTasks] = useState<Task[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedPlanning, setGeneratedPlanning] = useState<{
+    timeBlocks: TimeBlock[];
+    totalHours: number;
+    bufferHours: number;
+    rescueSlots: number;
+  } | null>(null);
 
   // Fetch backlog tasks for task lookup during drag operations
   useEffect(() => {
@@ -95,8 +106,53 @@ export const WarRoomModal = ({
   useEffect(() => {
     if (!open) {
       setDroppedTasks([]);
+      setGeneratedPlanning(null);
     }
   }, [open]);
+
+  // Handle generate planning button click
+  const handleGeneratePlanning = useCallback(async () => {
+    setIsGenerating(true);
+    try {
+      const result = await resolveActionResult(
+        generateWeeklyPlanningAction({ weekStartDate }),
+      );
+      setGeneratedPlanning(result);
+
+      // Convert generated time blocks to dropped tasks for preview display
+      const generatedDroppedTasks: DroppedTask[] = result.timeBlocks
+        .filter(
+          (
+            block,
+          ): block is typeof block & { taskId: string; taskTitle: string } =>
+            Boolean(block.taskId) && Boolean(block.taskTitle),
+        )
+        .map((block) => {
+          const day = format(block.date, "EEEE").toLowerCase();
+          const startTime = format(block.startTime, "HH:mm");
+          return {
+            taskId: block.taskId,
+            taskTitle: block.taskTitle,
+            day,
+            startTime,
+          };
+        });
+
+      // Merge with manually dropped tasks (manual takes precedence)
+      const manualTaskIds = new Set(droppedTasks.map((t) => t.taskId));
+      const newDroppedTasks = [
+        ...droppedTasks,
+        ...generatedDroppedTasks.filter((t) => !manualTaskIds.has(t.taskId)),
+      ];
+      setDroppedTasks(newDroppedTasks);
+
+      toast.success(t("weekly.warRoomModal.toast.generationSuccess"));
+    } catch {
+      toast.error(t("weekly.warRoomModal.toast.generationError"));
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [weekStartDate, droppedTasks, t]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -206,6 +262,13 @@ export const WarRoomModal = ({
                         weekStartDate={weekStartDate}
                       />
                     </div>
+
+                    {/* Charge validation - only show after generation */}
+                    {generatedPlanning && (
+                      <ChargeValidation
+                        totalHours={generatedPlanning.totalHours}
+                      />
+                    )}
                   </div>
                 </DndContext>
               </Card>
@@ -224,10 +287,12 @@ export const WarRoomModal = ({
             </Button>
             <Button
               variant="outline"
-              disabled
+              disabled={isGenerating}
+              onClick={handleGeneratePlanning}
               className="rounded-none border-2"
               data-testid="generate-planning-btn"
             >
+              {isGenerating && <Loader2 className="mr-2 size-4 animate-spin" />}
               {t("weekly.warRoomModal.generatePlanning")}
             </Button>
             <Button

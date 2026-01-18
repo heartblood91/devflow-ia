@@ -178,6 +178,10 @@
         "workload": "Weekly Workload",
         "overloaded": "Workload too high. Remove {hours}h of tasks.",
         "ariaLabel": "Weekly workload: {current} hours out of {max} hours"
+      },
+      "toast": {
+        "generationSuccess": "Planning generated successfully!",
+        "generationError": "Failed to generate planning"
       }
     },
     "aiInsights": {
