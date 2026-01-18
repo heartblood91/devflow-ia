@@ -171,6 +171,14 @@
       "planning": "Planification Hebdomadaire",
       "comingSoon": "Disponible Phase 5 Jour 3",
       "generatePlanning": "Générer Planning"
+    },
+    "aiInsights": {
+      "title": "DevFlow AI Insights",
+      "fallback": {
+        "unableToGenerate": "📊 Impossible de générer les insights",
+        "checkStats": "💡 Vérifiez vos statistiques et réessayez",
+        "keepTracking": "🎯 Continuez à suivre vos progrès"
+      }
     }
   },
   "nav": {
