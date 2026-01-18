@@ -105,7 +105,7 @@ test.describe("account", () => {
         const foundUser = await prisma.user.findUnique({
           where: { email: userData.email },
         });
-        if (!foundUser || foundUser.name !== newName) {
+        if (foundUser?.name !== newName) {
           throw new Error(
             `Name not updated yet: expected ${newName}, got ${foundUser?.name}`,
           );
