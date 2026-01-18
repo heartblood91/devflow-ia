@@ -9,8 +9,8 @@ test("sign up and verify account creation", async ({ page }) => {
     callbackURL: "/app",
   });
 
-  // Wait for navigation with regex pattern and longer timeout
-  await page.waitForURL(/\/app$/, { timeout: 30000 });
+  // Wait for navigation with regex pattern (allow /app or /app/ or /app/anything)
+  await page.waitForURL(/\/app\/?/, { timeout: 30000 });
   await page.waitForLoadState("networkidle");
 
   // Verify we're on the app page

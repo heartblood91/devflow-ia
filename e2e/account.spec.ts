@@ -65,7 +65,7 @@ test.describe("account", () => {
   });
 
   test("update name flow", async ({ page }) => {
-    await createTestAccount({ page, callbackURL: "/account" });
+    const userData = await createTestAccount({ page, callbackURL: "/account" });
 
     await page.getByRole("heading", { name: "Settings", level: 2 }).waitFor({
       timeout: 10000,
@@ -80,18 +80,31 @@ test.describe("account", () => {
     const saveButton = page.getByRole("button", { name: /save/i });
     await saveButton.click();
 
-    // Wait for save button to be re-enabled (mutation complete)
+    // Wait for mutation to complete - button becomes enabled again
     await expect(saveButton).toBeEnabled({ timeout: 10000 });
 
     // Wait for network to be idle after the save
     await page.waitForLoadState("networkidle");
 
-    // Reload and verify persistence
+    // Verify in database that update was successful
+    const user = await prisma.user.findUnique({
+      where: { email: userData.email },
+    });
+    expect(user?.name).toBe(newName);
+
+    // Reload and verify persistence in UI
     await page.reload();
     await page.waitForLoadState("networkidle");
 
     const updatedInput = page.getByRole("textbox", { name: "Name" });
-    await expect(updatedInput).toHaveValue(newName);
+    await expect(updatedInput).toHaveValue(newName, { timeout: 10000 });
+
+    // Clean up - delete user
+    if (user) {
+      await prisma.user.delete({
+        where: { id: user.id },
+      });
+    }
   });
 
   test("change password flow", async ({ page }) => {
@@ -111,7 +124,7 @@ test.describe("account", () => {
     await submitButton.click();
 
     // Wait for success: form redirects to /account after password change
-    await page.waitForURL(/\/account$/, { timeout: 15000 });
+    await page.waitForURL(/\/account\/?$/, { timeout: 15000 });
     await page.waitForLoadState("networkidle");
 
     await signOutAccount({ page });

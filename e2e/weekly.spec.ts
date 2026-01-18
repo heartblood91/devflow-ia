@@ -89,27 +89,29 @@ test.describe("Weekly Planning", () => {
     // Click next week button (exact match to avoid Next.js Dev Tools button)
     await page.getByRole("button", { name: "Next", exact: true }).click();
 
-    // Wait for the week range to change
-    await page.waitForTimeout(500);
+    // Wait for the week range to change (use poll to handle timing issues)
+    await expect
+      .poll(async () => weekRangeElement.textContent(), { timeout: 10000 })
+      .not.toBe(initialWeekRange);
 
-    // Get the new week date display
-    const nextWeekRange = await weekRangeElement.textContent();
-    expect(nextWeekRange).not.toBe(initialWeekRange);
+    // Get the new week date display (unused but kept for clarity)
+    const _nextWeekRange = await weekRangeElement.textContent();
 
     // Click previous week button to go back to original week
     await page.getByRole("button", { name: "Previous", exact: true }).click();
-    await page.waitForTimeout(500);
 
-    // Verify we're back to the original week
-    const backToOriginalRange = await weekRangeElement.textContent();
-    expect(backToOriginalRange).toBe(initialWeekRange);
+    // Wait for the week range to return to original
+    await expect
+      .poll(async () => weekRangeElement.textContent(), { timeout: 10000 })
+      .toBe(initialWeekRange);
 
     // Click previous again to go to the previous week
     await page.getByRole("button", { name: "Previous", exact: true }).click();
-    await page.waitForTimeout(500);
 
-    const previousWeekRange = await weekRangeElement.textContent();
-    expect(previousWeekRange).not.toBe(initialWeekRange);
+    // Wait for the week range to change again
+    await expect
+      .poll(async () => weekRangeElement.textContent(), { timeout: 10000 })
+      .not.toBe(initialWeekRange);
 
     // Clean up - delete user
     const user = await prisma.user.findUnique({
