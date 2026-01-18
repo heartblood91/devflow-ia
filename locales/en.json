@@ -173,7 +173,12 @@
       "comingSoon": "Coming in Phase 5 Day 3",
       "generatePlanning": "Generate Planning",
       "backlogTasks": "Backlog Tasks",
-      "noTasksToPlan": "No tasks to plan"
+      "noTasksToPlan": "No tasks to plan",
+      "chargeValidation": {
+        "workload": "Weekly Workload",
+        "overloaded": "Workload too high. Remove {hours}h of tasks.",
+        "ariaLabel": "Weekly workload: {current} hours out of {max} hours"
+      }
     },
     "aiInsights": {
       "title": "DevFlow AI Insights",

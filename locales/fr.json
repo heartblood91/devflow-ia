@@ -173,7 +173,12 @@
       "comingSoon": "Disponible Phase 5 Jour 3",
       "generatePlanning": "Générer Planning",
       "backlogTasks": "Tâches du Backlog",
-      "noTasksToPlan": "Aucune tâche à planifier"
+      "noTasksToPlan": "Aucune tâche à planifier",
+      "chargeValidation": {
+        "workload": "Charge Hebdomadaire",
+        "overloaded": "Charge trop élevée. Retirez {hours}h de tâches.",
+        "ariaLabel": "Charge hebdomadaire : {current} heures sur {max} heures"
+      }
     },
     "aiInsights": {
       "title": "DevFlow AI Insights",
