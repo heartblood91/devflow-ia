@@ -156,7 +156,31 @@
       "saturday": "SAT",
       "sunday": "SUN"
     },
-    "offDay": "OFF"
+    "offDay": "OFF",
+    "stats": {
+      "title": "Weekly Retrospective",
+      "tasksCompleted": "Tasks Completed",
+      "totalHours": "Total Hours",
+      "rescueSlots": "Rescue Slots",
+      "skippedTasks": "Skipped Tasks",
+      "focusQuality": "Focus Quality",
+      "energyLevel": "Energy Level",
+      "comingSoon": "Soon"
+    },
+    "warRoomModal": {
+      "title": "War Room - Week of {date}",
+      "planning": "Weekly Planning",
+      "comingSoon": "Coming in Phase 5 Day 3",
+      "generatePlanning": "Generate Planning"
+    },
+    "aiInsights": {
+      "title": "DevFlow AI Insights",
+      "fallback": {
+        "unableToGenerate": "📊 Unable to generate insights",
+        "checkStats": "💡 Check your stats and try again",
+        "keepTracking": "🎯 Keep tracking your progress"
+      }
+    }
   },
   "nav": {
     "menu": "Menu",

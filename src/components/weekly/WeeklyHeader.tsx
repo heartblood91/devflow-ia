@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getDateFnsLocale } from "@/lib/format/date";
 import { addWeeks, endOfWeek, format, startOfWeek, subWeeks } from "date-fns";
 import { ChevronLeft, ChevronRight, Target } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { WarRoomModal } from "./WarRoomModal";
 
 type WeeklyHeaderProps = {
   currentWeek: Date;
@@ -15,6 +17,7 @@ export const WeeklyHeader = ({
   currentWeek,
   onWeekChange,
 }: WeeklyHeaderProps) => {
+  const [isWarRoomOpen, setIsWarRoomOpen] = useState(false);
   const t = useTranslations("weekly");
   const tCommon = useTranslations("common");
   const locale = useLocale();
@@ -75,10 +78,20 @@ export const WeeklyHeader = ({
       </div>
 
       {/* War Room button */}
-      <Button variant="default" className="gap-2">
+      <Button
+        variant="default"
+        className="gap-2"
+        onClick={() => setIsWarRoomOpen(true)}
+      >
         <Target className="size-4" />
         {t("warRoom")}
       </Button>
+
+      <WarRoomModal
+        open={isWarRoomOpen}
+        onOpenChange={setIsWarRoomOpen}
+        weekStartDate={weekStart}
+      />
     </div>
   );
 };

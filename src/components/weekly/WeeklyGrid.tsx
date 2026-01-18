@@ -59,12 +59,12 @@ export const WeeklyGrid = ({ currentWeek, timeBlocks }: WeeklyGridProps) => {
   };
 
   return (
-    <div className="border-border bg-card overflow-x-auto rounded-lg border-2">
+    <div className="border-border bg-card min-w-0 overflow-x-auto rounded-lg border-2">
       {/* Grid container */}
       <div
-        className="grid"
+        className="grid min-w-[700px]"
         style={{
-          gridTemplateColumns: "80px repeat(7, minmax(120px, 1fr))",
+          gridTemplateColumns: "60px repeat(7, 1fr)",
         }}
       >
         {/* Header row */}
