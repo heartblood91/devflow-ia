@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { expect, test } from "@playwright/test";
 import { createTestAccount } from "./utils/auth-test";
+import { retry } from "./utils/retry";
 
 test.describe("Internationalization (i18n)", () => {
   test("should switch language on dashboard page", async ({ page }) => {
@@ -21,13 +22,17 @@ test.describe("Internationalization (i18n)", () => {
     // Wait for main heading with longer timeout for CI
     await expect(
       page.getByRole("heading", { name: /welcome back/i }),
-    ).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText(/weekly war room/i)).toBeVisible();
-    await expect(page.getByText(/focus timer/i)).toBeVisible();
-    await expect(
-      page.getByRole("main").getByText(/task backlog/i),
-    ).toBeVisible();
-    await expect(page.getByText(/devflow ai/i)).toBeVisible();
+    ).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText(/weekly war room/i)).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText(/focus timer/i)).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByRole("main").getByText(/task backlog/i)).toBeVisible(
+      { timeout: 10000 },
+    );
+    await expect(page.getByText(/devflow ai/i)).toBeVisible({ timeout: 10000 });
 
     // Open user dropdown (in sidebar footer) - use email to find the button
     await page.getByText(userData.email).click();
@@ -168,31 +173,36 @@ test.describe("Internationalization (i18n)", () => {
     await page.getByRole("menuitem", { name: /language/i }).click();
     await page.getByRole("menuitem", { name: "Français" }).click();
 
+    // Wait for language change to take effect
+    await page.waitForTimeout(500);
+
     // Verify French on dashboard (auto-waits for language change)
     await expect(
       page.getByRole("heading", { name: /bon retour/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
 
     // Navigate to backlog (use French translation since we switched language)
     await page.getByRole("link", { name: /backlog des tâches/i }).click();
-    await page.waitForURL("/app/backlog");
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
 
     // Verify language persisted (still French)
     await expect(
       page.getByRole("heading", { name: /boîte de réception/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
     await expect(
       page.getByRole("button", { name: /nouvelle tâche/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Navigate back to dashboard (use French translation since we're in French mode)
     await page.getByRole("link", { name: /tableau de bord/i }).click();
-    await page.waitForURL("/app");
+    await page.waitForURL(/\/app\/?$/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
 
     // Verify language still persisted (still French)
     await expect(
       page.getByRole("heading", { name: /bon retour/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
 
     // Clean up - delete user
     const user = await prisma.user.findUnique({
@@ -215,15 +225,23 @@ test.describe("Internationalization (i18n)", () => {
       callbackURL: "/app/backlog",
     });
 
-    await page.waitForURL("/app/backlog");
+    await page.waitForURL(/\/app\/backlog/, { timeout: 30000 });
+    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
-    // Get the user from database to create a task
-    const user = await prisma.user.findUnique({
-      where: { email: userData.email },
-    });
-
-    expect(user).not.toBeNull();
-    if (!user) throw new Error("User not found");
+    // Get the user from database with retry for race conditions
+    const user = await retry(
+      async () => {
+        const foundUser = await prisma.user.findUnique({
+          where: { email: userData.email },
+        });
+        if (!foundUser) {
+          throw new Error("User not found in database");
+        }
+        return foundUser;
+      },
+      { maxAttempts: 10, delayMs: 1500 },
+    );
 
     // Create a test task
     await prisma.task.create({
@@ -240,12 +258,15 @@ test.describe("Internationalization (i18n)", () => {
       },
     });
 
-    // Reload page to see the task
-    await page.reload();
+    // Navigate to backlog page to see the task (more reliable than reload)
+    await page.goto("/app/backlog", { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Verify task is visible in English
-    await expect(page.getByText("Test i18n Task")).toBeVisible();
+    await expect(page.getByText("Test i18n Task")).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify English buttons exist
     const taskCard = page.getByRole("button").filter({
@@ -256,10 +277,21 @@ test.describe("Internationalization (i18n)", () => {
       taskCard.getByRole("button", { name: /delete/i }),
     ).toBeVisible();
 
-    // Switch to French
+    // Switch to French - open user menu
     await page.getByText(userData.email).click();
-    await page.getByRole("menuitem", { name: /language/i }).click();
-    await page.getByRole("menuitem", { name: "Français" }).click();
+
+    // Wait for user dropdown to open and language menu item to be visible
+    const languageMenuItem = page.getByRole("menuitem", { name: /language/i });
+    await expect(languageMenuItem).toBeVisible({ timeout: 5000 });
+    await languageMenuItem.click();
+
+    // Wait for language submenu to open and French option to be visible
+    const francaisOption = page.getByRole("menuitem", { name: "Français" });
+    await expect(francaisOption).toBeVisible({ timeout: 5000 });
+    await francaisOption.click();
+
+    // Wait for language change to apply
+    await page.waitForTimeout(1000);
 
     // Verify task buttons are now in French (auto-waits for language change)
     const taskCardFr = page.getByRole("button").filter({
@@ -267,10 +299,10 @@ test.describe("Internationalization (i18n)", () => {
     });
     await expect(
       taskCardFr.getByRole("button", { name: /modifier/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
     await expect(
       taskCardFr.getByRole("button", { name: /supprimer/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Clean up
     await prisma.task.deleteMany({

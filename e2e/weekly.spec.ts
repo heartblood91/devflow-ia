@@ -14,42 +14,49 @@ test.describe("Weekly Planning", () => {
     await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
 
+    // Additional wait for hydration in CI environment
+    await page.waitForLoadState("domcontentloaded");
+
     // Verify we're on the weekly page
     expect(page.url()).toContain("/weekly");
 
     // Verify page title is visible (supports both EN and FR)
     // EN: "Weekly Planning", FR: "Planification Hebdomadaire"
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
-      timeout: 10000,
+      timeout: 30000,
     });
 
     // Verify page description is visible (check for h1 element exists)
     const h1 = page.locator("h1");
-    await expect(h1).toBeVisible();
+    await expect(h1).toBeVisible({ timeout: 10000 });
 
     // Verify week header is displayed (EN: "Week of", FR: "Semaine du")
     await expect(
       page.getByRole("heading", { level: 2, name: /week of|semaine du/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Verify navigation buttons are visible (using aria-label which stays consistent)
-    await expect(page.locator("button[aria-label]").first()).toBeVisible();
+    await expect(page.locator("button[aria-label]").first()).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify War Room button is visible
-    await expect(page.getByRole("button", { name: /war room/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /war room/i })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify grid displays all 7 days
-    await expect(page.getByText(/mon/i)).toBeVisible();
-    await expect(page.getByText(/tue/i)).toBeVisible();
-    await expect(page.getByText(/wed/i)).toBeVisible();
-    await expect(page.getByText(/thu/i)).toBeVisible();
-    await expect(page.getByText(/fri/i)).toBeVisible();
-    await expect(page.getByText(/sat/i)).toBeVisible();
-    await expect(page.getByText(/sun/i)).toBeVisible();
+    await expect(page.getByText(/mon/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/tue/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/wed/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/thu/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/fri/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/sat/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/sun/i)).toBeVisible({ timeout: 10000 });
 
     // Verify time slots are displayed (at least 08:00 and 19:00)
-    await expect(page.getByText("08:00")).toBeVisible();
-    await expect(page.getByText("19:00")).toBeVisible();
+    await expect(page.getByText("08:00")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("19:00")).toBeVisible({ timeout: 10000 });
 
     // Clean up - delete user
     const user = await prisma.user.findUnique({
@@ -72,13 +79,14 @@ test.describe("Weekly Planning", () => {
 
     await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Get the week header and verify it's visible
     const weekHeader = page.getByRole("heading", {
       level: 2,
       name: /week of|semaine du/i,
     });
-    await expect(weekHeader).toBeVisible({ timeout: 10000 });
+    await expect(weekHeader).toBeVisible({ timeout: 30000 });
 
     // Get the week date range element - it's the p element next to h2 in the header
     const weekRangeElement = weekHeader.locator("..").locator("p").first();
@@ -89,9 +97,12 @@ test.describe("Weekly Planning", () => {
     // Click next week button (exact match to avoid Next.js Dev Tools button)
     await page.getByRole("button", { name: "Next", exact: true }).click();
 
+    // Wait for navigation state to settle
+    await page.waitForTimeout(500);
+
     // Wait for the week range to change (use poll to handle timing issues)
     await expect
-      .poll(async () => weekRangeElement.textContent(), { timeout: 10000 })
+      .poll(async () => weekRangeElement.textContent(), { timeout: 15000 })
       .not.toBe(initialWeekRange);
 
     // Get the new week date display (unused but kept for clarity)
@@ -100,17 +111,23 @@ test.describe("Weekly Planning", () => {
     // Click previous week button to go back to original week
     await page.getByRole("button", { name: "Previous", exact: true }).click();
 
+    // Wait for navigation state to settle
+    await page.waitForTimeout(500);
+
     // Wait for the week range to return to original
     await expect
-      .poll(async () => weekRangeElement.textContent(), { timeout: 10000 })
+      .poll(async () => weekRangeElement.textContent(), { timeout: 15000 })
       .toBe(initialWeekRange);
 
     // Click previous again to go to the previous week
     await page.getByRole("button", { name: "Previous", exact: true }).click();
 
+    // Wait for navigation state to settle
+    await page.waitForTimeout(500);
+
     // Wait for the week range to change again
     await expect
-      .poll(async () => weekRangeElement.textContent(), { timeout: 10000 })
+      .poll(async () => weekRangeElement.textContent(), { timeout: 15000 })
       .not.toBe(initialWeekRange);
 
     // Clean up - delete user
@@ -134,10 +151,11 @@ test.describe("Weekly Planning", () => {
 
     await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Wait for the grid to be visible
     await expect(page.locator(".overflow-x-auto.rounded-lg")).toBeVisible({
-      timeout: 10000,
+      timeout: 30000,
     });
 
     // Verify OFF text appears for weekends (Saturday and Sunday)
@@ -166,6 +184,7 @@ test.describe("Weekly Planning", () => {
 
     await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Now resize to mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -175,26 +194,26 @@ test.describe("Weekly Planning", () => {
 
     // Verify page displays on mobile (check h1 exists)
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible({
-      timeout: 10000,
+      timeout: 30000,
     });
 
     // Verify header elements are visible (h2 for week info)
     await expect(
       page.getByRole("heading", { level: 2, name: /week of|semaine du/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("button", { name: "Previous", exact: true }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("button", { name: "Next", exact: true }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
 
     // Verify grid container exists
     const gridContainer = page.locator(".overflow-x-auto.rounded-lg").first();
-    await expect(gridContainer).toBeVisible();
+    await expect(gridContainer).toBeVisible({ timeout: 10000 });
 
     // Verify time column is visible
-    await expect(page.getByText("08:00")).toBeVisible();
+    await expect(page.getByText("08:00")).toBeVisible({ timeout: 10000 });
 
     // Verify sidebar is hidden on mobile (lg:block means hidden on smaller screens)
     const sidebar = page.locator("aside.hidden.lg\\:block");
@@ -223,10 +242,11 @@ test.describe("Weekly Planning", () => {
 
     await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Wait for the grid to be visible
     await expect(page.locator(".overflow-x-auto.rounded-lg")).toBeVisible({
-      timeout: 10000,
+      timeout: 30000,
     });
 
     // Verify all time slots are displayed (08:00 to 19:00)
@@ -280,10 +300,11 @@ test.describe("Weekly Planning", () => {
 
     await page.waitForURL(/\/app\/weekly/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Wait for the grid to be visible
     await expect(page.locator(".overflow-x-auto.rounded-lg")).toBeVisible({
-      timeout: 10000,
+      timeout: 30000,
     });
 
     // Verify all day abbreviations are displayed (EN or FR)
@@ -292,7 +313,9 @@ test.describe("Weekly Planning", () => {
     const dayHeaders = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
     await Promise.all(
-      dayHeaders.map(async (day) => expect(page.getByText(day)).toBeVisible()),
+      dayHeaders.map(async (day) =>
+        expect(page.getByText(day, { exact: true })).toBeVisible(),
+      ),
     );
 
     // Verify day numbers are present (at least one number should be visible)

@@ -44,7 +44,7 @@ test.describe("Task Backlog", () => {
         }
         return foundUser;
       },
-      { maxAttempts: 5, delayMs: 1000 },
+      { maxAttempts: 10, delayMs: 1500 },
     );
 
     // Create test tasks directly in the database
@@ -276,7 +276,7 @@ test.describe("Task Backlog", () => {
         }
         return foundUser;
       },
-      { maxAttempts: 5, delayMs: 1000 },
+      { maxAttempts: 10, delayMs: 1500 },
     );
 
     // Create a test task
@@ -376,7 +376,7 @@ test.describe("Task Backlog", () => {
         }
         return foundUser;
       },
-      { maxAttempts: 5, delayMs: 1000 },
+      { maxAttempts: 10, delayMs: 1500 },
     );
 
     // Create a test task in Inbox

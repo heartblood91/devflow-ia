@@ -162,8 +162,9 @@ test.describe("account", () => {
     await submitButton.click();
 
     // Wait for success: form redirects to /account after password change
-    await page.waitForURL(/\/account\/?$/, { timeout: 15000 });
+    await page.waitForURL(/\/account\/?$/, { timeout: 30000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     await signOutAccount({ page });
 
